@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Score Tracker 1000</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-900 text-white min-h-screen pb-24 font-sans">
+
+    <div class="max-w-md mx-auto p-2">
+        <!-- Banner Pemenang -->
+        <div id="winner-banner"
+            class="hidden bg-green-500 text-white p-4 rounded-lg font-bold text-center mb-4 shadow-lg animate-pulse">
+        </div>
+
+        <!-- Tabel Skor -->
+        <div class="bg-slate-800/50 rounded-xl overflow-hidden shadow-xl border border-slate-700">
+            <table class="w-full table-fixed border-collapse">
+                <thead>
+                    <tr class="bg-slate-800 border-b border-slate-700">
+                        <th class="w-10 p-2 text-center text-slate-300 text-sm">R</th>
+                        <!-- Header Nama Player (Bisa diedit) -->
+                        <th class="p-1"><input type="text" id="name-p1"
+                                class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1"
+                                data-player="p1"></th>
+                        <th class="p-1"><input type="text" id="name-p2"
+                                class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1"
+                                data-player="p2"></th>
+                        <th class="p-1"><input type="text" id="name-p3"
+                                class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1"
+                                data-player="p3"></th>
+                        <th class="p-1"><input type="text" id="name-p4"
+                                class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1"
+                                data-player="p4"></th>
+                    </tr>
+                </thead>
+                <tbody id="score-body">
+                    <!-- Baris Ronde -->
+                </tbody>
+                <tfoot id="score-foot">
+                    <!-- Baris Total -->
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Tombol Kontrol -->
+        <div class="mt-6 flex gap-3">
+            <button id="btn-add"
+                class="flex-1 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition-colors">
+                + Tambah Ronde
+            </button>
+            <button id="btn-reset"
+                class="bg-red-900/50 hover:bg-red-800 text-red-200 font-semibold py-3 px-4 rounded-lg border border-red-800 transition-colors">
+                Reset
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const SCORE_KEY = 'score_tracker_state';
+        const NAME_KEY = 'score_tracker_names';
+
+        // 1. Inisialisasi State (Skor & Nama)
+        let state = JSON.parse(localStorage.getItem(SCORE_KEY)) || [{ p1: '', p2: '', p3: '', p4: '' }];
+        let playerNames = JSON.parse(localStorage.getItem(NAME_KEY)) || { p1: 'P1', p2: 'P2', p3: 'P3', p4: 'P4' };
+
+        const tbody = document.getElementById('score-body');
+        const tfoot = document.getElementById('score-foot');
+        const btnAdd = document.getElementById('btn-add');
+        const btnReset = document.getElementById('btn-reset');
+        const winnerBanner = document.getElementById('winner-banner');
+
+        // 2. Setup Input Nama Player
+        document.querySelectorAll('.name-input').forEach(input => {
+            const playerKey = input.getAttribute('data-player');
+            input.value = playerNames[playerKey]; // Set nilai awal dari local storage
+
+            // Simpan nama setiap kali diketik
+            input.addEventListener('input', (e) => {
+                playerNames[playerKey] = e.target.value || playerKey.toUpperCase();
+                localStorage.setItem(NAME_KEY, JSON.stringify(playerNames));
+                renderFooter(); // Update banner kalau-kalau ada yang menang dan namanya berubah
+            });
+        });
+
+        function saveState() {
+            localStorage.setItem(SCORE_KEY, JSON.stringify(state));
+        }
+
+        function calculateTotals() {
+            return state.reduce((acc, row) => {
+                acc.p1 += parseInt(row.p1) || 0;
+                acc.p2 += parseInt(row.p2) || 0;
+                acc.p3 += parseInt(row.p3) || 0;
+                acc.p4 += parseInt(row.p4) || 0;
+                return acc;
+            }, { p1: 0, p2: 0, p3: 0, p4: 0 });
+        }
+
+        // 3. Render Tabel Ronde
+        function renderTable() {
+            tbody.innerHTML = '';
+            state.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-700/50";
+                tr.innerHTML = `
+          <td class="p-1 text-center text-xs font-bold text-slate-500">${index + 1}</td>
+          <td class="p-1"><input type="number" data-idx="${index}" data-player="p1" value="${row.p1}" class="score-input w-full bg-slate-800/80 text-white text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"></td>
+          <td class="p-1"><input type="number" data-idx="${index}" data-player="p2" value="${row.p2}" class="score-input w-full bg-slate-800/80 text-white text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"></td>
+          <td class="p-1"><input type="number" data-idx="${index}" data-player="p3" value="${row.p3}" class="score-input w-full bg-slate-800/80 text-white text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"></td>
+          <td class="p-1"><input type="number" data-idx="${index}" data-player="p4" value="${row.p4}" class="score-input w-full bg-slate-800/80 text-white text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"></td>
+        `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 4. Render Footer (Total & Pengecekan Menang)
+        function renderFooter() {
+            const totals = calculateTotals();
+
+            tfoot.innerHTML = `
+        <tr class="bg-slate-900 font-bold text-xl sticky bottom-0 border-t-2 border-slate-600 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.5)]">
+          <td class="p-3 text-center text-blue-400 text-sm">TOT</td>
+          <td class="p-3 text-center ${totals.p1 >= 1000 ? 'text-green-400' : 'text-white'}">${totals.p1}</td>
+          <td class="p-3 text-center ${totals.p2 >= 1000 ? 'text-green-400' : 'text-white'}">${totals.p2}</td>
+          <td class="p-3 text-center ${totals.p3 >= 1000 ? 'text-green-400' : 'text-white'}">${totals.p3}</td>
+          <td class="p-3 text-center ${totals.p4 >= 1000 ? 'text-green-400' : 'text-white'}">${totals.p4}</td>
+        </tr>
+      `;
+
+            // Cek Pemenang menggunakan nama asli player
+            const winners = ['p1', 'p2', 'p3', 'p4'].filter(p => totals[p] >= 1000);
+
+            if (winners.length > 0) {
+                const winnerDisplayNames = winners.map(w => playerNames[w]).join(' & ');
+                winnerBanner.classList.remove('hidden');
+                winnerBanner.innerHTML = `🏆 <b>${winnerDisplayNames}</b> Mencapai 1000 Poin!<br>Game Selesai.`;
+
+                document.querySelectorAll('.score-input').forEach(input => input.disabled = true);
+                btnAdd.disabled = true;
+                btnAdd.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                winnerBanner.classList.add('hidden');
+                document.querySelectorAll('.score-input').forEach(input => input.disabled = false);
+                btnAdd.disabled = false;
+                btnAdd.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        // 5. Tangkap event mengetik skor
+        tbody.addEventListener('input', (e) => {
+            if (e.target.classList.contains('score-input')) {
+                const index = e.target.getAttribute('data-idx');
+                const player = e.target.getAttribute('data-player');
+
+                state[index][player] = e.target.value;
+                saveState();
+                renderFooter();
+            }
+        });
+
+        // 6. Tombol Tambah & Reset
+        btnAdd.addEventListener('click', () => {
+            state.push({ p1: '', p2: '', p3: '', p4: '' });
+            saveState();
+            renderTable();
+            renderFooter();
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        });
+
+        btnReset.addEventListener('click', () => {
+            if (confirm('Yakin mau reset skor? (Nama player tidak akan direset)')) {
+                state = [{ p1: '', p2: '', p3: '', p4: '' }];
+                saveState();
+                renderTable();
+                renderFooter();
+            }
+        });
+
+        // Initial render
+        renderTable();
+        renderFooter();
+    </script>
+</body>
+
+</html>
