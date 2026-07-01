@@ -166,7 +166,7 @@
       }
     }
 
-    tbody.addEventListener('input', (e) => {
+    tbody.addEventListener('change', (e) => {
       if (e.target.classList.contains('score-input')) {
         const index = e.target.getAttribute('data-idx');
         const player = e.target.getAttribute('data-player');
