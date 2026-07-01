@@ -11,14 +11,14 @@
   <div class="max-w-md mx-auto p-2">
     <!-- Banner Pengumuman Kemenangan -->
     <div id="winner-banner" class="hidden bg-green-500 text-white p-5 rounded-xl shadow-[0_10px_25px_-5px_rgba(34,197,94,0.5)] mb-4 text-center transition-all border-2 border-green-400">
-      <!-- Isi dirender oleh JS -->
     </div>
 
-    <!-- Tabel Skor -->
-    <div class="bg-slate-800/50 rounded-xl overflow-hidden shadow-xl border border-slate-700">
+    <!-- Tabel Skor (Class overflow-hidden dihapus agar sticky header berfungsi) -->
+    <div class="bg-slate-800/50 rounded-xl shadow-xl border border-slate-700">
       <table class="w-full table-fixed border-collapse">
-        <thead>
-          <tr class="bg-slate-800 border-b border-slate-700">
+        <!-- Sticky Header untuk Nama Player -->
+        <thead class="sticky top-0 z-20 bg-slate-800 shadow-md">
+          <tr class="border-b border-slate-700">
             <th class="w-10 p-2 text-center text-slate-300 text-sm">R</th>
             <th class="p-1"><input type="text" class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1 transition-colors" data-player="p1"></th>
             <th class="p-1"><input type="text" class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1 transition-colors" data-player="p2"></th>
@@ -27,15 +27,15 @@
           </tr>
         </thead>
         <tbody id="score-body">
-          <!-- Baris Ronde -->
+          <!-- Baris Ronde akan dirender oleh JS -->
         </tbody>
         <tfoot id="score-foot">
-          <!-- Baris Total -->
+          <!-- Baris Total akan dirender oleh JS -->
         </tfoot>
       </table>
     </div>
 
-    <!-- Panel Quick Actions (Tersembunyi secara default, muncul saat kolom skor di-tap) -->
+    <!-- Panel Quick Actions -->
     <div id="quick-actions" class="hidden mt-4 bg-slate-800/80 p-3 rounded-xl border border-slate-700 shadow-lg transition-all">
       <div class="text-center text-xs text-slate-400 font-bold mb-2">INPUT CEPAT (Pilih kolom skor dulu)</div>
       <div class="flex justify-between gap-1">
@@ -85,7 +85,7 @@
     let history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
     
     const players = ['p1', 'p2', 'p3', 'p4'];
-    let activeInput = null; // Menyimpan input mana yang sedang di-tap
+    let activeInput = null; 
 
     const tbody = document.getElementById('score-body');
     const tfoot = document.getElementById('score-foot');
@@ -94,13 +94,12 @@
     const winnerBanner = document.getElementById('winner-banner');
     const quickActionsPanel = document.getElementById('quick-actions');
     
-    // Modal Elements
     const historyModal = document.getElementById('history-modal');
     const historyList = document.getElementById('history-list');
     const btnOpenHistory = document.getElementById('btn-open-history');
     const btnCloseHistory = document.getElementById('btn-close-history');
 
-    // 1. Setup Input Nama
+    // 1. Setup Input Nama di Header
     document.querySelectorAll('.name-input').forEach(input => {
       const playerKey = input.getAttribute('data-player');
       input.value = playerNames[playerKey];
@@ -126,7 +125,7 @@
       }, { p1: 0, p2: 0, p3: 0, p4: 0 });
     }
 
-    // 2. Render Tabel Utama
+    // 2. Render Tabel Utama (Keyboard HP Dinonaktifkan)
     function renderTable() {
       tbody.innerHTML = '';
       state.forEach((row, index) => {
@@ -134,10 +133,10 @@
         tr.className = "border-b border-slate-700/50";
         tr.innerHTML = `
           <td class="p-1 text-center text-xs font-bold text-slate-500">${index + 1}</td>
-          <td class="p-1"><input type="number" data-idx="${index}" data-player="p1" value="${row.p1}" class="score-input w-full bg-slate-800/80 text-white text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg transition-all"></td>
-          <td class="p-1"><input type="number" data-idx="${index}" data-player="p2" value="${row.p2}" class="score-input w-full bg-slate-800/80 text-white text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg transition-all"></td>
-          <td class="p-1"><input type="number" data-idx="${index}" data-player="p3" value="${row.p3}" class="score-input w-full bg-slate-800/80 text-white text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg transition-all"></td>
-          <td class="p-1"><input type="number" data-idx="${index}" data-player="p4" value="${row.p4}" class="score-input w-full bg-slate-800/80 text-white text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg transition-all"></td>
+          <td class="p-1"><input type="text" inputmode="none" readonly data-idx="${index}" data-player="p1" value="${row.p1}" class="score-input w-full bg-slate-800/80 text-white text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg transition-all cursor-pointer select-none"></td>
+          <td class="p-1"><input type="text" inputmode="none" readonly data-idx="${index}" data-player="p2" value="${row.p2}" class="score-input w-full bg-slate-800/80 text-white text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg transition-all cursor-pointer select-none"></td>
+          <td class="p-1"><input type="text" inputmode="none" readonly data-idx="${index}" data-player="p3" value="${row.p3}" class="score-input w-full bg-slate-800/80 text-white text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg transition-all cursor-pointer select-none"></td>
+          <td class="p-1"><input type="text" inputmode="none" readonly data-idx="${index}" data-player="p4" value="${row.p4}" class="score-input w-full bg-slate-800/80 text-white text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg transition-all cursor-pointer select-none"></td>
         `;
         tbody.appendChild(tr);
       });
@@ -171,7 +170,7 @@
       };
 
       tfoot.innerHTML = `
-        <tr class="bg-slate-900 font-bold text-xl sticky bottom-0 border-t-2 border-slate-600 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.5)] transition-colors z-10">
+        <tr class="bg-slate-900 font-bold text-xl sticky bottom-0 border-t-2 border-slate-600 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.5)] transition-colors z-30">
           <td class="p-3 text-center text-blue-400 text-sm">TOT</td>
           <td class="p-3 text-center ${getColor('p1')}">${totals.p1}</td>
           <td class="p-3 text-center ${getColor('p2')}">${totals.p2}</td>
@@ -198,7 +197,7 @@
         document.querySelectorAll('.score-input').forEach(input => input.disabled = true);
         btnAdd.disabled = true;
         btnAdd.classList.add('opacity-50', 'cursor-not-allowed');
-        quickActionsPanel.classList.add('hidden'); // Sembunyikan quick actions
+        quickActionsPanel.classList.add('hidden'); 
       } else {
         winnerBanner.classList.add('hidden');
         document.querySelectorAll('.score-input').forEach(input => input.disabled = false);
@@ -207,26 +206,11 @@
       }
     }
 
-    // 4. Deteksi Event pada Tabel
-    
-    // Pakai 'change' agar tidak menghitung saat sedang mengetik
-    tbody.addEventListener('change', (e) => {
-      if (e.target.classList.contains('score-input')) {
-        const index = e.target.getAttribute('data-idx');
-        const player = e.target.getAttribute('data-player');
-        
-        state[index][player] = e.target.value;
-        saveState();
-        renderFooter();
-      }
-    });
-
-    // Event 'focusin' untuk mendeteksi kolom mana yang sedang diklik (memunculkan Quick Actions)
+    // 4. Deteksi Interaksi Kolom (Munculkan Panel Cepat)
     tbody.addEventListener('focusin', (e) => {
       if (e.target.classList.contains('score-input')) {
         activeInput = e.target;
         
-        // Highlight input yang aktif
         document.querySelectorAll('.score-input').forEach(input => input.classList.remove('ring-2', 'ring-blue-500', 'bg-slate-700'));
         activeInput.classList.add('ring-2', 'ring-blue-500', 'bg-slate-700');
         
@@ -234,17 +218,14 @@
       }
     });
 
-// --- TAMBAHKAN KODE INI DI SINI ---
-    // Deteksi klik di luar untuk menyembunyikan Quick Actions
+    // 5. Deteksi Klik di Luar Kolom (Sembunyikan Panel Cepat)
     document.addEventListener('click', (e) => {
       const isInput = e.target.classList.contains('score-input');
       const isQuickActionArea = quickActionsPanel.contains(e.target);
 
-      // Jika yang disentuh BUKAN input skor DAN BUKAN panel input cepat
       if (!isInput && !isQuickActionArea) {
-        quickActionsPanel.classList.add('hidden'); // Sembunyikan panel
+        quickActionsPanel.classList.add('hidden'); 
         
-        // Hapus warna highlight dari kolom yang aktif
         if (activeInput) {
           activeInput.classList.remove('ring-2', 'ring-blue-500', 'bg-slate-700');
           activeInput = null;
@@ -252,7 +233,7 @@
       }
     });
 
-    // 5. Logika Tombol Quick Actions
+    // 6. Logika Eksekusi Tombol Input Cepat
     document.querySelectorAll('.quick-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         if (activeInput && !activeInput.disabled) {
@@ -260,20 +241,19 @@
           let addVal = parseInt(btn.getAttribute('data-val'));
           let newVal = currentVal + addVal;
           
-          activeInput.value = newVal; // Update UI Input
+          activeInput.value = newVal; 
           
-          // Simpan ke State
           const index = activeInput.getAttribute('data-idx');
           const player = activeInput.getAttribute('data-player');
           state[index][player] = newVal;
           
           saveState();
-          renderFooter(); // Langsung hitung ulang
+          renderFooter(); 
         }
       });
     });
 
-    // 6. Logika Menyimpan Riwayat (Event Delegation pada Banner)
+    // 7. Logika Menyimpan Riwayat 
     winnerBanner.addEventListener('click', (e) => {
       if (e.target.id === 'btn-save-history') {
         const totals = calculateTotals();
@@ -297,7 +277,6 @@
         history.push(matchData);
         localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
 
-        // Reset game
         state = [{ p1: '', p2: '', p3: '', p4: '' }];
         saveState();
         renderTable();
@@ -309,7 +288,7 @@
       }
     });
 
-    // 7. Modal Riwayat & Render Riwayat
+    // 8. Logika Tampilan Modal Riwayat
     btnOpenHistory.addEventListener('click', () => {
       historyModal.classList.remove('hidden');
       renderHistory();
@@ -325,7 +304,6 @@
         return;
       }
 
-      // Reverse agar yang terbaru di atas
       historyList.innerHTML = history.slice().reverse().map((match) => `
         <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-lg">
           <div class="text-xs text-slate-400 mb-3 border-b border-slate-700 pb-2">${match.date}</div>
@@ -345,7 +323,7 @@
       `).join('');
     }
 
-    // 8. Tombol Kontrol Lainnya
+    // 9. Tombol Kontrol Bawah (Tambah Ronde & Reset)
     btnAdd.addEventListener('click', () => {
       state.push({ p1: '', p2: '', p3: '', p4: '' });
       saveState();
@@ -365,7 +343,7 @@
       }
     });
 
-    // Inisialisasi awal
+    // Render Awal saat Halaman Dimuat
     renderTable();
     renderFooter();
   </script>
