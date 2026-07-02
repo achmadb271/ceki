@@ -1,176 +1,244 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Score Tracker 1000</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Score Tracker 1000</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-slate-900 text-white min-h-screen pb-24 font-sans relative">
-  
-  <div class="max-w-md mx-auto p-2">
-    <!-- Banner Pengumuman Kemenangan -->
-    <div id="winner-banner" class="hidden bg-green-500 text-white p-5 rounded-xl shadow-[0_10px_25px_-5px_rgba(34,197,94,0.5)] mb-4 text-center transition-all border-2 border-green-400">
+
+    <div class="max-w-md mx-auto p-2">
+        <div id="winner-banner"
+            class="hidden bg-green-500 text-white p-5 rounded-xl shadow-[0_10px_25px_-5px_rgba(34,197,94,0.5)] mb-4 text-center transition-all border-2 border-green-400">
+        </div>
+
+        <div class="bg-slate-800/50 rounded-xl shadow-xl border border-slate-700">
+            <table class="w-full table-fixed border-collapse">
+                <thead class="sticky top-0 z-20 bg-slate-800 shadow-md">
+                    <tr class="border-b border-slate-700">
+                        <th class="w-10 p-2 text-center text-slate-300 text-sm">R</th>
+                        <th class="p-1"><input type="text"
+                                class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1 transition-colors"
+                                data-player="p1"></th>
+                        <th class="p-1"><input type="text"
+                                class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1 transition-colors"
+                                data-player="p2"></th>
+                        <th class="p-1"><input type="text"
+                                class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1 transition-colors"
+                                data-player="p3"></th>
+                        <th class="p-1"><input type="text"
+                                class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1 transition-colors"
+                                data-player="p4"></th>
+                    </tr>
+                </thead>
+                <tbody id="score-body">
+                </tbody>
+                <tfoot id="score-foot">
+                </tfoot>
+            </table>
+        </div>
+
+        <div id="quick-actions"
+            class="hidden mt-4 bg-slate-800/80 p-3 rounded-xl border border-slate-700 shadow-lg transition-all">
+            <div class="text-center text-xs text-slate-400 font-bold mb-2">INPUT CEPAT (Pilih kolom skor dulu)</div>
+            <div class="flex justify-between gap-1">
+                <button
+                    class="quick-btn flex-1 bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 py-2 rounded font-bold border border-red-800 transition-colors"
+                    data-val="-50">-50</button>
+                <button
+                    class="quick-btn flex-1 bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 py-2 rounded font-bold border border-red-800 transition-colors"
+                    data-val="-10">-10</button>
+                <button
+                    class="quick-btn flex-1 bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 py-2 rounded font-bold border border-red-800 transition-colors"
+                    data-val="-5">-5</button>
+                <button
+                    class="quick-btn flex-1 bg-blue-600 hover:bg-blue-500 active:bg-blue-400 text-white py-2 rounded font-bold shadow-lg transition-colors"
+                    data-val="5">+5</button>
+                <button
+                    class="quick-btn flex-1 bg-blue-600 hover:bg-blue-500 active:bg-blue-400 text-white py-2 rounded font-bold shadow-lg transition-colors"
+                    data-val="10">+10</button>
+                <button
+                    class="quick-btn flex-1 bg-blue-600 hover:bg-blue-500 active:bg-blue-400 text-white py-2 rounded font-bold shadow-lg transition-colors"
+                    data-val="50">+50</button>
+            </div>
+        </div>
+
+        <div class="mt-6 flex gap-2">
+            <button id="btn-add"
+                class="flex-[2] bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3 px-2 rounded-lg shadow-lg transition-colors text-sm">
+                + Ronde Baru
+            </button>
+            <button id="btn-open-history"
+                class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-2 rounded-lg border border-slate-600 transition-colors text-sm">
+                Riwayat
+            </button>
+            <button id="btn-reset"
+                class="flex-1 bg-red-900/50 hover:bg-red-800 text-red-200 font-semibold py-3 px-2 rounded-lg border border-red-800 transition-colors text-sm">
+                Reset
+            </button>
+        </div>
     </div>
 
-    <!-- Tabel Skor (Class overflow-hidden dihapus agar sticky header berfungsi) -->
-    <div class="bg-slate-800/50 rounded-xl shadow-xl border border-slate-700">
-      <table class="w-full table-fixed border-collapse">
-        <!-- Sticky Header untuk Nama Player -->
-        <thead class="sticky top-0 z-20 bg-slate-800 shadow-md">
-          <tr class="border-b border-slate-700">
-            <th class="w-10 p-2 text-center text-slate-300 text-sm">R</th>
-            <th class="p-1"><input type="text" class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1 transition-colors" data-player="p1"></th>
-            <th class="p-1"><input type="text" class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1 transition-colors" data-player="p2"></th>
-            <th class="p-1"><input type="text" class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1 transition-colors" data-player="p3"></th>
-            <th class="p-1"><input type="text" class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1 transition-colors" data-player="p4"></th>
-          </tr>
-        </thead>
-        <tbody id="score-body">
-          <!-- Baris Ronde akan dirender oleh JS -->
-        </tbody>
-        <tfoot id="score-foot">
-          <!-- Baris Total akan dirender oleh JS -->
-        </tfoot>
-      </table>
+    <div id="history-modal"
+        class="hidden fixed inset-0 bg-slate-950/95 z-50 p-4 overflow-y-auto flex flex-col backdrop-blur-sm">
+        <div class="max-w-md mx-auto w-full">
+            <div class="flex justify-between items-center mb-6 mt-4">
+                <h2 class="text-2xl font-bold text-white">Riwayat Game</h2>
+                <button id="btn-close-history"
+                    class="text-red-400 font-bold text-sm px-4 py-2 bg-red-900/30 hover:bg-red-900/50 rounded-lg border border-red-900 transition-colors">Tutup</button>
+            </div>
+            <div id="history-list" class="space-y-4 pb-10">
+            </div>
+        </div>
     </div>
 
-    <!-- Panel Quick Actions -->
-    <div id="quick-actions" class="hidden mt-4 bg-slate-800/80 p-3 rounded-xl border border-slate-700 shadow-lg transition-all">
-      <div class="text-center text-xs text-slate-400 font-bold mb-2">INPUT CEPAT (Pilih kolom skor dulu)</div>
-      <div class="flex justify-between gap-1">
-        <button class="quick-btn flex-1 bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 py-2 rounded font-bold border border-red-800 transition-colors" data-val="-50">-50</button>
-        <button class="quick-btn flex-1 bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 py-2 rounded font-bold border border-red-800 transition-colors" data-val="-10">-10</button>
-        <button class="quick-btn flex-1 bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 py-2 rounded font-bold border border-red-800 transition-colors" data-val="-5">-5</button>
-        <button class="quick-btn flex-1 bg-blue-600 hover:bg-blue-500 active:bg-blue-400 text-white py-2 rounded font-bold shadow-lg transition-colors" data-val="5">+5</button>
-        <button class="quick-btn flex-1 bg-blue-600 hover:bg-blue-500 active:bg-blue-400 text-white py-2 rounded font-bold shadow-lg transition-colors" data-val="10">+10</button>
-        <button class="quick-btn flex-1 bg-blue-600 hover:bg-blue-500 active:bg-blue-400 text-white py-2 rounded font-bold shadow-lg transition-colors" data-val="50">+50</button>
-      </div>
-    </div>
+    <script>
+        const SCORE_KEY = 'score_tracker_state';
+        const NAME_KEY = 'score_tracker_names';
+        const HISTORY_KEY = 'score_tracker_history';
 
-    <!-- Tombol Kontrol Bawah -->
-    <div class="mt-6 flex gap-2">
-      <button id="btn-add" class="flex-[2] bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3 px-2 rounded-lg shadow-lg transition-colors text-sm">
-        + Ronde Baru
-      </button>
-      <button id="btn-open-history" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-2 rounded-lg border border-slate-600 transition-colors text-sm">
-        Riwayat
-      </button>
-      <button id="btn-reset" class="flex-1 bg-red-900/50 hover:bg-red-800 text-red-200 font-semibold py-3 px-2 rounded-lg border border-red-800 transition-colors text-sm">
-        Reset
-      </button>
-    </div>
-  </div>
+        let state = JSON.parse(localStorage.getItem(SCORE_KEY)) || [{ p1: '', p2: '', p3: '', p4: '' }];
+        let playerNames = JSON.parse(localStorage.getItem(NAME_KEY)) || { p1: 'P1', p2: 'P2', p3: 'P3', p4: 'P4' };
+        let history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
 
-  <!-- Modal Riwayat Pertandingan -->
-  <div id="history-modal" class="hidden fixed inset-0 bg-slate-950/95 z-50 p-4 overflow-y-auto flex flex-col backdrop-blur-sm">
-    <div class="max-w-md mx-auto w-full">
-      <div class="flex justify-between items-center mb-6 mt-4">
-        <h2 class="text-2xl font-bold text-white">Riwayat Game</h2>
-        <button id="btn-close-history" class="text-red-400 font-bold text-sm px-4 py-2 bg-red-900/30 hover:bg-red-900/50 rounded-lg border border-red-900 transition-colors">Tutup</button>
-      </div>
-      <div id="history-list" class="space-y-4 pb-10">
-        <!-- List riwayat dirender oleh JS -->
-      </div>
-    </div>
-  </div>
+        const players = ['p1', 'p2', 'p3', 'p4'];
+        let activeInput = null;
 
-  <script>
-    const SCORE_KEY = 'score_tracker_state';
-    const NAME_KEY = 'score_tracker_names';
-    const HISTORY_KEY = 'score_tracker_history';
+        const tbody = document.getElementById('score-body');
+        const tfoot = document.getElementById('score-foot');
+        const btnAdd = document.getElementById('btn-add');
+        const btnReset = document.getElementById('btn-reset');
+        const winnerBanner = document.getElementById('winner-banner');
+        const quickActionsPanel = document.getElementById('quick-actions');
 
-    let state = JSON.parse(localStorage.getItem(SCORE_KEY)) || [{ p1: '', p2: '', p3: '', p4: '' }];
-    let playerNames = JSON.parse(localStorage.getItem(NAME_KEY)) || { p1: 'P1', p2: 'P2', p3: 'P3', p4: 'P4' };
-    let history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
-    
-    const players = ['p1', 'p2', 'p3', 'p4'];
-    let activeInput = null; 
+        const historyModal = document.getElementById('history-modal');
+        const historyList = document.getElementById('history-list');
+        const btnOpenHistory = document.getElementById('btn-open-history');
+        const btnCloseHistory = document.getElementById('btn-close-history');
 
-    const tbody = document.getElementById('score-body');
-    const tfoot = document.getElementById('score-foot');
-    const btnAdd = document.getElementById('btn-add');
-    const btnReset = document.getElementById('btn-reset');
-    const winnerBanner = document.getElementById('winner-banner');
-    const quickActionsPanel = document.getElementById('quick-actions');
-    
-    const historyModal = document.getElementById('history-modal');
-    const historyList = document.getElementById('history-list');
-    const btnOpenHistory = document.getElementById('btn-open-history');
-    const btnCloseHistory = document.getElementById('btn-close-history');
+        // 1. Setup Input Nama di Header
+        document.querySelectorAll('.name-input').forEach(input => {
+            const playerKey = input.getAttribute('data-player');
+            input.value = playerNames[playerKey];
 
-    // 1. Setup Input Nama di Header
-    document.querySelectorAll('.name-input').forEach(input => {
-      const playerKey = input.getAttribute('data-player');
-      input.value = playerNames[playerKey];
-      
-      input.addEventListener('input', (e) => {
-        playerNames[playerKey] = e.target.value || playerKey.toUpperCase();
-        localStorage.setItem(NAME_KEY, JSON.stringify(playerNames));
-        renderFooter(); 
-      });
-    });
+            input.addEventListener('input', (e) => {
+                playerNames[playerKey] = e.target.value || playerKey.toUpperCase();
+                localStorage.setItem(NAME_KEY, JSON.stringify(playerNames));
+                renderFooter();
+            });
+        });
 
-    function saveState() {
-      localStorage.setItem(SCORE_KEY, JSON.stringify(state));
-    }
+        function saveState() {
+            localStorage.setItem(SCORE_KEY, JSON.stringify(state));
+        }
 
-    function calculateTotals() {
-      return state.reduce((acc, row) => {
-        acc.p1 += parseInt(row.p1) || 0;
-        acc.p2 += parseInt(row.p2) || 0;
-        acc.p3 += parseInt(row.p3) || 0;
-        acc.p4 += parseInt(row.p4) || 0;
-        return acc;
-      }, { p1: 0, p2: 0, p3: 0, p4: 0 });
-    }
+        // 2. Kalkulasi Total & Deteksi Player Gosong
+        function calculateTotals() {
+            let currentTotals = { p1: 0, p2: 0, p3: 0, p4: 0 };
+            let burnHistory = []; // Simpan data siapa yang gosong di setiap ronde
 
-    // 2. Render Tabel Utama (Keyboard HP Dinonaktifkan)
-    function renderTable() {
-      tbody.innerHTML = '';
-      state.forEach((row, index) => {
-        const tr = document.createElement('tr');
-        tr.className = "border-b border-slate-700/50";
-        tr.innerHTML = `
+            for (let i = 0; i < state.length; i++) {
+                const row = state[i];
+                let prevTotals = { ...currentTotals };
+                let tempTotals = { ...currentTotals };
+                let burnedInThisRound = [];
+
+                ['p1', 'p2', 'p3', 'p4'].forEach(p => {
+                    tempTotals[p] += parseInt(row[p]) || 0;
+                });
+
+                const isRowFinished = row.p1 !== '' && row.p2 !== '' && row.p3 !== '' && row.p4 !== '';
+
+                if (isRowFinished) {
+                    let burnedPlayers = new Set();
+
+                    ['p1', 'p2', 'p3', 'p4'].forEach(playerA => {
+                        ['p1', 'p2', 'p3', 'p4'].forEach(playerB => {
+                            if (playerA !== playerB) {
+                                if (prevTotals[playerA] > prevTotals[playerB] && tempTotals[playerB] > tempTotals[playerA]) {
+                                    burnedPlayers.add(playerA); // Ketemu yang disalip!
+                                }
+                            }
+                        });
+                    });
+
+                    burnedPlayers.forEach(p => {
+                        tempTotals[p] = 0; // Hukuman reset 0
+                        burnedInThisRound.push(p);
+                    });
+                }
+
+                burnHistory.push(burnedInThisRound);
+                currentTotals = tempTotals;
+            }
+
+            return { totals: currentTotals, burnHistory };
+        }
+
+        // 3. Render Tabel (Input Keyboard Nonaktif & Disiapkan Border transparan untuk efek Gosong)
+        function renderTable() {
+            tbody.innerHTML = '';
+            state.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-700/50";
+                tr.innerHTML = `
           <td class="p-1 text-center text-xs font-bold text-slate-500">${index + 1}</td>
-          <td class="p-1"><input type="text" inputmode="none" readonly data-idx="${index}" data-player="p1" value="${row.p1}" class="score-input w-full bg-slate-800/80 text-white text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg transition-all cursor-pointer select-none"></td>
-          <td class="p-1"><input type="text" inputmode="none" readonly data-idx="${index}" data-player="p2" value="${row.p2}" class="score-input w-full bg-slate-800/80 text-white text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg transition-all cursor-pointer select-none"></td>
-          <td class="p-1"><input type="text" inputmode="none" readonly data-idx="${index}" data-player="p3" value="${row.p3}" class="score-input w-full bg-slate-800/80 text-white text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg transition-all cursor-pointer select-none"></td>
-          <td class="p-1"><input type="text" inputmode="none" readonly data-idx="${index}" data-player="p4" value="${row.p4}" class="score-input w-full bg-slate-800/80 text-white text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg transition-all cursor-pointer select-none"></td>
+          <td class="p-1"><input type="text" inputmode="none" readonly data-idx="${index}" data-player="p1" value="${row.p1}" class="score-input w-full bg-slate-800/80 text-white border border-transparent text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg transition-all cursor-pointer select-none"></td>
+          <td class="p-1"><input type="text" inputmode="none" readonly data-idx="${index}" data-player="p2" value="${row.p2}" class="score-input w-full bg-slate-800/80 text-white border border-transparent text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg transition-all cursor-pointer select-none"></td>
+          <td class="p-1"><input type="text" inputmode="none" readonly data-idx="${index}" data-player="p3" value="${row.p3}" class="score-input w-full bg-slate-800/80 text-white border border-transparent text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg transition-all cursor-pointer select-none"></td>
+          <td class="p-1"><input type="text" inputmode="none" readonly data-idx="${index}" data-player="p4" value="${row.p4}" class="score-input w-full bg-slate-800/80 text-white border border-transparent text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg transition-all cursor-pointer select-none"></td>
         `;
-        tbody.appendChild(tr);
-      });
-    }
+                tbody.appendChild(tr);
+            });
+        }
 
-// 3. Render Footer & Pengecekan Pemenang (Dengan Mode Preview)
-    function renderFooter(isPreview = false) {
-      const totals = calculateTotals();
-      
-      const hasReached1000 = players.some(p => totals[p] >= 1000);
-      const lastRow = state[state.length - 1];
-      const isCurrentRoundFinished = lastRow.p1 !== '' && lastRow.p2 !== '' && lastRow.p3 !== '' && lastRow.p4 !== '';
-      
-      // KUNCI: Status Game Over HANYA disahkan jika BUKAN dalam mode preview
-      const isGameOver = !isPreview && hasReached1000 && isCurrentRoundFinished;
+        // 4. Render Footer, Pengecekan Kemenangan, & Visual Gosong
+        function renderFooter(isPreview = false) {
+            const { totals, burnHistory } = calculateTotals();
 
-      let winners = [];
-      let losers = [];
-      let minScore = 0;
+            // Update Visual Warna "Gosong"
+            document.querySelectorAll('.score-input').forEach(input => {
+                const idx = input.getAttribute('data-idx');
+                const p = input.getAttribute('data-player');
 
-      if (isGameOver) {
-        winners = players.filter(p => totals[p] >= 1000);
-        minScore = Math.min(totals.p1, totals.p2, totals.p3, totals.p4);
-        losers = players.filter(p => totals[p] === minScore);
-      }
+                if (burnHistory[idx] && burnHistory[idx].includes(p)) {
+                    // Ganti warna jadi merah kalau gosong di baris ini
+                    input.classList.remove('bg-slate-800/80', 'text-white', 'border-transparent');
+                    input.classList.add('bg-red-950', 'text-red-400', 'border-red-600', 'font-black');
+                } else {
+                    // Kembalikan ke normal
+                    input.classList.remove('bg-red-950', 'text-red-400', 'border-red-600', 'font-black');
+                    input.classList.add('bg-slate-800/80', 'text-white', 'border-transparent');
+                }
+            });
 
-      const getColor = (player) => {
-        if (!isGameOver) return 'text-white'; 
-        if (winners.includes(player)) return 'text-green-400 font-black'; 
-        if (losers.includes(player)) return 'text-red-400'; 
-        return 'text-slate-400'; 
-      };
+            const hasReached1000 = players.some(p => totals[p] >= 1000);
+            const lastRow = state[state.length - 1];
+            const isCurrentRoundFinished = lastRow.p1 !== '' && lastRow.p2 !== '' && lastRow.p3 !== '' && lastRow.p4 !== '';
 
-      tfoot.innerHTML = `
+            const isGameOver = !isPreview && hasReached1000 && isCurrentRoundFinished;
+
+            let winners = [];
+            let losers = [];
+            let minScore = 0;
+
+            if (isGameOver) {
+                winners = players.filter(p => totals[p] >= 1000);
+                minScore = Math.min(totals.p1, totals.p2, totals.p3, totals.p4);
+                losers = players.filter(p => totals[p] === minScore);
+            }
+
+            const getColor = (player) => {
+                if (!isGameOver) return 'text-white';
+                if (winners.includes(player)) return 'text-green-400 font-black';
+                if (losers.includes(player)) return 'text-red-400';
+                return 'text-slate-400';
+            };
+
+            tfoot.innerHTML = `
         <tr class="bg-slate-900 font-bold text-xl sticky bottom-0 border-t-2 border-slate-600 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.5)] transition-colors z-30">
           <td class="p-3 text-center text-blue-400 text-sm">TOT</td>
           <td class="p-3 text-center ${getColor('p1')}">${totals.p1}</td>
@@ -180,14 +248,13 @@
         </tr>
       `;
 
-      // KUNCI: Banner Kemenangan dan Kunci Input cuma dieksekusi di luar mode preview
-      if (!isPreview) {
-        if (isGameOver) {
-          const winnerDisplay = winners.map(w => playerNames[w]).join(' & ');
-          const loserDisplay = losers.map(l => playerNames[l]).join(' & ');
-          
-          winnerBanner.classList.remove('hidden');
-          winnerBanner.innerHTML = `
+            if (!isPreview) {
+                if (isGameOver) {
+                    const winnerDisplay = winners.map(w => playerNames[w]).join(' & ');
+                    const loserDisplay = losers.map(l => playerNames[l]).join(' & ');
+
+                    winnerBanner.classList.remove('hidden');
+                    winnerBanner.innerHTML = `
             <div class="text-2xl font-black mb-1">🏆 ${winnerDisplay} Menang!</div>
             <div class="text-sm bg-green-700/40 text-white inline-block px-4 py-1.5 rounded-full mt-2 border border-green-600">
               Skor Terendah: <span class="text-red-200 font-bold">${loserDisplay} (${minScore})</span>
@@ -196,132 +263,125 @@
               Simpan & Mulai Baru
             </button>
           `;
-          
-          document.querySelectorAll('.score-input').forEach(input => input.disabled = true);
-          btnAdd.disabled = true;
-          btnAdd.classList.add('opacity-50', 'cursor-not-allowed');
-          quickActionsPanel.classList.add('hidden'); 
-        } else {
-          winnerBanner.classList.add('hidden');
-          document.querySelectorAll('.score-input').forEach(input => input.disabled = false);
-          btnAdd.disabled = false;
-          btnAdd.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
-      }
-    }
 
-// 4. Deteksi Interaksi Kolom (Munculkan Panel Cepat)
-    tbody.addEventListener('focusin', (e) => {
-      if (e.target.classList.contains('score-input')) {
-        // Trik baru: Jika kamu pindah tap dari P1 ke P2, hitung dulu poin P1-nya
-        if (activeInput && activeInput !== e.target) {
-          saveState();
-          renderFooter();
+                    document.querySelectorAll('.score-input').forEach(input => input.disabled = true);
+                    btnAdd.disabled = true;
+                    btnAdd.classList.add('opacity-50', 'cursor-not-allowed');
+                    quickActionsPanel.classList.add('hidden');
+                } else {
+                    winnerBanner.classList.add('hidden');
+                    document.querySelectorAll('.score-input').forEach(input => input.disabled = false);
+                    btnAdd.disabled = false;
+                    btnAdd.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
         }
 
-        activeInput = e.target;
-        
-        document.querySelectorAll('.score-input').forEach(input => input.classList.remove('ring-2', 'ring-blue-500', 'bg-slate-700'));
-        activeInput.classList.add('ring-2', 'ring-blue-500', 'bg-slate-700');
-        
-        quickActionsPanel.classList.remove('hidden');
-      }
-    });
+        // 5. Interaksi Kolom & Tombol Cepat
+        tbody.addEventListener('focusin', (e) => {
+            if (e.target.classList.contains('score-input')) {
+                if (activeInput && activeInput !== e.target) {
+                    saveState();
+                    renderFooter(); // Hitung mutlak jika pindah kolom
+                }
 
-    // 5. Deteksi Klik di Luar Kolom (Sembunyikan Panel Cepat & Hitung Total Akhir)
-    document.addEventListener('click', (e) => {
-      const isInput = e.target.classList.contains('score-input');
-      const isQuickActionArea = quickActionsPanel.contains(e.target);
+                activeInput = e.target;
 
-      if (!isInput && !isQuickActionArea) {
-        if (!quickActionsPanel.classList.contains('hidden')) {
-          quickActionsPanel.classList.add('hidden'); 
-          
-          if (activeInput) {
-            activeInput.classList.remove('ring-2', 'ring-blue-500', 'bg-slate-700');
-            
-            // KUNCI PERBAIKAN: Hitung Total & cek pemenang HANYA pas panel ngumpet
-            saveState();
-            renderFooter();
-            
-            activeInput = null;
-          }
-        }
-      }
-    });
+                document.querySelectorAll('.score-input').forEach(input => input.classList.remove('ring-2', 'ring-blue-500'));
+                activeInput.classList.add('ring-2', 'ring-blue-500');
 
-// 6. Logika Eksekusi Tombol Input Cepat
-    document.querySelectorAll('.quick-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (activeInput && !activeInput.disabled) {
-          let currentVal = parseInt(activeInput.value) || 0;
-          let addVal = parseInt(btn.getAttribute('data-val'));
-          let newVal = currentVal + addVal;
-          
-          activeInput.value = newVal; 
-          
-          const index = activeInput.getAttribute('data-idx');
-          const player = activeInput.getAttribute('data-player');
-          state[index][player] = newVal;
-          
-          // Tampilkan preview total secara real-time TANPA mengetok palu Game Over
-          renderFooter(true);
-        }
-      });
-    });
+                quickActionsPanel.classList.remove('hidden');
+            }
+        });
 
-    // 7. Logika Menyimpan Riwayat 
-    winnerBanner.addEventListener('click', (e) => {
-      if (e.target.id === 'btn-save-history') {
-        const totals = calculateTotals();
-        const minScore = Math.min(totals.p1, totals.p2, totals.p3, totals.p4);
-        const winners = players.filter(p => totals[p] >= 1000).map(w => playerNames[w]).join(' & ');
-        const losers = players.filter(p => totals[p] === minScore).map(l => playerNames[l]).join(' & ');
+        document.addEventListener('click', (e) => {
+            const isInput = e.target.classList.contains('score-input');
+            const isQuickActionArea = quickActionsPanel.contains(e.target);
 
-        const matchData = {
-          date: new Date().toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
-          winner: winners,
-          loser: losers,
-          minScore: minScore,
-          scores: {
-            [playerNames.p1]: totals.p1,
-            [playerNames.p2]: totals.p2,
-            [playerNames.p3]: totals.p3,
-            [playerNames.p4]: totals.p4,
-          }
-        };
+            if (!isInput && !isQuickActionArea) {
+                if (!quickActionsPanel.classList.contains('hidden')) {
+                    quickActionsPanel.classList.add('hidden');
 
-        history.push(matchData);
-        localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+                    if (activeInput) {
+                        activeInput.classList.remove('ring-2', 'ring-blue-500');
+                        saveState();
+                        renderFooter(); // Hitung mutlak saat klik luar (Game Over bisa ter-trigger di sini)
+                        activeInput = null;
+                    }
+                }
+            }
+        });
 
-        state = [{ p1: '', p2: '', p3: '', p4: '' }];
-        saveState();
-        renderTable();
-        renderFooter();
-        activeInput = null;
-        quickActionsPanel.classList.add('hidden');
-        
-        alert('Data tersimpan! Memulai ronde baru.');
-      }
-    });
+        document.querySelectorAll('.quick-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (activeInput && !activeInput.disabled) {
+                    let currentVal = parseInt(activeInput.value) || 0;
+                    let addVal = parseInt(btn.getAttribute('data-val'));
+                    let newVal = currentVal + addVal;
 
-    // 8. Logika Tampilan Modal Riwayat
-    btnOpenHistory.addEventListener('click', () => {
-      historyModal.classList.remove('hidden');
-      renderHistory();
-    });
+                    activeInput.value = newVal;
 
-    btnCloseHistory.addEventListener('click', () => {
-      historyModal.classList.add('hidden');
-    });
+                    const index = activeInput.getAttribute('data-idx');
+                    const player = activeInput.getAttribute('data-player');
+                    state[index][player] = newVal;
 
-    function renderHistory() {
-      if (history.length === 0) {
-        historyList.innerHTML = '<div class="text-center text-slate-400 mt-10">Belum ada sejarah pertandingan. Mainkan dan selesaikan 1 game untuk menyimpannya di sini.</div>';
-        return;
-      }
+                    renderFooter(true); // Preview live tanpa trigger Game Over prematur
+                }
+            });
+        });
 
-      historyList.innerHTML = history.slice().reverse().map((match) => `
+        // 6. Menyimpan ke Sejarah Match
+        winnerBanner.addEventListener('click', (e) => {
+            if (e.target.id === 'btn-save-history') {
+                const { totals } = calculateTotals();
+                const minScore = Math.min(totals.p1, totals.p2, totals.p3, totals.p4);
+                const winners = players.filter(p => totals[p] >= 1000).map(w => playerNames[w]).join(' & ');
+                const losers = players.filter(p => totals[p] === minScore).map(l => playerNames[l]).join(' & ');
+
+                const matchData = {
+                    date: new Date().toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
+                    winner: winners,
+                    loser: losers,
+                    minScore: minScore,
+                    scores: {
+                        [playerNames.p1]: totals.p1,
+                        [playerNames.p2]: totals.p2,
+                        [playerNames.p3]: totals.p3,
+                        [playerNames.p4]: totals.p4,
+                    }
+                };
+
+                history.push(matchData);
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+
+                state = [{ p1: '', p2: '', p3: '', p4: '' }];
+                saveState();
+                renderTable();
+                renderFooter();
+                activeInput = null;
+                quickActionsPanel.classList.add('hidden');
+
+                alert('Data tersimpan! Memulai ronde baru.');
+            }
+        });
+
+        // 7. Modal Riwayat
+        btnOpenHistory.addEventListener('click', () => {
+            historyModal.classList.remove('hidden');
+            renderHistory();
+        });
+
+        btnCloseHistory.addEventListener('click', () => {
+            historyModal.classList.add('hidden');
+        });
+
+        function renderHistory() {
+            if (history.length === 0) {
+                historyList.innerHTML = '<div class="text-center text-slate-400 mt-10">Belum ada sejarah pertandingan. Mainkan dan selesaikan 1 game untuk menyimpannya di sini.</div>';
+                return;
+            }
+
+            historyList.innerHTML = history.slice().reverse().map((match) => `
         <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-lg">
           <div class="text-xs text-slate-400 mb-3 border-b border-slate-700 pb-2">${match.date}</div>
           <div class="flex justify-between items-center mb-3">
@@ -338,31 +398,32 @@
           </div>
         </div>
       `).join('');
-    }
+        }
 
-    // 9. Tombol Kontrol Bawah (Tambah Ronde & Reset)
-    btnAdd.addEventListener('click', () => {
-      state.push({ p1: '', p2: '', p3: '', p4: '' });
-      saveState();
-      renderTable();
-      renderFooter();
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    });
+        // 8. Tambah Ronde & Reset 
+        btnAdd.addEventListener('click', () => {
+            state.push({ p1: '', p2: '', p3: '', p4: '' });
+            saveState();
+            renderTable();
+            renderFooter();
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        });
 
-    btnReset.addEventListener('click', () => {
-      if(confirm('Yakin mau reset skor? (Data yang belum di-save ke Riwayat akan hilang)')) {
-        state = [{ p1: '', p2: '', p3: '', p4: '' }];
-        saveState();
+        btnReset.addEventListener('click', () => {
+            if (confirm('Yakin mau reset skor? (Data yang belum di-save ke Riwayat akan hilang)')) {
+                state = [{ p1: '', p2: '', p3: '', p4: '' }];
+                saveState();
+                renderTable();
+                renderFooter();
+                activeInput = null;
+                quickActionsPanel.classList.add('hidden');
+            }
+        });
+
+        // Inisialisasi
         renderTable();
         renderFooter();
-        activeInput = null;
-        quickActionsPanel.classList.add('hidden');
-      }
-    });
-
-    // Render Awal saat Halaman Dimuat
-    renderTable();
-    renderFooter();
-  </script>
+    </script>
 </body>
+
 </html>
