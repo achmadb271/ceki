@@ -142,15 +142,16 @@
       });
     }
 
-    // 3. Render Footer & Pengecekan Pemenang
-    function renderFooter() {
+// 3. Render Footer & Pengecekan Pemenang (Dengan Mode Preview)
+    function renderFooter(isPreview = false) {
       const totals = calculateTotals();
       
       const hasReached1000 = players.some(p => totals[p] >= 1000);
       const lastRow = state[state.length - 1];
       const isCurrentRoundFinished = lastRow.p1 !== '' && lastRow.p2 !== '' && lastRow.p3 !== '' && lastRow.p4 !== '';
       
-      const isGameOver = hasReached1000 && isCurrentRoundFinished;
+      // KUNCI: Status Game Over HANYA disahkan jika BUKAN dalam mode preview
+      const isGameOver = !isPreview && hasReached1000 && isCurrentRoundFinished;
 
       let winners = [];
       let losers = [];
@@ -179,36 +180,45 @@
         </tr>
       `;
 
-      if (isGameOver) {
-        const winnerDisplay = winners.map(w => playerNames[w]).join(' & ');
-        const loserDisplay = losers.map(l => playerNames[l]).join(' & ');
-        
-        winnerBanner.classList.remove('hidden');
-        winnerBanner.innerHTML = `
-          <div class="text-2xl font-black mb-1">🏆 ${winnerDisplay} Menang!</div>
-          <div class="text-sm bg-green-700/40 text-white inline-block px-4 py-1.5 rounded-full mt-2 border border-green-600">
-            Skor Terendah: <span class="text-red-200 font-bold">${loserDisplay} (${minScore})</span>
-          </div>
-          <button id="btn-save-history" class="mt-5 w-full bg-white text-green-700 hover:bg-slate-100 active:bg-slate-200 font-black py-3 rounded-lg shadow-lg transition-colors text-lg">
-            Simpan & Mulai Baru
-          </button>
-        `;
-        
-        document.querySelectorAll('.score-input').forEach(input => input.disabled = true);
-        btnAdd.disabled = true;
-        btnAdd.classList.add('opacity-50', 'cursor-not-allowed');
-        quickActionsPanel.classList.add('hidden'); 
-      } else {
-        winnerBanner.classList.add('hidden');
-        document.querySelectorAll('.score-input').forEach(input => input.disabled = false);
-        btnAdd.disabled = false;
-        btnAdd.classList.remove('opacity-50', 'cursor-not-allowed');
+      // KUNCI: Banner Kemenangan dan Kunci Input cuma dieksekusi di luar mode preview
+      if (!isPreview) {
+        if (isGameOver) {
+          const winnerDisplay = winners.map(w => playerNames[w]).join(' & ');
+          const loserDisplay = losers.map(l => playerNames[l]).join(' & ');
+          
+          winnerBanner.classList.remove('hidden');
+          winnerBanner.innerHTML = `
+            <div class="text-2xl font-black mb-1">🏆 ${winnerDisplay} Menang!</div>
+            <div class="text-sm bg-green-700/40 text-white inline-block px-4 py-1.5 rounded-full mt-2 border border-green-600">
+              Skor Terendah: <span class="text-red-200 font-bold">${loserDisplay} (${minScore})</span>
+            </div>
+            <button id="btn-save-history" class="mt-5 w-full bg-white text-green-700 hover:bg-slate-100 active:bg-slate-200 font-black py-3 rounded-lg shadow-lg transition-colors text-lg">
+              Simpan & Mulai Baru
+            </button>
+          `;
+          
+          document.querySelectorAll('.score-input').forEach(input => input.disabled = true);
+          btnAdd.disabled = true;
+          btnAdd.classList.add('opacity-50', 'cursor-not-allowed');
+          quickActionsPanel.classList.add('hidden'); 
+        } else {
+          winnerBanner.classList.add('hidden');
+          document.querySelectorAll('.score-input').forEach(input => input.disabled = false);
+          btnAdd.disabled = false;
+          btnAdd.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
       }
     }
 
-    // 4. Deteksi Interaksi Kolom (Munculkan Panel Cepat)
+// 4. Deteksi Interaksi Kolom (Munculkan Panel Cepat)
     tbody.addEventListener('focusin', (e) => {
       if (e.target.classList.contains('score-input')) {
+        // Trik baru: Jika kamu pindah tap dari P1 ke P2, hitung dulu poin P1-nya
+        if (activeInput && activeInput !== e.target) {
+          saveState();
+          renderFooter();
+        }
+
         activeInput = e.target;
         
         document.querySelectorAll('.score-input').forEach(input => input.classList.remove('ring-2', 'ring-blue-500', 'bg-slate-700'));
@@ -218,22 +228,29 @@
       }
     });
 
-    // 5. Deteksi Klik di Luar Kolom (Sembunyikan Panel Cepat)
+    // 5. Deteksi Klik di Luar Kolom (Sembunyikan Panel Cepat & Hitung Total Akhir)
     document.addEventListener('click', (e) => {
       const isInput = e.target.classList.contains('score-input');
       const isQuickActionArea = quickActionsPanel.contains(e.target);
 
       if (!isInput && !isQuickActionArea) {
-        quickActionsPanel.classList.add('hidden'); 
-        
-        if (activeInput) {
-          activeInput.classList.remove('ring-2', 'ring-blue-500', 'bg-slate-700');
-          activeInput = null;
+        if (!quickActionsPanel.classList.contains('hidden')) {
+          quickActionsPanel.classList.add('hidden'); 
+          
+          if (activeInput) {
+            activeInput.classList.remove('ring-2', 'ring-blue-500', 'bg-slate-700');
+            
+            // KUNCI PERBAIKAN: Hitung Total & cek pemenang HANYA pas panel ngumpet
+            saveState();
+            renderFooter();
+            
+            activeInput = null;
+          }
         }
       }
     });
 
-    // 6. Logika Eksekusi Tombol Input Cepat
+// 6. Logika Eksekusi Tombol Input Cepat
     document.querySelectorAll('.quick-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         if (activeInput && !activeInput.disabled) {
@@ -247,8 +264,8 @@
           const player = activeInput.getAttribute('data-player');
           state[index][player] = newVal;
           
-          saveState();
-          renderFooter(); 
+          // Tampilkan preview total secara real-time TANPA mengetok palu Game Over
+          renderFooter(true);
         }
       });
     });
