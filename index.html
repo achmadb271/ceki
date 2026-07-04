@@ -82,6 +82,83 @@
         .burn-flicker {
             animation: flameFlicker 0.4s ease-in-out 3;
         }
+
+        @keyframes tensePulseRisk {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.65);
+                border-color: #f87171;
+            }
+
+            50% {
+                box-shadow: 0 0 0 7px rgba(248, 113, 113, 0);
+                border-color: #fca5a5;
+            }
+        }
+
+        @keyframes tensePulseOvertake {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.65);
+                border-color: #facc15;
+            }
+
+            50% {
+                box-shadow: 0 0 0 7px rgba(250, 204, 21, 0);
+                border-color: #fde047;
+            }
+        }
+
+        .tense-atrisk {
+            border-width: 2px !important;
+            animation: tensePulseRisk 0.85s ease-in-out infinite;
+        }
+
+        .tense-overtaking {
+            border-width: 2px !important;
+            animation: tensePulseOvertake 0.85s ease-in-out infinite;
+        }
+
+        .app-toast {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            z-index: 100;
+            padding: 12px 22px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            max-width: 90vw;
+            text-align: center;
+            animation: burnToastIn 0.35s ease-out forwards;
+        }
+
+        .app-toast.hide {
+            animation: burnToastOut 0.35s ease-in forwards;
+        }
+
+        .app-toast-success {
+            background: linear-gradient(135deg, #14532d, #16a34a);
+            color: #ecfdf5;
+            border: 1px solid #22c55e;
+            box-shadow: 0 10px 25px -5px rgba(34, 197, 94, 0.5);
+        }
+
+        .app-toast-error {
+            background: linear-gradient(135deg, #7f1d1d, #b91c1c);
+            color: #fef2f2;
+            border: 1px solid #ef4444;
+            box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.5);
+        }
+
+        .app-toast-info {
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            color: #eff6ff;
+            border: 1px solid #3b82f6;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+        }
     </style>
 </head>
 
@@ -90,6 +167,12 @@
     <div class="max-w-md mx-auto p-2">
         <div id="winner-banner"
             class="hidden bg-green-500 text-white p-5 rounded-xl shadow-[0_10px_25px_-5px_rgba(34,197,94,0.5)] mb-4 text-center transition-all border-2 border-green-400">
+        </div>
+
+        <div class="flex justify-center mb-2">
+            <div id="match-timer"
+                class="text-xs font-mono font-bold text-slate-400 bg-slate-800/60 px-3 py-1.5 rounded-full border border-slate-700 tracking-wider">
+                ⏱️ 00:00</div>
         </div>
 
         <div class="bg-slate-800/50 rounded-xl shadow-xl border border-slate-700">
@@ -120,31 +203,58 @@
 
         <div id="quick-actions"
             class="hidden mt-4 bg-slate-800/80 p-3 rounded-xl border border-slate-700 shadow-lg transition-all">
-            <div class="text-center text-xs text-slate-400 font-bold mb-2">INPUT CEPAT (Pilih kolom skor dulu)</div>
-            <div class="flex justify-between gap-1">
+            <div class="text-center text-xs text-slate-400 font-bold mb-1">KETIK SKOR (Pilih kolom dulu)</div>
+            <div class="text-center text-[10px] text-slate-500 mb-2">🔴 keancem kesalip &nbsp;·&nbsp; 🟡 lagi nyalip
+            </div>
+            <div class="grid grid-cols-4 gap-1.5">
                 <button
-                    class="quick-btn flex-1 px-0 text-sm bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 py-2 rounded font-bold border border-red-800 transition-colors"
-                    data-val="-50">-50</button>
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    data-key="7">7</button>
                 <button
-                    class="quick-btn flex-1 px-0 text-sm bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 py-2 rounded font-bold border border-red-800 transition-colors"
-                    data-val="-10">-10</button>
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    data-key="8">8</button>
                 <button
-                    class="quick-btn flex-1 px-0 text-sm bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 py-2 rounded font-bold border border-red-800 transition-colors"
-                    data-val="-5">-5</button>
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    data-key="9">9</button>
+                <button
+                    class="keypad-btn bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 text-lg font-bold py-3 rounded-lg border border-red-800 transition-colors"
+                    data-key="backspace">⌫</button>
 
                 <button
-                    class="quick-btn flex-1 px-0 text-sm bg-slate-600 hover:bg-slate-500 active:bg-slate-400 text-white py-2 rounded font-bold border border-slate-500 shadow-lg transition-colors"
-                    data-val="0">0</button>
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    data-key="4">4</button>
+                <button
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    data-key="5">5</button>
+                <button
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    data-key="6">6</button>
+                <button
+                    class="keypad-btn bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 text-sm font-bold py-3 rounded-lg border border-red-800 transition-colors"
+                    data-key="clear">C</button>
 
                 <button
-                    class="quick-btn flex-1 px-0 text-sm bg-blue-600 hover:bg-blue-500 active:bg-blue-400 text-white py-2 rounded font-bold shadow-lg transition-colors"
-                    data-val="5">+5</button>
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    data-key="1">1</button>
                 <button
-                    class="quick-btn flex-1 px-0 text-sm bg-blue-600 hover:bg-blue-500 active:bg-blue-400 text-white py-2 rounded font-bold shadow-lg transition-colors"
-                    data-val="10">+10</button>
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    data-key="2">2</button>
                 <button
-                    class="quick-btn flex-1 px-0 text-sm bg-blue-600 hover:bg-blue-500 active:bg-blue-400 text-white py-2 rounded font-bold shadow-lg transition-colors"
-                    data-val="50">+50</button>
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    data-key="3">3</button>
+                <button
+                    class="keypad-btn bg-slate-600 hover:bg-slate-500 active:bg-slate-400 text-white text-lg font-bold py-3 rounded-lg border border-slate-500 transition-colors"
+                    data-key="sign">±</button>
+
+                <button
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg col-span-2 transition-colors"
+                    data-key="0">0</button>
+                <button
+                    class="keypad-btn bg-slate-600 hover:bg-slate-500 active:bg-slate-400 text-white text-base font-bold py-3 rounded-lg border border-slate-500 transition-colors"
+                    data-key="00">00</button>
+                <button id="keypad-ok"
+                    class="keypad-btn bg-blue-600 hover:bg-blue-500 active:bg-blue-400 text-white text-lg font-bold py-3 rounded-lg shadow-lg transition-colors"
+                    data-key="ok">✔</button>
             </div>
         </div>
 
@@ -195,14 +305,35 @@
         </div>
     </div>
 
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-600 rounded-xl p-5 max-w-sm w-full shadow-2xl">
+            <div id="confirm-modal-message" class="text-white text-sm mb-5 leading-relaxed"></div>
+            <div class="flex gap-2">
+                <button id="confirm-modal-cancel"
+                    class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 rounded-lg transition-colors text-sm">Batal</button>
+                <button id="confirm-modal-ok"
+                    class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 rounded-lg transition-colors text-sm">Ya,
+                    Lanjut</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const SCORE_KEY = 'score_tracker_state';
         const NAME_KEY = 'score_tracker_names';
         const HISTORY_KEY = 'score_tracker_history';
+        const MATCH_START_KEY = 'score_tracker_match_start';
+        const MATCH_END_KEY = 'score_tracker_match_end';
 
         let state = JSON.parse(localStorage.getItem(SCORE_KEY)) || [{ p1: '', p2: '', p3: '', p4: '' }];
         let playerNames = JSON.parse(localStorage.getItem(NAME_KEY)) || { p1: 'P1', p2: 'P2', p3: 'P3', p4: 'P4' };
         let history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+
+        let matchStartTime = parseInt(localStorage.getItem(MATCH_START_KEY)) || Date.now();
+        if (!localStorage.getItem(MATCH_START_KEY)) {
+            localStorage.setItem(MATCH_START_KEY, String(matchStartTime));
+        }
+        let matchEndTime = parseInt(localStorage.getItem(MATCH_END_KEY)) || null;
 
         const players = ['p1', 'p2', 'p3', 'p4'];
         let activeInput = null;
@@ -214,6 +345,7 @@
         const btnUndo = document.getElementById('btn-undo');
         const winnerBanner = document.getElementById('winner-banner');
         const quickActionsPanel = document.getElementById('quick-actions');
+        const matchTimerEl = document.getElementById('match-timer');
 
         const historyModal = document.getElementById('history-modal');
         const historyList = document.getElementById('history-list');
@@ -223,6 +355,96 @@
         const btnImportData = document.getElementById('btn-import-data');
         const importFileInput = document.getElementById('import-file-input');
         const btnInstall = document.getElementById('btn-install');
+
+        const confirmModal = document.getElementById('confirm-modal');
+        const confirmModalMessage = document.getElementById('confirm-modal-message');
+        const confirmModalCancel = document.getElementById('confirm-modal-cancel');
+        const confirmModalOk = document.getElementById('confirm-modal-ok');
+
+        // --- Modal konfirmasi custom (gantiin window.confirm bawaan browser, yang sering diblokir di iframe preview) ---
+        let confirmModalCallback = null;
+
+        function showConfirmModal(message, onConfirm) {
+            confirmModalMessage.textContent = message;
+            confirmModalCallback = onConfirm;
+            confirmModal.classList.remove('hidden');
+        }
+
+        function hideConfirmModal() {
+            confirmModal.classList.add('hidden');
+            confirmModalCallback = null;
+        }
+
+        confirmModalCancel.addEventListener('click', hideConfirmModal);
+        confirmModalOk.addEventListener('click', () => {
+            const cb = confirmModalCallback;
+            hideConfirmModal();
+            if (cb) cb();
+        });
+        // Klik di area gelap luar kotak dialog = batal
+        confirmModal.addEventListener('click', (e) => {
+            if (e.target === confirmModal) hideConfirmModal();
+        });
+
+        // --- Toast notifikasi custom (gantiin window.alert bawaan browser) ---
+        function showAppToast(message, type = 'info', duration = 2600) {
+            const toast = document.createElement('div');
+            toast.className = `app-toast app-toast-${type}`;
+            toast.textContent = message;
+            const existingCount = document.querySelectorAll('.app-toast:not(.hide), .burn-toast:not(.hide)').length;
+            toast.style.top = (16 + existingCount * 58) + 'px';
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('hide');
+                setTimeout(() => toast.remove(), 350);
+            }, duration);
+        }
+
+        // --- Timer durasi pertandingan ---
+        let timerInterval = null;
+
+        function formatDuration(ms) {
+            const totalSec = Math.max(0, Math.floor(ms / 1000));
+            const h = Math.floor(totalSec / 3600);
+            const m = Math.floor((totalSec % 3600) / 60);
+            const s = totalSec % 60;
+            const pad = (n) => String(n).padStart(2, '0');
+            return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+        }
+
+        function updateTimerDisplay() {
+            if (!matchTimerEl) return;
+            const end = matchEndTime || Date.now();
+            matchTimerEl.textContent = '⏱️ ' + formatDuration(end - matchStartTime);
+        }
+
+        function startMatchTimer() {
+            stopMatchTimer();
+            updateTimerDisplay();
+            timerInterval = setInterval(updateTimerDisplay, 1000);
+        }
+
+        function stopMatchTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        function markMatchEndIfNeeded() {
+            if (!matchEndTime) {
+                matchEndTime = Date.now();
+                localStorage.setItem(MATCH_END_KEY, String(matchEndTime));
+            }
+            stopMatchTimer();
+            updateTimerDisplay();
+        }
+
+        function startNewMatchTimer() {
+            matchStartTime = Date.now();
+            matchEndTime = null;
+            localStorage.setItem(MATCH_START_KEY, String(matchStartTime));
+            localStorage.removeItem(MATCH_END_KEY);
+            startMatchTimer();
+        }
 
         // --- Undo stack ---
         const MAX_UNDO = 50;
@@ -255,6 +477,8 @@
             const toast = document.createElement('div');
             toast.className = 'burn-toast';
             toast.textContent = `🔥 ${names} KEBAKAR!`;
+            const existingCount = document.querySelectorAll('.burn-toast:not(.hide), .app-toast:not(.hide)').length;
+            toast.style.top = (16 + existingCount * 58) + 'px';
             document.body.appendChild(toast);
             setTimeout(() => {
                 toast.classList.add('hide');
@@ -290,13 +514,14 @@
         }
 
         // 2. Kalkulasi Total & Deteksi Player Gosong
-        function calculateTotals() {
+        function calculateTotals(customState) {
+            const rows = customState || state;
             const BURN_THRESHOLD = 100; // Skor minimal biar bisa "kebakar" kalau disalip
             let currentTotals = { p1: 0, p2: 0, p3: 0, p4: 0 };
             let burnHistory = []; // Simpan data siapa yang gosong di setiap ronde
 
-            for (let i = 0; i < state.length; i++) {
-                const row = state[i];
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
                 let prevTotals = { ...currentTotals };
                 let tempTotals = { ...currentTotals };
                 let burnedInThisRound = [];
@@ -335,6 +560,35 @@
             }
 
             return { totals: currentTotals, burnHistory };
+        }
+
+        // 2b. Deteksi "sikut-sikutan" - preview live siapa yang KEMUNGKINAN kesalip/nyalip
+        // di ronde yang lagi diketik (belum lengkap 4 kolom), pakai angka yang udah ke-input sejauh ini.
+        function getLiveOvertakeWarnings() {
+            const atRisk = new Set();     // udah di atas 100, lagi keancem kesalip -> bakal kebakar
+            const overtaking = new Set(); // yang lagi nyalip dia
+
+            if (state.length < 1) return { atRisk, overtaking };
+
+            const lastIdx = state.length - 1;
+            const { totals: prevTotals } = calculateTotals(state.slice(0, lastIdx));
+            const row = state[lastIdx];
+            const previewTemp = { ...prevTotals };
+            players.forEach(p => { previewTemp[p] += parseInt(row[p]) || 0; });
+
+            const BURN_THRESHOLD = 100;
+            players.forEach(a => {
+                if (prevTotals[a] < BURN_THRESHOLD) return;
+                players.forEach(b => {
+                    if (a === b) return;
+                    if (prevTotals[a] > prevTotals[b] && previewTemp[b] > previewTemp[a]) {
+                        atRisk.add(a);
+                        overtaking.add(b);
+                    }
+                });
+            });
+
+            return { atRisk, overtaking };
         }
 
         // 3. Render Tabel (Input Keyboard Nonaktif & Disiapkan Border transparan untuk efek Gosong)
@@ -377,6 +631,22 @@
             const hasReached1000 = players.some(p => totals[p] >= 1000);
             const lastRow = state[state.length - 1];
             const isCurrentRoundFinished = lastRow.p1 !== '' && lastRow.p2 !== '' && lastRow.p3 !== '' && lastRow.p4 !== '';
+
+            // "Sikut-sikutan" - highlight deg-degan buat ronde yang LAGI diketik (belum lengkap 4 kolom).
+            // Begitu rondenya lengkap, status kebakar udah pasti (ditangani warna merah di atas), jadi preview ini gak perlu lagi.
+            document.querySelectorAll('.score-input').forEach(input => {
+                input.classList.remove('tense-atrisk', 'tense-overtaking');
+            });
+            if (!isCurrentRoundFinished) {
+                const { atRisk, overtaking } = getLiveOvertakeWarnings();
+                const lastIdx = state.length - 1;
+                players.forEach(p => {
+                    const cell = tbody.querySelector(`.score-input[data-idx="${lastIdx}"][data-player="${p}"]`);
+                    if (!cell) return;
+                    if (atRisk.has(p)) cell.classList.add('tense-atrisk');
+                    else if (overtaking.has(p)) cell.classList.add('tense-overtaking');
+                });
+            }
 
             // Notif & animasi pas ada yang baru kebakar (cuma pas ronde beneran baru selesai, bukan preview)
             if (!isPreview) {
@@ -427,6 +697,8 @@
 
             if (!isPreview) {
                 if (isGameOver) {
+                    markMatchEndIfNeeded();
+                    const durationText = formatDuration((matchEndTime || Date.now()) - matchStartTime);
                     const winnerDisplay = winners.map(w => playerNames[w]).join(' & ');
                     const loserDisplay = losers.map(l => playerNames[l]).join(' & ');
 
@@ -436,6 +708,7 @@
             <div class="text-sm bg-green-700/40 text-white inline-block px-4 py-1.5 rounded-full mt-2 border border-green-600">
               Skor Terendah: <span class="text-red-200 font-bold">${loserDisplay} (${minScore})</span>
             </div>
+            <div class="text-xs text-green-100/80 mt-2 font-mono">⏱️ Durasi Pertandingan: ${durationText}</div>
             <button id="btn-save-history" class="mt-5 w-full bg-white text-green-700 hover:bg-slate-100 active:bg-slate-200 font-black py-3 rounded-lg shadow-lg transition-colors text-lg">
               Simpan & Mulai Baru
             </button>
@@ -453,14 +726,101 @@
                     document.querySelectorAll('.score-input').forEach(input => input.disabled = false);
                     btnAdd.disabled = false;
                     btnAdd.classList.remove('opacity-50', 'cursor-not-allowed');
+                    if (!timerInterval) startMatchTimer();
                 }
             }
         }
 
-        // 5. Interaksi Kolom & Tombol Cepat
+        // 5. Interaksi Kolom & Numpad
+        let keypadBuffer = '';       // digit yang lagi diketik buat kolom aktif
+        let keypadFreshStart = true; // true kalau belum ada tombol numpad dipencet sejak fokus ke kolom ini
+
+        function commitActiveInputAndClosePanel() {
+            quickActionsPanel.classList.add('hidden');
+            if (activeInput) {
+                activeInput.classList.remove('ring-2', 'ring-blue-500');
+                saveState();
+                renderFooter(); // Hitung mutlak (Game Over bisa ter-trigger di sini)
+                activeInput = null;
+            }
+            keypadBuffer = '';
+            keypadFreshStart = true;
+        }
+
+        function syncActiveInputFromBuffer() {
+            if (!activeInput) return;
+            activeInput.value = keypadBuffer;
+
+            const index = activeInput.getAttribute('data-idx');
+            const player = activeInput.getAttribute('data-player');
+            const isIncomplete = keypadBuffer === '' || keypadBuffer === '-';
+            state[index][player] = isIncomplete ? '' : parseInt(keypadBuffer, 10);
+
+            renderFooter(true); // Preview live tanpa trigger Game Over prematur
+        }
+
+        function appendToBuffer(str) {
+            const sign = keypadBuffer.startsWith('-') ? '-' : '';
+            const digits = keypadBuffer.replace('-', '');
+            if (digits.length >= 5) return; // batasin biar gak kepanjangan
+            keypadBuffer = sign + digits + str;
+        }
+
+        function handleKeypadKey(key) {
+            if (!activeInput || activeInput.disabled) return;
+
+            if (key === 'ok') {
+                commitActiveInputAndClosePanel();
+                return;
+            }
+
+            if (key === 'clear') {
+                keypadBuffer = '';
+                keypadFreshStart = false;
+                syncActiveInputFromBuffer();
+                return;
+            }
+
+            if (key === 'backspace') {
+                if (keypadFreshStart) {
+                    keypadBuffer = (activeInput.value || '').toString();
+                    keypadFreshStart = false;
+                }
+                keypadBuffer = keypadBuffer.slice(0, -1);
+                syncActiveInputFromBuffer();
+                return;
+            }
+
+            if (key === 'sign') {
+                if (keypadFreshStart) {
+                    keypadBuffer = (activeInput.value || '').toString();
+                    keypadFreshStart = false;
+                }
+                if (keypadBuffer.startsWith('-')) {
+                    keypadBuffer = keypadBuffer.slice(1);
+                } else if (keypadBuffer !== '') {
+                    keypadBuffer = '-' + keypadBuffer;
+                } else {
+                    keypadBuffer = '-';
+                }
+                syncActiveInputFromBuffer();
+                return;
+            }
+
+            // key numerik: '0'-'9' atau '00'
+            if (keypadFreshStart) {
+                keypadBuffer = '';
+                keypadFreshStart = false;
+            }
+            appendToBuffer(key);
+            syncActiveInputFromBuffer();
+        }
+
         tbody.addEventListener('focusin', (e) => {
             if (e.target.classList.contains('score-input')) {
-                if (activeInput && activeInput !== e.target) {
+                const isNewSession = activeInput !== e.target;
+
+                if (activeInput && isNewSession) {
                     saveState();
                     renderFooter(); // Hitung mutlak jika pindah kolom
                 }
@@ -469,6 +829,12 @@
 
                 document.querySelectorAll('.score-input').forEach(input => input.classList.remove('ring-2', 'ring-blue-500'));
                 activeInput.classList.add('ring-2', 'ring-blue-500');
+
+                if (isNewSession) {
+                    pushUndo(); // 1 snapshot per kolom yang mulai diedit, bukan per digit
+                    keypadBuffer = '';
+                    keypadFreshStart = true;
+                }
 
                 quickActionsPanel.classList.remove('hidden');
             }
@@ -480,34 +846,14 @@
 
             if (!isInput && !isQuickActionArea) {
                 if (!quickActionsPanel.classList.contains('hidden')) {
-                    quickActionsPanel.classList.add('hidden');
-
-                    if (activeInput) {
-                        activeInput.classList.remove('ring-2', 'ring-blue-500');
-                        saveState();
-                        renderFooter(); // Hitung mutlak saat klik luar (Game Over bisa ter-trigger di sini)
-                        activeInput = null;
-                    }
+                    commitActiveInputAndClosePanel();
                 }
             }
         });
 
-        document.querySelectorAll('.quick-btn').forEach(btn => {
+        document.querySelectorAll('.keypad-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                if (activeInput && !activeInput.disabled) {
-                    let currentVal = parseInt(activeInput.value) || 0;
-                    let addVal = parseInt(btn.getAttribute('data-val'));
-                    let newVal = currentVal + addVal;
-
-                    pushUndo();
-                    activeInput.value = newVal;
-
-                    const index = activeInput.getAttribute('data-idx');
-                    const player = activeInput.getAttribute('data-player');
-                    state[index][player] = newVal;
-
-                    renderFooter(true); // Preview live tanpa trigger Game Over prematur
-                }
+                handleKeypadKey(btn.getAttribute('data-key'));
             });
         });
 
@@ -524,6 +870,7 @@
                     winner: winners,
                     loser: losers,
                     minScore: minScore,
+                    duration: formatDuration((matchEndTime || Date.now()) - matchStartTime),
                     scores: {
                         [playerNames.p1]: totals.p1,
                         [playerNames.p2]: totals.p2,
@@ -540,12 +887,13 @@
                 undoStack = [];
                 updateUndoButton();
                 lastAnnouncedRoundIndex = -1;
+                startNewMatchTimer();
                 renderTable();
                 renderFooter();
                 activeInput = null;
                 quickActionsPanel.classList.add('hidden');
 
-                alert('Data tersimpan! Memulai ronde baru.');
+                showAppToast('✅ Data tersimpan! Memulai ronde baru.', 'success');
             }
 
             if (e.target.id === 'btn-share-image') {
@@ -607,7 +955,7 @@
                     });
                 });
             } catch (err) {
-                alert('Gagal bikin gambar. Coba lagi ya.');
+                showAppToast('⚠️ Gagal bikin gambar. Coba lagi ya.', 'error');
             } finally {
                 card.remove();
                 if (shareBtn) {
@@ -635,7 +983,10 @@
 
             historyList.innerHTML = history.slice().reverse().map((match) => `
         <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-lg">
-          <div class="text-xs text-slate-400 mb-3 border-b border-slate-700 pb-2">${match.date}</div>
+          <div class="flex justify-between items-center text-xs text-slate-400 mb-3 border-b border-slate-700 pb-2">
+            <span>${match.date}</span>
+            ${match.duration ? `<span class="font-mono">⏱️ ${match.duration}</span>` : ''}
+          </div>
           <div class="flex justify-between items-center mb-3">
             <span class="text-green-400 font-black text-lg">🏆 ${match.winner}</span>
             <span class="text-red-400 text-xs bg-red-900/20 px-2 py-1 rounded border border-red-900/50">Terendah: ${match.loser} (${match.minScore})</span>
@@ -667,28 +1018,32 @@
         });
 
         btnReset.addEventListener('click', () => {
-            if (confirm('Yakin mau reset skor? (Data yang belum di-save ke Riwayat akan hilang)')) {
+            showConfirmModal('Yakin mau reset skor? (Data yang belum di-save ke Riwayat akan hilang)', () => {
                 state = [{ p1: '', p2: '', p3: '', p4: '' }];
                 saveState();
                 undoStack = [];
                 updateUndoButton();
                 lastAnnouncedRoundIndex = -1;
+                startNewMatchTimer();
                 renderTable();
                 renderFooter();
                 activeInput = null;
                 quickActionsPanel.classList.add('hidden');
-            }
+                showAppToast('🔄 Skor berhasil di-reset.', 'success');
+            });
         });
 
         // 9. Backup / Restore Data
         function exportData() {
             const backup = {
                 app: 'ceki-score-tracker',
-                version: 1,
+                version: 2,
                 exportedAt: new Date().toISOString(),
                 state,
                 playerNames,
                 history,
+                matchStartTime,
+                matchEndTime,
             };
             const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -707,38 +1062,54 @@
                 try {
                     data = JSON.parse(e.target.result);
                 } catch (err) {
-                    alert('Gagal import: file bukan JSON yang valid.');
+                    showAppToast('⚠️ Gagal import: file bukan JSON yang valid.', 'error');
                     return;
                 }
                 if (!data || !Array.isArray(data.state) || !data.playerNames || !Array.isArray(data.history)) {
-                    alert('Gagal import: format file tidak sesuai backup Score Tracker 1000.');
-                    return;
-                }
-                if (!confirm('Import akan MENIMPA data ronde, nama pemain, dan riwayat yang ada sekarang. Lanjut?')) {
+                    showAppToast('⚠️ Gagal import: format file tidak sesuai backup Score Tracker 1000.', 'error');
                     return;
                 }
 
-                state = data.state;
-                playerNames = data.playerNames;
-                history = data.history;
+                showConfirmModal('Import akan MENIMPA data ronde, nama pemain, dan riwayat yang ada sekarang. Lanjut?', () => {
+                    state = data.state;
+                    playerNames = data.playerNames;
+                    history = data.history;
 
-                saveState();
-                localStorage.setItem(NAME_KEY, JSON.stringify(playerNames));
-                localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+                    // Backup lama (versi 1) belum nyimpen waktu, jadi fallback ke "mulai sekarang"
+                    matchStartTime = data.matchStartTime || Date.now();
+                    matchEndTime = data.matchEndTime || null;
+                    localStorage.setItem(MATCH_START_KEY, String(matchStartTime));
+                    if (matchEndTime) {
+                        localStorage.setItem(MATCH_END_KEY, String(matchEndTime));
+                    } else {
+                        localStorage.removeItem(MATCH_END_KEY);
+                    }
 
-                document.querySelectorAll('.name-input').forEach(input => {
-                    const key = input.getAttribute('data-player');
-                    input.value = playerNames[key] || key.toUpperCase();
+                    saveState();
+                    localStorage.setItem(NAME_KEY, JSON.stringify(playerNames));
+                    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+
+                    document.querySelectorAll('.name-input').forEach(input => {
+                        const key = input.getAttribute('data-player');
+                        input.value = playerNames[key] || key.toUpperCase();
+                    });
+
+                    undoStack = [];
+                    updateUndoButton();
+                    lastAnnouncedRoundIndex = -1;
+
+                    if (matchEndTime) {
+                        stopMatchTimer();
+                        updateTimerDisplay();
+                    } else {
+                        startMatchTimer();
+                    }
+
+                    renderTable();
+                    renderFooter();
+                    historyModal.classList.add('hidden');
+                    showAppToast('✅ Data berhasil di-import!', 'success');
                 });
-
-                undoStack = [];
-                updateUndoButton();
-                lastAnnouncedRoundIndex = -1;
-
-                renderTable();
-                renderFooter();
-                historyModal.classList.add('hidden');
-                alert('Data berhasil di-import!');
             };
             reader.readAsText(file);
         }
@@ -783,6 +1154,11 @@
         updateUndoButton();
         renderTable();
         renderFooter();
+        if (matchEndTime) {
+            updateTimerDisplay(); // game sebelumnya udah selesai, timer beku di durasi akhir
+        } else {
+            startMatchTimer();
+        }
     </script>
 </body>
 
