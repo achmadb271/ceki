@@ -28,14 +28,13 @@ const HISTORY_KEY = 'score_tracker_history';
 const MATCH_START_KEY = 'score_tracker_match_start';
 const MATCH_END_KEY = 'score_tracker_match_end';
 
-let state = JSON.parse(localStorage.getItem(SCORE_KEY)) || [{ p1: '', p2: '', p3: '', p4: '' }];
+let state = JSON.parse(localStorage.getItem(SCORE_KEY)) || [];
 let playerNames = JSON.parse(localStorage.getItem(NAME_KEY)) || { p1: 'P1', p2: 'P2', p3: 'P3', p4: 'P4' };
 let history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
 
-let matchStartTime = parseInt(localStorage.getItem(MATCH_START_KEY)) || Date.now();
-if (!localStorage.getItem(MATCH_START_KEY)) {
-    localStorage.setItem(MATCH_START_KEY, String(matchStartTime));
-}
+// Timer BARU mulai begitu ronde pertama ditambahin (lihat bagian 8: btnAdd), bukan pas halaman dibuka.
+// matchStartTime tetep null selama belum ada ronde sama sekali.
+let matchStartTime = parseInt(localStorage.getItem(MATCH_START_KEY)) || null;
 let matchEndTime = parseInt(localStorage.getItem(MATCH_END_KEY)) || null;
 
 const players = ['p1', 'p2', 'p3', 'p4'];
@@ -117,6 +116,10 @@ function formatDuration(ms) {
 
 function updateTimerDisplay() {
     if (!matchTimerEl) return;
+    if (!matchStartTime) {
+        matchTimerEl.textContent = '⏱️ 00:00';
+        return;
+    }
     const end = matchEndTime || Date.now();
     matchTimerEl.textContent = '⏱️ ' + formatDuration(end - matchStartTime);
 }
@@ -149,6 +152,16 @@ function startNewMatchTimer() {
     startMatchTimer();
 }
 
+// Balikin timer ke kondisi "belum mulai sama sekali" (dipakai pas papan skor kosong lagi)
+function clearMatchTimer() {
+    stopMatchTimer();
+    matchStartTime = null;
+    matchEndTime = null;
+    localStorage.removeItem(MATCH_START_KEY);
+    localStorage.removeItem(MATCH_END_KEY);
+    updateTimerDisplay();
+}
+
 // --- Undo stack ---
 const MAX_UNDO = 50;
 let undoStack = [];
@@ -167,6 +180,10 @@ function undoLastAction() {
     if (undoStack.length === 0) return;
     state = JSON.parse(undoStack.pop());
     saveState();
+    if (state.length === 0) {
+        // Undo balik ke kondisi bener-bener kosong -> timer ikut dianggap belum mulai
+        clearMatchTimer();
+    }
     renderTable();
     renderFooter();
     updateUndoButton();
@@ -297,6 +314,19 @@ function getLiveOvertakeWarnings() {
 // 3. Render Tabel (Input Keyboard Nonaktif & Disiapkan Border transparan untuk efek Gosong)
 function renderTable() {
     tbody.innerHTML = '';
+
+    if (state.length === 0) {
+        tbody.innerHTML = `
+      <tr>
+        <td colspan="5" class="p-8 text-center text-slate-500 text-sm">
+          Belum ada ronde.<br>
+          <span class="text-slate-400 font-semibold">Tap "+ Ronde Baru" buat mulai main & jalanin timer!</span>
+        </td>
+      </tr>
+    `;
+        return;
+    }
+
     state.forEach((row, index) => {
         const tr = document.createElement('tr');
         tr.className = "border-b border-slate-700/50";
@@ -333,7 +363,7 @@ function renderFooter(isPreview = false) {
 
     const hasReached1000 = players.some(p => totals[p] >= 1000);
     const lastRow = state[state.length - 1];
-    const isCurrentRoundFinished = lastRow.p1 !== '' && lastRow.p2 !== '' && lastRow.p3 !== '' && lastRow.p4 !== '';
+    const isCurrentRoundFinished = lastRow ? (lastRow.p1 !== '' && lastRow.p2 !== '' && lastRow.p3 !== '' && lastRow.p4 !== '') : false;
 
     // "Sikut-sikutan" - highlight deg-degan buat ronde yang LAGI diketik (belum lengkap 4 kolom).
     // Begitu rondenya lengkap, status kebakar udah pasti (ditangani warna merah di atas), jadi preview ini gak perlu lagi.
@@ -429,7 +459,7 @@ function renderFooter(isPreview = false) {
             document.querySelectorAll('.score-input').forEach(input => input.disabled = false);
             btnAdd.disabled = false;
             btnAdd.classList.remove('opacity-50', 'cursor-not-allowed');
-            if (!timerInterval) startMatchTimer();
+            if (!timerInterval && matchStartTime) startMatchTimer();
         }
     }
 }
@@ -464,9 +494,20 @@ function syncActiveInputFromBuffer() {
 
 function appendToBuffer(str) {
     const sign = keypadBuffer.startsWith('-') ? '-' : '';
-    const digits = keypadBuffer.replace('-', '');
+    let digits = keypadBuffer.replace('-', '');
+
+    if (digits === '0') {
+        // Udah ada "0" doang di depan -> tombol 0/00 lagi gak boleh nambah jadi "00"/"000"
+        if (str === '0' || str === '00') return;
+        // Angka lain (1-9) GANTI si nol di depan, bukan nambah (biar gak jadi "05")
+        digits = '';
+    }
+
     if (digits.length >= 5) return; // batasin biar gak kepanjangan
-    keypadBuffer = sign + digits + str;
+    digits += str;
+    if (digits === '00') digits = '0'; // tombol "00" dipencet duluan pas masih kosong -> tetep "0"
+
+    keypadBuffer = sign + digits;
 }
 
 function handleKeypadKey(key) {
@@ -585,18 +626,18 @@ winnerBanner.addEventListener('click', (e) => {
         history.push(matchData);
         localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
 
-        state = [{ p1: '', p2: '', p3: '', p4: '' }];
+        state = [];
         saveState();
         undoStack = [];
         updateUndoButton();
         lastAnnouncedRoundIndex = -1;
-        startNewMatchTimer();
+        clearMatchTimer();
         renderTable();
         renderFooter();
         activeInput = null;
         quickActionsPanel.classList.add('hidden');
 
-        showAppToast('✅ Data tersimpan! Memulai ronde baru.', 'success');
+        showAppToast('✅ Data tersimpan! Tap "+ Ronde Baru" buat mulai match berikutnya.', 'success');
     }
 
     if (e.target.id === 'btn-share-image') {
@@ -709,8 +750,12 @@ function renderHistory() {
 // 8. Tambah Ronde, Undo, & Reset
 btnAdd.addEventListener('click', () => {
     pushUndo();
+    const isFirstRound = state.length === 0;
     state.push({ p1: '', p2: '', p3: '', p4: '' });
     saveState();
+    if (isFirstRound) {
+        startNewMatchTimer(); // ronde pertama beneran mulai di sini -> timer jalan dari sini
+    }
     renderTable();
     renderFooter();
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
@@ -722,12 +767,12 @@ btnUndo.addEventListener('click', () => {
 
 btnReset.addEventListener('click', () => {
     showConfirmModal('Yakin mau reset skor? (Data yang belum di-save ke Riwayat akan hilang)', () => {
-        state = [{ p1: '', p2: '', p3: '', p4: '' }];
+        state = [];
         saveState();
         undoStack = [];
         updateUndoButton();
         lastAnnouncedRoundIndex = -1;
-        startNewMatchTimer();
+        clearMatchTimer();
         renderTable();
         renderFooter();
         activeInput = null;
@@ -778,14 +823,22 @@ function importDataFromFile(file) {
             playerNames = data.playerNames;
             history = data.history;
 
-            // Backup lama (versi 1) belum nyimpen waktu, jadi fallback ke "mulai sekarang"
-            matchStartTime = data.matchStartTime || Date.now();
-            matchEndTime = data.matchEndTime || null;
-            localStorage.setItem(MATCH_START_KEY, String(matchStartTime));
-            if (matchEndTime) {
-                localStorage.setItem(MATCH_END_KEY, String(matchEndTime));
-            } else {
+            // Backup lama (versi 1) belum nyimpen waktu. Kalau papan skornya kosong (0 ronde),
+            // anggap belum mulai match (biar konsisten sama aturan "harus + Ronde Baru dulu").
+            if (state.length === 0) {
+                matchStartTime = null;
+                matchEndTime = null;
+                localStorage.removeItem(MATCH_START_KEY);
                 localStorage.removeItem(MATCH_END_KEY);
+            } else {
+                matchStartTime = data.matchStartTime || Date.now();
+                matchEndTime = data.matchEndTime || null;
+                localStorage.setItem(MATCH_START_KEY, String(matchStartTime));
+                if (matchEndTime) {
+                    localStorage.setItem(MATCH_END_KEY, String(matchEndTime));
+                } else {
+                    localStorage.removeItem(MATCH_END_KEY);
+                }
             }
 
             saveState();
@@ -804,8 +857,10 @@ function importDataFromFile(file) {
             if (matchEndTime) {
                 stopMatchTimer();
                 updateTimerDisplay();
-            } else {
+            } else if (matchStartTime) {
                 startMatchTimer();
+            } else {
+                updateTimerDisplay();
             }
 
             renderTable();
@@ -859,6 +914,8 @@ renderTable();
 renderFooter();
 if (matchEndTime) {
     updateTimerDisplay(); // game sebelumnya udah selesai, timer beku di durasi akhir
+} else if (matchStartTime) {
+    startMatchTimer(); // ada match yang lagi jalan (reload di tengah permainan) -> lanjutin timer-nya
 } else {
-    startMatchTimer();
+    updateTimerDisplay(); // belum ada ronde sama sekali -> tampilin 00:00, nunggu "+ Ronde Baru"
 }
