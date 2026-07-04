@@ -1,7 +1,9 @@
-const CACHE_NAME = 'ceki-score-tracker-v1';
+const CACHE_NAME = 'ceki-score-tracker-v2';
 const APP_SHELL = [
     './',
     './index.html',
+    './style.css',
+    './script.js',
     './manifest.json',
     './icons/icon-192.png',
     './icons/icon-512.png',

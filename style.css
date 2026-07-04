@@ -1,0 +1,162 @@
+/*
+ * Score Tracker 1000 - Ceki
+ * ==========================
+ * Animasi & style custom di luar utility class Tailwind (yang dipasang lewat CDN di index.html).
+ * File ini isinya cuma: toast notifikasi, animasi kebakar, dan highlight "sikut-sikutan".
+ *
+ * Struktur:
+ * 1. Toast "Kebakar"      -> animasi masuk/keluar + style .burn-toast
+ * 2. Animasi Flicker      -> efek kedip pas cell BENERAN kebakar (final, bukan preview)
+ * 3. Preview Sikut-sikutan -> highlight pulsing pas ronde masih diketik (belum final)
+ * 4. Toast Umum           -> pengganti window.alert() (sukses/error/info)
+ */
+
+/* ===== 1. Toast "Kebakar" ===== */
+@keyframes burnToastIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -20px) scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+    }
+}
+
+@keyframes burnToastOut {
+    from {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: translate(-50%, -10px) scale(0.95);
+    }
+}
+
+@keyframes flameFlicker {
+
+    0%,
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
+
+    25% {
+        transform: scale(1.08) rotate(-2deg);
+    }
+
+    50% {
+        transform: scale(0.97) rotate(2deg);
+    }
+
+    75% {
+        transform: scale(1.05) rotate(-1deg);
+    }
+}
+
+.burn-toast {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    z-index: 100;
+    background: linear-gradient(135deg, #7f1d1d, #b91c1c);
+    color: #fef2f2;
+    border: 1px solid #ef4444;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 15px;
+    box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.5);
+    animation: burnToastIn 0.35s ease-out forwards;
+    white-space: nowrap;
+}
+
+.burn-toast.hide {
+    animation: burnToastOut 0.35s ease-in forwards;
+}
+
+/* ===== 2. Animasi Flicker (efek kedip pas cell BENERAN kebakar) ===== */
+.burn-flicker {
+    animation: flameFlicker 0.4s ease-in-out 3;
+}
+
+/* ===== 3. Preview "Sikut-sikutan" (highlight pulsing pas ronde masih diketik) ===== */
+@keyframes tensePulseRisk {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.65);
+        border-color: #f87171;
+    }
+
+    50% {
+        box-shadow: 0 0 0 7px rgba(248, 113, 113, 0);
+        border-color: #fca5a5;
+    }
+}
+
+@keyframes tensePulseOvertake {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.65);
+        border-color: #facc15;
+    }
+
+    50% {
+        box-shadow: 0 0 0 7px rgba(250, 204, 21, 0);
+        border-color: #fde047;
+    }
+}
+
+.tense-atrisk {
+    border-width: 2px !important;
+    animation: tensePulseRisk 0.85s ease-in-out infinite;
+}
+
+.tense-overtaking {
+    border-width: 2px !important;
+    animation: tensePulseOvertake 0.85s ease-in-out infinite;
+}
+
+/* ===== 4. Toast Umum (pengganti window.alert()) ===== */
+.app-toast {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    z-index: 100;
+    padding: 12px 22px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 14px;
+    max-width: 90vw;
+    text-align: center;
+    animation: burnToastIn 0.35s ease-out forwards;
+}
+
+.app-toast.hide {
+    animation: burnToastOut 0.35s ease-in forwards;
+}
+
+.app-toast-success {
+    background: linear-gradient(135deg, #14532d, #16a34a);
+    color: #ecfdf5;
+    border: 1px solid #22c55e;
+    box-shadow: 0 10px 25px -5px rgba(34, 197, 94, 0.5);
+}
+
+.app-toast-error {
+    background: linear-gradient(135deg, #7f1d1d, #b91c1c);
+    color: #fef2f2;
+    border: 1px solid #ef4444;
+    box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.5);
+}
+
+.app-toast-info {
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    color: #eff6ff;
+    border: 1px solid #3b82f6;
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+}
