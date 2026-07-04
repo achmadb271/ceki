@@ -1,1 +1,1 @@
-web buat nyatet skor 4 player
+web buat nyatet skor game Ceki
