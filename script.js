@@ -311,6 +311,29 @@ function getLiveOvertakeWarnings() {
     return { atRisk, overtaking };
 }
 
+// 2c. Deteksi "udah deketan" di TOTAL POINT sekarang (gak butuh ngetik apa-apa dulu).
+// Kalau selisih total 2 pemain <= PROXIMITY_GAP dan yang unggul udah lewat ambang kebakar,
+// langsung kasih highlight di baris TOT: yang unggul (merah, keancem) & yang ngintil (kuning, siap nyalip).
+function getTotalProximityWarnings(totals) {
+    const atRisk = new Set();
+    const closing = new Set();
+    const BURN_THRESHOLD = 100;
+    const PROXIMITY_GAP = 50;
+
+    players.forEach(a => {
+        if (totals[a] < BURN_THRESHOLD) return;
+        players.forEach(b => {
+            if (a === b) return;
+            if (totals[a] > totals[b] && (totals[a] - totals[b]) <= PROXIMITY_GAP) {
+                atRisk.add(a);
+                closing.add(b);
+            }
+        });
+    });
+
+    return { atRisk, closing };
+}
+
 // 3. Render Tabel (Input Keyboard Nonaktif & Disiapkan Border transparan untuk efek Gosong)
 function renderTable() {
     tbody.innerHTML = '';
@@ -421,12 +444,22 @@ function renderFooter(isPreview = false) {
     tfoot.innerHTML = `
     <tr class="bg-slate-900 font-bold text-xl sticky bottom-0 border-t-2 border-slate-600 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.5)] transition-colors z-30">
       <td class="p-3 text-center text-blue-400 text-sm">TOT</td>
-      <td class="p-3 text-center ${getColor('p1')}">${totals.p1}</td>
-      <td class="p-3 text-center ${getColor('p2')}">${totals.p2}</td>
-      <td class="p-3 text-center ${getColor('p3')}">${totals.p3}</td>
-      <td class="p-3 text-center ${getColor('p4')}">${totals.p4}</td>
+      <td data-total-player="p1" class="p-3 text-center border border-transparent transition-colors ${getColor('p1')}">${totals.p1}</td>
+      <td data-total-player="p2" class="p-3 text-center border border-transparent transition-colors ${getColor('p2')}">${totals.p2}</td>
+      <td data-total-player="p3" class="p-3 text-center border border-transparent transition-colors ${getColor('p3')}">${totals.p3}</td>
+      <td data-total-player="p4" class="p-3 text-center border border-transparent transition-colors ${getColor('p4')}">${totals.p4}</td>
     </tr>
   `;
+
+    // Highlight "udah deketan" di total point - selalu aktif, gak perlu nunggu ngetik apa-apa dulu
+    const { atRisk: totalAtRisk, closing: totalClosing } = getTotalProximityWarnings(totals);
+    players.forEach(p => {
+        const cell = tfoot.querySelector(`[data-total-player="${p}"]`);
+        if (!cell) return;
+        cell.classList.remove('tense-atrisk', 'tense-overtaking');
+        if (totalAtRisk.has(p)) cell.classList.add('tense-atrisk');
+        else if (totalClosing.has(p)) cell.classList.add('tense-overtaking');
+    });
 
     if (!isPreview) {
         if (isGameOver) {
