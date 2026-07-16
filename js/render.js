@@ -84,8 +84,11 @@ export function renderFooter(isPreview = false) {
         players.forEach(p => {
             const cell = tbody.querySelector(`.score-input[data-idx="${lastIdx}"][data-player="${p}"]`);
             if (!cell) return;
-            if (atRisk.has(p)) cell.classList.add('tense-atrisk');
-            else if (overtaking.has(p)) cell.classList.add('tense-overtaking');
+            // "overtaking" (ijo) menang kalau kebetulan sama-sama kena "atRisk" (kuning) -
+            // misal pemain B lagi ngedeketin A, tapi B sendiri juga lagi diincer C dari
+            // belakang. Progress "lagi nyalip" lebih relevan buat ditampilin duluan.
+            if (overtaking.has(p)) cell.classList.add('tense-overtaking');
+            else if (atRisk.has(p)) cell.classList.add('tense-atrisk');
         });
     }
 
@@ -138,8 +141,8 @@ export function renderFooter(isPreview = false) {
         const cell = tfoot.querySelector(`[data-total-player="${p}"]`);
         if (!cell) return;
         cell.classList.remove('tense-atrisk', 'tense-overtaking');
-        if (totalAtRisk.has(p)) cell.classList.add('tense-atrisk');
-        else if (totalClosing.has(p)) cell.classList.add('tense-overtaking');
+        if (totalClosing.has(p)) cell.classList.add('tense-overtaking');
+        else if (totalAtRisk.has(p)) cell.classList.add('tense-atrisk');
     });
 
     if (!isPreview) {

@@ -1,5 +1,5 @@
 {
-    "name": "Ceki Score",
+    "name": "Score Tracker 1000 - Ceki",
     "short_name": "Ceki Score",
     "description": "Pencatat skor Ceki 4 pemain dengan sistem kebakar otomatis",
     "start_url": "./index.html",

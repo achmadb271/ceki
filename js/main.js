@@ -12,14 +12,15 @@
  *   4.  undo.js                - undo stack
  *   5.  burn-announcer.js      - notif kebakar (anti dobel)
  *   6.  toast.js                - toast & confirm modal custom
- *   7.  render.js               - render tabel/footer + deteksi game over
- *   8.  player-names.js         - input nama header
- *   9.  keypad.js               - numpad custom
- *   10. share.js                - share hasil ke gambar PNG
- *   11. win-modal.js            - popup menang
- *   12. history-modal.js        - modal riwayat + hapus riwayat
- *   13. pwa.js                  - install prompt & service worker
- *   14. main.js (file ini)      - orkestrasi + init
+ *   7.  sound.js                - efek suara (Web Audio API) & toggle mute
+ *   8.  render.js               - render tabel/footer + deteksi game over
+ *   9.  player-names.js         - input nama header
+ *   10. keypad.js               - numpad custom
+ *   11. share.js                - share hasil ke gambar PNG
+ *   12. win-modal.js            - popup menang
+ *   13. history-modal.js        - modal riwayat + hapus riwayat
+ *   14. pwa.js                  - install prompt & service worker
+ *   15. main.js (file ini)      - orkestrasi + init
  */
 
 import { getRounds, addRound, resetMatchOnly } from './store.js';

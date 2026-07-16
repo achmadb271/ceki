@@ -6,6 +6,7 @@
  */
 
 import { showBurnToast } from './toast.js';
+import { playBurnSound } from './sound.js';
 
 let lastAnnouncedRoundIndex = -1;
 
@@ -16,6 +17,7 @@ export function checkAndAnnounceBurns(burnHistory, isLastRowFinished) {
     const burnsThisRound = burnHistory[lastIdx] || [];
     if (burnsThisRound.length > 0) {
         showBurnToast(burnsThisRound);
+        playBurnSound();
     }
     lastAnnouncedRoundIndex = lastIdx;
 }
