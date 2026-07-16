@@ -93,7 +93,7 @@ winModalBody.addEventListener('click', (e) => {
     }
 
     if (e.target.id === 'btn-share-image') {
-        shareResultAsImage(pendingResult);
+        shareResultAsImage();
     }
 });
 
