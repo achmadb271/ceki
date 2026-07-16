@@ -39,7 +39,7 @@ export async function shareResultAsImage() {
         const file = new File([blob], 'hasil-ceki.png', { type: 'image/png' });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
             try {
-                await navigator.share({ files: [file], title: 'Hasil Ceki', text: 'Hasil pertandingan Ceki' });
+                await navigator.share({ files: [file], title: 'Hasil Ceki', text: 'No Ceki No Life' });
             } catch (err) {
                 // user membatalkan share, gapapa
             }

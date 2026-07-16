@@ -23,13 +23,21 @@ const APP_SHELL = [
     './icons/icon-180.png',
 ];
 
-// Install: cache app shell
+// Install: cache app shell. SENGAJA gak langsung self.skipWaiting() di sini -
+// biar SW baru nunggu dulu ("waiting") sampe user klik banner update di pwa.js,
+// biar gak reload tiba-tiba pas lagi di tengah masukin skor.
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => cache.addAll(APP_SHELL))
-            .then(() => self.skipWaiting())
     );
+});
+
+// pwa.js kirim pesan ini pas user klik banner "Ada update baru".
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
 });
 
 // Activate: bersihin cache versi lama
