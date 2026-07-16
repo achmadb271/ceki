@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Score Tracker 1000</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="icon" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-180.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="bg-slate-900 text-white min-h-screen pb-24 font-sans relative">
+
+    <div class="max-w-md mx-auto p-2">
+        <div class="flex justify-center mb-2">
+            <div id="match-timer"
+                class="text-xs font-mono font-bold text-slate-400 bg-slate-800/60 px-3 py-1.5 rounded-full border border-slate-700 tracking-wider">
+                ⏱️ 00:00</div>
+        </div>
+
+        <div class="bg-slate-800/50 rounded-xl shadow-xl border border-slate-700">
+            <table class="w-full table-fixed border-collapse">
+                <thead class="sticky top-0 z-20 bg-slate-800 shadow-md">
+                    <tr class="border-b border-slate-700">
+                        <th class="w-10 p-2 text-center text-slate-300 text-sm">R</th>
+                        <th class="p-1"><input type="text"
+                                class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1 transition-colors"
+                                data-player="p1"></th>
+                        <th class="p-1"><input type="text"
+                                class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1 transition-colors"
+                                data-player="p2"></th>
+                        <th class="p-1"><input type="text"
+                                class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1 transition-colors"
+                                data-player="p3"></th>
+                        <th class="p-1"><input type="text"
+                                class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1 transition-colors"
+                                data-player="p4"></th>
+                    </tr>
+                </thead>
+                <tbody id="score-body">
+                </tbody>
+                <tfoot id="score-foot">
+                </tfoot>
+            </table>
+        </div>
+
+        <div id="quick-actions"
+            class="hidden mt-4 bg-slate-800/80 p-3 rounded-xl border border-slate-700 shadow-lg transition-all">
+            <div class="text-center text-xs text-slate-400 font-bold mb-1">KETIK SKOR (Pilih kolom dulu)</div>
+            <div class="text-center text-[10px] text-slate-500 mb-2">🔴 kebakar &nbsp;·&nbsp; 🟡 keancem kesalip &nbsp;·&nbsp; 🟢 lagi nyalip
+            </div>
+            <div class="grid grid-cols-2 gap-1.5 mb-1.5">
+                <button
+                    class="keypad-btn bg-purple-900/50 hover:bg-purple-800 active:bg-purple-700 text-purple-100 font-bold py-2.5 rounded-lg border border-purple-700 transition-colors text-sm"
+                    data-key="gope">Gope <span class="opacity-70 font-normal">+500</span></button>
+                <button
+                    class="keypad-btn bg-indigo-900/50 hover:bg-indigo-800 active:bg-indigo-700 text-indigo-100 font-bold py-2.5 rounded-lg border border-indigo-700 transition-colors text-sm"
+                    data-key="nutup">Nutup <span class="opacity-70 font-normal">+250</span></button>
+            </div>
+            <div class="grid grid-cols-4 gap-1.5">
+                <button
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    data-key="7">7</button>
+                <button
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    data-key="8">8</button>
+                <button
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    data-key="9">9</button>
+                <button
+                    class="keypad-btn bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 text-lg font-bold py-3 rounded-lg border border-red-800 transition-colors"
+                    data-key="backspace">⌫</button>
+
+                <button
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    data-key="4">4</button>
+                <button
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    data-key="5">5</button>
+                <button
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    data-key="6">6</button>
+                <button
+                    class="keypad-btn bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 text-sm font-bold py-3 rounded-lg border border-red-800 transition-colors"
+                    data-key="clear">C</button>
+
+                <button
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    data-key="1">1</button>
+                <button
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    data-key="2">2</button>
+                <button
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    data-key="3">3</button>
+                <button
+                    class="keypad-btn bg-slate-600 hover:bg-slate-500 active:bg-slate-400 text-white text-lg font-bold py-3 rounded-lg border border-slate-500 transition-colors"
+                    data-key="sign">±</button>
+
+                <button
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg col-span-2 transition-colors"
+                    data-key="0">0</button>
+                <button
+                    class="keypad-btn bg-slate-600 hover:bg-slate-500 active:bg-slate-400 text-white text-base font-bold py-3 rounded-lg border border-slate-500 transition-colors"
+                    data-key="00">00</button>
+                <button id="keypad-ok"
+                    class="keypad-btn bg-blue-600 hover:bg-blue-500 active:bg-blue-400 text-white text-lg font-bold py-3 rounded-lg shadow-lg transition-colors"
+                    data-key="ok">✔</button>
+            </div>
+        </div>
+
+        <div class="mt-6 flex gap-2">
+            <button id="btn-add"
+                class="flex-[2] bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3 px-2 rounded-lg shadow-lg transition-colors text-sm">
+                + Ronde Baru
+            </button>
+            <button id="btn-undo" disabled
+                class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-2 rounded-lg border border-slate-600 transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed">
+                ↩️ Undo
+            </button>
+            <button id="btn-open-history"
+                class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-2 rounded-lg border border-slate-600 transition-colors text-sm">
+                Riwayat
+            </button>
+            <button id="btn-reset"
+                class="flex-1 bg-red-900/50 hover:bg-red-800 text-red-200 font-semibold py-3 px-2 rounded-lg border border-red-800 transition-colors text-sm">
+                Reset
+            </button>
+        </div>
+
+        <button id="btn-install"
+            class="hidden mt-2 w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 px-2 rounded-lg border border-slate-700 transition-colors text-xs">
+            ⬇️ Install App ke HP
+        </button>
+    </div>
+
+    <!-- Popup Menang: full-screen overlay dengan animasi masuk (gantiin banner ijo lama) -->
+    <div id="win-modal" class="hidden fixed inset-0 bg-slate-950/90 z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div id="win-modal-content"
+            class="bg-gradient-to-b from-green-600 to-green-700 border-2 border-green-400 rounded-2xl p-6 max-w-sm w-full shadow-[0_20px_50px_-10px_rgba(34,197,94,0.6)] max-h-[90vh] overflow-y-auto">
+            <div id="win-modal-body"></div>
+        </div>
+    </div>
+
+    <div id="history-modal"
+        class="hidden fixed inset-0 bg-slate-950/95 z-50 p-4 overflow-y-auto flex flex-col backdrop-blur-sm">
+        <div class="max-w-md mx-auto w-full">
+            <div class="flex justify-between items-center mb-4 mt-4">
+                <h2 class="text-2xl font-bold text-white">Riwayat Game</h2>
+                <button id="btn-close-history"
+                    class="text-red-400 font-bold text-sm px-4 py-2 bg-red-900/30 hover:bg-red-900/50 rounded-lg border border-red-900 transition-colors">Tutup</button>
+            </div>
+            <div class="flex gap-2 mb-6">
+                <button id="btn-clear-history"
+                    class="flex-1 bg-red-900/30 hover:bg-red-900/50 text-red-300 text-xs font-bold py-2.5 rounded-lg border border-red-900 transition-colors">🗑️
+                    Hapus Riwayat</button>
+            </div>
+            <div id="history-list" class="space-y-4 pb-10">
+            </div>
+        </div>
+    </div>
+
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-600 rounded-xl p-5 max-w-sm w-full shadow-2xl">
+            <div id="confirm-modal-message" class="text-white text-sm mb-5 leading-relaxed"></div>
+            <div class="flex gap-2">
+                <button id="confirm-modal-cancel"
+                    class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 rounded-lg transition-colors text-sm">Batal</button>
+                <button id="confirm-modal-ok"
+                    class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 rounded-lg transition-colors text-sm">Ya,
+                    Lanjut</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+
+</html>
