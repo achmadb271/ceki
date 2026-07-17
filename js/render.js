@@ -74,12 +74,19 @@ export function renderFooter(isPreview = false) {
     const lastRow = rounds[rounds.length - 1];
     const isCurrentRoundFinished = lastRow ? players.every(p => lastRow[p] !== '') : false;
 
+    // Status "sikut-sikutan" versi BENERAN kesalip (dari ronde yang lagi diketik, belum lengkap
+    // 4 kolom). Dihitung sekali di sini, dipake bareng buat kolom input DAN baris TOT di bawah,
+    // biar dua-duanya konsisten (gak ada lagi TOT bilang "cuma deket" padahal kolom input udah
+    // bilang "kesalip beneran").
+    const liveOvertake = !isCurrentRoundFinished
+        ? getLiveOvertakeWarnings(rounds)
+        : { atRisk: new Set(), overtaking: new Set() };
+
     // "Sikut-sikutan" - highlight pulsing buat ronde yang LAGI diketik (belum lengkap 4 kolom)
     document.querySelectorAll('.score-input').forEach(input => {
         input.classList.remove('tense-atrisk', 'tense-overtaking');
     });
     if (!isCurrentRoundFinished) {
-        const { atRisk, overtaking } = getLiveOvertakeWarnings(rounds);
         const lastIdx = rounds.length - 1;
         players.forEach(p => {
             const cell = tbody.querySelector(`.score-input[data-idx="${lastIdx}"][data-player="${p}"]`);
@@ -87,8 +94,8 @@ export function renderFooter(isPreview = false) {
             // "overtaking" (ijo) menang kalau kebetulan sama-sama kena "atRisk" (kuning) -
             // misal pemain B lagi ngedeketin A, tapi B sendiri juga lagi diincer C dari
             // belakang. Progress "lagi nyalip" lebih relevan buat ditampilin duluan.
-            if (overtaking.has(p)) cell.classList.add('tense-overtaking');
-            else if (atRisk.has(p)) cell.classList.add('tense-atrisk');
+            if (liveOvertake.overtaking.has(p)) cell.classList.add('tense-overtaking');
+            else if (liveOvertake.atRisk.has(p)) cell.classList.add('tense-atrisk');
         });
     }
 
@@ -135,13 +142,18 @@ export function renderFooter(isPreview = false) {
     </tr>
   `;
 
-    // Highlight "udah deketan" di total point - selalu aktif, gak perlu nunggu ngetik apa-apa
+    // Highlight "udah deketan" di total point - selalu aktif, gak perlu nunggu ngetik apa-apa.
+    // Prioritasin status "beneran kesalip" (liveOvertake) dulu kalau lagi kejadian di ronde yang
+    // diketik, baru fallback ke "sekedar deket" (proximity statis) - biar TOT gak pernah bilang
+    // "cuma deket" pas kolom input di atas udah jelas-jelas nunjukin ada yang beneran kesalip.
     const { atRisk: totalAtRisk, closing: totalClosing } = getTotalProximityWarnings(totals);
     players.forEach(p => {
         const cell = tfoot.querySelector(`[data-total-player="${p}"]`);
         if (!cell) return;
         cell.classList.remove('tense-atrisk', 'tense-overtaking');
-        if (totalClosing.has(p)) cell.classList.add('tense-overtaking');
+        if (liveOvertake.overtaking.has(p)) cell.classList.add('tense-overtaking');
+        else if (liveOvertake.atRisk.has(p)) cell.classList.add('tense-atrisk');
+        else if (totalClosing.has(p)) cell.classList.add('tense-overtaking');
         else if (totalAtRisk.has(p)) cell.classList.add('tense-atrisk');
     });
 
