@@ -24,9 +24,12 @@ winAudio.preload = 'auto';
 function play(audio) {
     if (muted) return;
     audio.currentTime = 0;
-    audio.play().catch(() => {
+    audio.play().catch((err) => {
         // Gapapa kalau gagal (file belum ditaro, atau browser blokir autoplay
-        // sebelum ada gesture user pertama) - lanjut normal tanpa suara.
+        // sebelum ada gesture user pertama) - lanjut normal tanpa suara buat
+        // user, tapi tetep di-log ke console biar kelacak kalau lagi debug
+        // (misal remote-inspect HP orang lain yang laporan gak ada suara).
+        console.warn('[sound.js] Gagal mainin', audio.src, '-', err.name, err.message);
     });
 }
 

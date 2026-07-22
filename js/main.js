@@ -12,15 +12,18 @@
  *   4.  undo.js                - undo stack
  *   5.  burn-announcer.js      - notif kebakar (anti dobel)
  *   6.  toast.js                - toast & confirm modal custom
- *   7.  sound.js                - efek suara (Web Audio API) & toggle mute
- *   8.  render.js               - render tabel/footer + deteksi game over
- *   9.  player-names.js         - input nama header
- *   10. keypad.js               - numpad custom
- *   11. share.js                - share hasil ke gambar PNG
- *   12. win-modal.js            - popup menang
- *   13. history-modal.js        - modal riwayat + hapus riwayat
- *   14. pwa.js                  - install prompt & service worker
- *   15. main.js (file ini)      - orkestrasi + init
+ *   7.  sound.js                - efek suara custom (audio file) & toggle mute
+ *   8.  haptics.js              - getar HP pas kebakar/menang
+ *   9.  wakelock.js             - layar gak mati sendiri pas match jalan
+ *   10. render.js               - render tabel/footer + deteksi game over
+ *   11. player-names.js         - input nama header
+ *   12. keypad.js               - numpad custom + shortcut Gope/Nutup/Triss
+ *   13. share.js                - share hasil ke gambar PNG (final & sementara)
+ *   14. win-modal.js            - popup menang
+ *   15. progress-modal.js       - popup skor sementara (share sebelum kelar)
+ *   16. history-modal.js        - modal riwayat + hapus riwayat
+ *   17. pwa.js                  - install prompt & service worker
+ *   18. main.js (file ini)      - orkestrasi + init
  */
 
 import { getRounds, addRound, resetMatchOnly } from './store.js';
@@ -33,6 +36,7 @@ import { showAppToast, showConfirmModal } from './toast.js';
 
 import './player-names.js';
 import './win-modal.js';
+import './progress-modal.js';
 import './history-modal.js';
 import './pwa.js';
 

@@ -18,6 +18,7 @@ let keypadFreshStart = true; // true kalau belum ada tombol numpad dipencet seja
 
 const GOPE_VALUE = 500;   // shortcut nilai umum di Ceki
 const NUTUP_VALUE = 250;  // nilai buat yang nutup ronde
+const TRISS_VALUE = 300;  // shortcut nilai umum lainnya
 
 function commitActiveInputAndClosePanel() {
     quickActionsPanel.classList.add('hidden');
@@ -59,13 +60,18 @@ function appendToBuffer(str) {
     keypadBuffer = sign + digits;
 }
 
-function applyNutup() {
+/**
+ * Shortcut "tutup ronde": isi kolom aktif dengan `value`, sisa 3 kolom pemain
+ * lain di ronde itu otomatis 0, terus langsung commit (kayak nge-OK). Dipakai
+ * bareng buat Gope/Nutup/Triss - bedanya cuma angkanya.
+ */
+function applyClosingShortcut(value) {
     const index = activeInput.getAttribute('data-idx');
     const closingPlayer = activeInput.getAttribute('data-player');
     const row = getRounds()[index];
 
     players.forEach(p => {
-        row[p] = (p === closingPlayer) ? NUTUP_VALUE : 0;
+        row[p] = (p === closingPlayer) ? value : 0;
     });
 
     // Refresh SEMUA kolom di ronde ini di layar (bukan cuma kolom yang lagi aktif)
@@ -119,14 +125,17 @@ function handleKeypadKey(key) {
     }
 
     if (key === 'gope') {
-        keypadBuffer = String(GOPE_VALUE);
-        keypadFreshStart = false;
-        syncActiveInputFromBuffer();
+        applyClosingShortcut(GOPE_VALUE);
         return;
     }
 
     if (key === 'nutup') {
-        applyNutup();
+        applyClosingShortcut(NUTUP_VALUE);
+        return;
+    }
+
+    if (key === 'triss') {
+        applyClosingShortcut(TRISS_VALUE);
         return;
     }
 

@@ -15,6 +15,7 @@ import { clearActiveInput } from './keypad.js';
 import { showAppToast } from './toast.js';
 import { shareResultAsImage } from './share.js';
 import { playWinSound } from './sound.js';
+import { vibrateWin } from './haptics.js';
 
 const winModal = document.getElementById('win-modal');
 const winModalContent = document.getElementById('win-modal-content');
@@ -25,6 +26,7 @@ let pendingResult = null;
 function open(result) {
     pendingResult = result;
     playWinSound();
+    vibrateWin();
     const playerNames = getPlayerNames();
     const { winners, losers, minScore, totals, durationText, burnCounts } = result;
     const winnerDisplay = winners.map(w => playerNames[w]).join(' & ');

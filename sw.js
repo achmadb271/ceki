@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ceki-score-tracker-v6';
+const CACHE_NAME = 'ceki-score-tracker-v9';
 const APP_SHELL = [
     './',
     './index.html',
@@ -11,11 +11,14 @@ const APP_SHELL = [
     './js/burn-announcer.js',
     './js/toast.js',
     './js/sound.js',
+    './js/haptics.js',
+    './js/wakelock.js',
     './js/render.js',
     './js/player-names.js',
     './js/keypad.js',
     './js/share.js',
     './js/win-modal.js',
+    './js/progress-modal.js',
     './js/history-modal.js',
     './js/pwa.js',
     './js/main.js',

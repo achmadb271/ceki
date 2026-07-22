@@ -13,17 +13,20 @@ export const WIN_SCORE = 1000;
 
 /**
  * Hitung total skor tiap pemain ronde demi ronde, sambil deteksi siapa
- * "kebakar" (skornya di atas ambang lalu kesalip -> direset ke 0).
+ * "kebakar" (skornya di atas ambang lalu kesalip -> direset ke 0), DAN siapa
+ * yang jadi penyebabnya (yang nyalip).
  */
 export function calculateTotals(rows) {
     let currentTotals = { p1: 0, p2: 0, p3: 0, p4: 0 };
-    let burnHistory = []; // Simpan data siapa yang gosong di setiap ronde
+    let burnHistory = [];   // Simpan data siapa yang gosong di setiap ronde
+    let burnedByHistory = []; // Simpan data siapa yang JADI PENYEBAB gosong (yang nyalip) di tiap ronde
 
     for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
         let prevTotals = { ...currentTotals };
         let tempTotals = { ...currentTotals };
         let burnedInThisRound = [];
+        let burnedByInThisRound = new Set();
 
         players.forEach(p => {
             tempTotals[p] += parseInt(row[p]) || 0;
@@ -43,6 +46,7 @@ export function calculateTotals(rows) {
                     if (playerA !== playerB) {
                         if (prevTotals[playerA] > prevTotals[playerB] && tempTotals[playerB] > tempTotals[playerA]) {
                             burnedPlayers.add(playerA); // Lagi di atas ambang, terus disalip -> gosong!
+                            burnedByInThisRound.add(playerB); // playerB yang nyalip -> penyebabnya
                         }
                     }
                 });
@@ -55,10 +59,11 @@ export function calculateTotals(rows) {
         }
 
         burnHistory.push(burnedInThisRound);
+        burnedByHistory.push([...burnedByInThisRound]);
         currentTotals = tempTotals;
     }
 
-    return { totals: currentTotals, burnHistory };
+    return { totals: currentTotals, burnHistory, burnedByHistory };
 }
 
 /**

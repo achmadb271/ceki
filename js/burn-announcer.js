@@ -7,6 +7,7 @@
 
 import { showBurnToast } from './toast.js';
 import { playBurnSound } from './sound.js';
+import { vibrateBurn } from './haptics.js';
 
 let lastAnnouncedRoundIndex = -1;
 
@@ -18,6 +19,7 @@ export function checkAndAnnounceBurns(burnHistory, isLastRowFinished) {
     if (burnsThisRound.length > 0) {
         showBurnToast(burnsThisRound);
         playBurnSound();
+        vibrateBurn();
     }
     lastAnnouncedRoundIndex = lastIdx;
 }

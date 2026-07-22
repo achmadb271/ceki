@@ -54,18 +54,24 @@ export function renderTable() {
 
 export function renderFooter(isPreview = false) {
     const rounds = getRounds();
-    const { totals, burnHistory } = calculateTotals(rounds);
+    const { totals, burnHistory, burnedByHistory } = calculateTotals(rounds);
 
-    // Update Visual Warna "Gosong"
+    // Update Visual Warna "Gosong" - merah buat yang kebakar, ijo buat penyebabnya (yang nyalip)
     document.querySelectorAll('.score-input').forEach(input => {
         const idx = input.getAttribute('data-idx');
         const p = input.getAttribute('data-player');
+        input.classList.remove(
+            'bg-slate-800/80', 'text-white', 'border-transparent',
+            'bg-red-950', 'text-red-400', 'border-red-600',
+            'bg-green-950', 'text-green-400', 'border-green-600',
+            'font-black'
+        );
 
         if (burnHistory[idx] && burnHistory[idx].includes(p)) {
-            input.classList.remove('bg-slate-800/80', 'text-white', 'border-transparent');
             input.classList.add('bg-red-950', 'text-red-400', 'border-red-600', 'font-black');
+        } else if (burnedByHistory[idx] && burnedByHistory[idx].includes(p)) {
+            input.classList.add('bg-green-950', 'text-green-400', 'border-green-600', 'font-black');
         } else {
-            input.classList.remove('bg-red-950', 'text-red-400', 'border-red-600', 'font-black');
             input.classList.add('bg-slate-800/80', 'text-white', 'border-transparent');
         }
     });

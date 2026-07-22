@@ -6,6 +6,7 @@
  */
 
 import { getMatchStartTime, getMatchEndTime, startNewMatch as storeStartNewMatch, markMatchEnd as storeMarkMatchEnd, clearMatchTiming } from './store.js';
+import { holdWakeLock, releaseWakeLock } from './wakelock.js';
 
 const matchTimerEl = document.getElementById('match-timer');
 let timerInterval = null;
@@ -34,11 +35,13 @@ export function startMatchTimer() {
     stopMatchTimer();
     updateTimerDisplay();
     timerInterval = setInterval(updateTimerDisplay, 1000);
+    holdWakeLock();
 }
 
 export function stopMatchTimer() {
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = null;
+    releaseWakeLock();
 }
 
 export function isTimerRunning() {
