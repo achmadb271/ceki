@@ -37,6 +37,7 @@ import { showAppToast, showConfirmModal } from './toast.js';
 import './player-names.js';
 import './win-modal.js';
 import './progress-modal.js';
+import './sync-code.js';
 import './history-modal.js';
 import './pwa.js';
 

@@ -13,8 +13,19 @@ export const WIN_SCORE = 1000;
 
 /**
  * Hitung total skor tiap pemain ronde demi ronde, sambil deteksi siapa
- * "kebakar" (skornya di atas ambang lalu kesalip -> direset ke 0), DAN siapa
- * yang jadi penyebabnya (yang nyalip).
+ * "kebakar" (skornya di atas ambang lalu BENERAN kesalip -> direset ke 0),
+ * DAN siapa yang jadi penyebabnya (yang nyalip).
+ *
+ * "Beneran kesalip" itu beberapa syarat, bukan cuma lihat hasil akhir:
+ *   1. Total akhir si penantang emang lebih tinggi dari si leader (kayak
+ *      sebelumnya).
+ *   2. Poin YANG DIDAPET si penantang di ronde ini harus POSITIF - dia
+ *      beneran nambah, bukan cuma "berkurang lebih sedikit" dibanding
+ *      si leader (itu bukan ngebalap, itu leader-nya jatuh sendiri).
+ *   3. Total baru si leader (SEBELUM di-reset) harus masih POSITIF - kalau
+ *      leader-nya udah minus duluan gara-gara poinnya ambrol, di-reset ke 0
+ *      itu justru NAIKIN skornya, bukan hukuman, jadi gak masuk akal
+ *      disebut "kebakar".
  */
 export function calculateTotals(rows) {
     let currentTotals = { p1: 0, p2: 0, p3: 0, p4: 0 };
@@ -44,8 +55,14 @@ export function calculateTotals(rows) {
 
                 players.forEach(playerB => {
                     if (playerA !== playerB) {
-                        if (prevTotals[playerA] > prevTotals[playerB] && tempTotals[playerB] > tempTotals[playerA]) {
-                            burnedPlayers.add(playerA); // Lagi di atas ambang, terus disalip -> gosong!
+                        const wasAhead = prevTotals[playerA] > prevTotals[playerB];
+                        const nowBehind = tempTotals[playerB] > tempTotals[playerA];
+                        const playerBGainThisRound = parseInt(row[playerB]) || 0;
+                        const genuineGain = playerBGainThisRound > 0; // B beneran nambah, bukan cuma turun lebih sedikit
+                        const somethingToLose = tempTotals[playerA] > 0; // Reset ke 0 harus beneran ngerugiin A
+
+                        if (wasAhead && nowBehind && genuineGain && somethingToLose) {
+                            burnedPlayers.add(playerA); // Lagi di atas ambang, BENERAN disalip -> gosong!
                             burnedByInThisRound.add(playerB); // playerB yang nyalip -> penyebabnya
                         }
                     }
@@ -86,7 +103,13 @@ export function getLiveOvertakeWarnings(rows) {
         if (prevTotals[a] < BURN_THRESHOLD) return;
         players.forEach(b => {
             if (a === b) return;
-            if (prevTotals[a] > prevTotals[b] && previewTemp[b] > previewTemp[a]) {
+            const wasAhead = prevTotals[a] > prevTotals[b];
+            const nowBehind = previewTemp[b] > previewTemp[a];
+            const playerBGainSoFar = parseInt(row[b]) || 0;
+            const genuineGain = playerBGainSoFar > 0;
+            const somethingToLose = previewTemp[a] > 0;
+
+            if (wasAhead && nowBehind && genuineGain && somethingToLose) {
                 atRisk.add(a);
                 overtaking.add(b);
             }
