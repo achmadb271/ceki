@@ -1,11 +1,11 @@
 /**
  * sync-code.js
  * ============
- * Pindahin progress match antar-HP pake kode (bukan sinkron real-time -
+ * Pindahin progress match antar-HP pake kode/QR (bukan sinkron real-time -
  * app ini gak punya server/database di belakangnya, semuanya cuma jalan di
- * localStorage HP masing-masing). Alurnya: HP A generate kode dari state
- * sekarang, kode itu di-copy/share manual ke HP B, HP B masukin kodenya buat
- * numpuk timpa state lokalnya sendiri.
+ * localStorage HP masing-masing). Alurnya: HP A generate kode+QR dari state
+ * sekarang, HP B scan QR-nya (atau tempel kodenya manual) buat numpuk timpa
+ * state lokalnya sendiri.
  *
  * Kode-nya cuma JSON {rounds, playerNames, matchStartTime} yang di-base64.
  * SENGAJA gak termasuk riwayat (history) - fitur ini buat nerusin MATCH YANG
@@ -28,10 +28,17 @@ const btnCloseSync = document.getElementById('btn-close-sync');
 const btnGenerateCode = document.getElementById('btn-generate-code');
 const generatedCodeBox = document.getElementById('generated-code-box');
 const generatedCodeText = document.getElementById('generated-code-text');
+const qrCodeCanvas = document.getElementById('qr-code-canvas');
 const btnCopyCode = document.getElementById('btn-copy-code');
 const btnShareCode = document.getElementById('btn-share-code');
 const importCodeInput = document.getElementById('import-code-input');
 const btnImportCode = document.getElementById('btn-import-code');
+const btnOpenScanner = document.getElementById('btn-open-scanner');
+const btnCancelScan = document.getElementById('btn-cancel-scan');
+const qrScannerBox = document.getElementById('qr-scanner-box');
+
+let qrCodeInstance = null;   // instance qrcodejs yang lagi kepasang di qr-code-canvas
+let html5QrCode = null;      // instance html5-qrcode (scanner kamera) yang lagi aktif
 
 // --- Encode/decode UTF-8-safe base64 (biar nama pemain apapun karakternya aman) ---
 function toBase64(str) {
@@ -91,6 +98,58 @@ function applyPayload(payload) {
     renderFooter();
 }
 
+/** Dipakai bareng baik dari hasil scan QR maupun dari tempel manual. */
+function syncFromCode(raw) {
+    if (!raw || !raw.trim()) {
+        showAppToast('Kodenya belum diisi.', 'info');
+        return;
+    }
+
+    let payload;
+    try {
+        payload = parseCode(raw);
+    } catch (err) {
+        showAppToast('⚠️ ' + err.message, 'error');
+        return;
+    }
+
+    showConfirmModal('Ini bakal NIMPA progress yang lagi jalan di HP ini sama data dari kode. Lanjut?', () => {
+        applyPayload(payload);
+        closeSyncModal();
+        showAppToast('✅ Progress berhasil disinkronkan!', 'success');
+    });
+}
+
+// --- Scanner kamera ---
+function startScanner() {
+    qrScannerBox.classList.remove('hidden');
+    html5QrCode = new Html5Qrcode('qr-reader');
+    html5QrCode.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: 220 },
+        (decodedText) => {
+            stopScanner();
+            syncFromCode(decodedText);
+        },
+        () => {
+            // gagal scan 1 frame itu normal banget (kamera belum pas ke QR-nya) - diemin aja
+        }
+    ).catch((err) => {
+        qrScannerBox.classList.add('hidden');
+        showAppToast('⚠️ Gagal buka kamera. Pastiin izin kamera diizinin, atau tempel kode manual aja.', 'error');
+    });
+}
+
+function stopScanner() {
+    qrScannerBox.classList.add('hidden');
+    if (html5QrCode) {
+        html5QrCode.stop().catch(() => { }).finally(() => {
+            html5QrCode.clear();
+            html5QrCode = null;
+        });
+    }
+}
+
 function openSyncModal() {
     generatedCodeBox.classList.add('hidden');
     importCodeInput.value = '';
@@ -99,6 +158,7 @@ function openSyncModal() {
 
 function closeSyncModal() {
     syncModal.classList.add('hidden');
+    stopScanner(); // jangan biarin kamera nyala di background pas modal ditutup
 }
 
 btnOpenSync.addEventListener('click', openSyncModal);
@@ -112,7 +172,17 @@ btnGenerateCode.addEventListener('click', () => {
         showAppToast('Belum ada progress buat di-generate kodenya.', 'info');
         return;
     }
-    generatedCodeText.value = generateCode();
+    const code = generateCode();
+    generatedCodeText.value = code;
+
+    qrCodeCanvas.innerHTML = ''; // bersihin QR sebelumnya biar gak numpuk
+    qrCodeInstance = new QRCode(qrCodeCanvas, {
+        text: code,
+        width: 200,
+        height: 200,
+        correctLevel: QRCode.CorrectLevel.M,
+    });
+
     generatedCodeBox.classList.remove('hidden');
 });
 
@@ -138,24 +208,9 @@ btnShareCode.addEventListener('click', async () => {
     }
 });
 
+btnOpenScanner.addEventListener('click', startScanner);
+btnCancelScan.addEventListener('click', stopScanner);
+
 btnImportCode.addEventListener('click', () => {
-    const raw = importCodeInput.value.trim();
-    if (!raw) {
-        showAppToast('Kodenya belum diisi.', 'info');
-        return;
-    }
-
-    let payload;
-    try {
-        payload = parseCode(raw);
-    } catch (err) {
-        showAppToast('⚠️ ' + err.message, 'error');
-        return;
-    }
-
-    showConfirmModal('Ini bakal NIMPA progress yang lagi jalan di HP ini sama data dari kode. Lanjut?', () => {
-        applyPayload(payload);
-        closeSyncModal();
-        showAppToast('✅ Progress berhasil disinkronkan!', 'success');
-    });
+    syncFromCode(importCodeInput.value.trim());
 });
