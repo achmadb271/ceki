@@ -2,11 +2,12 @@
  * sound.js
  * ========
  * Efek suara cerdas & audio meme Ceki:
- *   - Acak suara kebakar: audio/burn.mp3, burn1.mp3, burn2.mp3, burn3.mp3, dst.
- *   - Acak suara menang: audio/win.mp3, win1.mp3, win2.mp3, dst.
+ *   - Acak suara kebakar: audio/burn1.mp3, burn2.mp3, burn.mp3
+ *   - Acak suara menang: audio/win.mp3, win1.mp3
  *   - Suara peringatan mau nyalip / terancam: audio/warn.mp3
  *   - Suara feedback sentuhan tombol keypad
- * Jika file audio belum ada, otomatis memakai Web Audio API synthesizer sebagai fallback!
+ * Menggunakan Web Audio API Buffer Engine (anti-blokir autoplay mobile, bebas delay),
+ * dan otomatis fallback ke Web Audio API synthesizer jika file belum ada.
  * Ada tombol mute (🔊/🔇) yang kepersist ke localStorage.
  */
 
@@ -15,24 +16,19 @@ const btnMuteToggle = document.getElementById('btn-mute-toggle');
 
 let muted = localStorage.getItem(MUTE_KEY) === 'true';
 
+// Gunakan URL absolut yang di-resolve berdasarkan lokasi modul saat ini (aman untuk GitHub Pages subpath)
 const BURN_FILES = [
-    'audio/burn.mp3',
-    'audio/burn1.mp3',
-    'audio/burn2.mp3',
-    'audio/burn3.mp3',
-    'audio/burn4.mp3',
-    'audio/burn5.mp3',
+    new URL('../audio/burn1.mp3', import.meta.url).href,
+    new URL('../audio/burn2.mp3', import.meta.url).href,
+    new URL('../audio/burn.mp3', import.meta.url).href,
 ];
 
 const WIN_FILES = [
-    'audio/win.mp3',
-    'audio/win1.mp3',
-    'audio/win2.mp3',
-    'audio/win3.mp3',
+    new URL('../audio/win.mp3', import.meta.url).href,
+    new URL('../audio/win1.mp3', import.meta.url).href,
 ];
 
-const warnAudio = new Audio('audio/warn.mp3');
-warnAudio.preload = 'auto';
+const WARN_FILE = new URL('../audio/warn.mp3', import.meta.url).href;
 
 let audioCtx = null;
 function getAudioContext() {
@@ -48,8 +44,70 @@ function getAudioContext() {
     return audioCtx;
 }
 
-// Inisialisasi AudioContext saat interaksi pertama user agar aman dari blokir browser
-document.addEventListener('pointerdown', () => getAudioContext(), { once: true });
+// In-memory audio buffer cache agar pemutaran instan tanpa request berulang
+const audioBufferCache = new Map();
+
+async function loadBuffer(url) {
+    if (audioBufferCache.has(url)) return audioBufferCache.get(url);
+    const ctx = getAudioContext();
+    if (!ctx) return null;
+    try {
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const arrayBuf = await res.arrayBuffer();
+        const audioBuf = await ctx.decodeAudioData(arrayBuf);
+        audioBufferCache.set(url, audioBuf);
+        return audioBuf;
+    } catch (e) {
+        return null;
+    }
+}
+
+function playBuffer(buf) {
+    const ctx = getAudioContext();
+    if (!ctx || !buf) return false;
+    try {
+        const source = ctx.createBufferSource();
+        source.buffer = buf;
+        source.connect(ctx.destination);
+        source.start(0);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+async function playAudioFile(url, synthFallback) {
+    if (muted) return;
+    const ctx = getAudioContext();
+    if (ctx) {
+        let buf = audioBufferCache.get(url);
+        if (!buf) {
+            buf = await loadBuffer(url);
+        }
+        if (buf && playBuffer(buf)) {
+            return;
+        }
+    }
+
+    // Fallback: HTML5 Audio jika Web Audio Buffer gagal
+    try {
+        const audio = new Audio(url);
+        audio.currentTime = 0;
+        await audio.play();
+    } catch (err) {
+        if (synthFallback) synthFallback();
+    }
+}
+
+// Inisialisasi AudioContext & preload audio pada tap/klik pertama agar mobile browser mengizinkan audio
+function onFirstInteraction() {
+    getAudioContext();
+    loadBuffer(WARN_FILE);
+    BURN_FILES.forEach(url => loadBuffer(url));
+}
+document.addEventListener('pointerdown', onFirstInteraction, { once: true });
+document.addEventListener('click', onFirstInteraction, { once: true });
 
 function playSynthBurn() {
     if (muted) return;
@@ -148,27 +206,17 @@ export function playKeypadClick() {
 
 export function playBurnSound() {
     if (muted) return;
-    // Pilih acak dari pool audio kebakar/meme
+    // Pilih acak dari pool file audio kebakar yang tersedia
     const chosen = BURN_FILES[Math.floor(Math.random() * BURN_FILES.length)];
-    const audio = new Audio(chosen);
-    audio.play().catch(() => {
-        const baseAudio = new Audio('audio/burn.mp3');
-        baseAudio.play().catch(() => {
-            playSynthBurn();
-        });
+    playAudioFile(chosen, () => {
+        playAudioFile(BURN_FILES[0], playSynthBurn);
     });
 }
 
 export function playWinSound() {
     if (muted) return;
     const chosen = WIN_FILES[Math.floor(Math.random() * WIN_FILES.length)];
-    const audio = new Audio(chosen);
-    audio.play().catch(() => {
-        const baseAudio = new Audio('audio/win.mp3');
-        baseAudio.play().catch(() => {
-            playSynthWin();
-        });
-    });
+    playAudioFile(chosen, playSynthWin);
 }
 
 let lastWarnPlayedAt = 0;
@@ -179,10 +227,7 @@ export function playWarnSound() {
     if (now - lastWarnPlayedAt < 2500) return;
     lastWarnPlayedAt = now;
 
-    warnAudio.currentTime = 0;
-    warnAudio.play().catch(() => {
-        playSynthWarn();
-    });
+    playAudioFile(WARN_FILE, playSynthWarn);
 }
 
 function updateMuteIcon() {

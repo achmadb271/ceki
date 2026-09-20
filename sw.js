@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ceki-score-tracker-v21';
+const CACHE_NAME = 'ceki-score-tracker-v22';
 const APP_SHELL = [
     './',
     './index.html',
@@ -23,6 +23,10 @@ const APP_SHELL = [
     './js/history-modal.js',
     './js/pwa.js',
     './js/main.js',
+    './audio/burn.mp3',
+    './audio/burn1.mp3',
+    './audio/burn2.mp3',
+    './audio/warn.mp3',
     './icons/icon-192.png',
     './icons/icon-512.png',
     './icons/icon-180.png',
@@ -60,6 +64,12 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     const req = event.request;
     if (req.method !== 'GET') return;
+
+    // Untuk range request (streaming audio browser), bypass langsung ke network
+    if (req.headers.has('range')) {
+        event.respondWith(fetch(req));
+        return;
+    }
 
     event.respondWith(
         caches.match(req).then((cached) => {
