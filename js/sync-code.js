@@ -14,6 +14,7 @@
 
 import { getRounds, setRounds, getPlayerNames, setAllPlayerNames, getMatchStartTime, setMatchTiming, clearMatchTiming } from './store.js';
 import { renderTable, renderFooter } from './render.js';
+import { refreshNameInputs } from './player-names.js';
 import { resetUndoStack } from './undo.js';
 import { resetBurnAnnouncer } from './burn-announcer.js';
 import { clearActiveInput } from './keypad.js';
@@ -81,6 +82,7 @@ function parseCode(code) {
 function applyPayload(payload) {
     setRounds(payload.rounds);
     setAllPlayerNames(payload.playerNames);
+    refreshNameInputs();
     resetUndoStack();
     resetBurnAnnouncer();
     clearActiveInput();

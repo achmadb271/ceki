@@ -27,9 +27,8 @@ function open() {
     }
 
     const playerNames = getPlayerNames();
-    const { totals, burnHistory } = calculateTotals(rounds);
-    const burnCounts = countBurns(burnHistory);
-    const ranked = rankPlayers(totals);
+    const { totals, burnCounts, burnsInflictedCounts } = calculateTotals(rounds);
+    const ranked = rankPlayers(totals, burnsInflictedCounts, burnCounts);
     const durationText = getMatchStartTime() ? formatDuration(Date.now() - getMatchStartTime()) : '00:00';
 
     progressModalBody.innerHTML = `
@@ -39,8 +38,13 @@ function open() {
       ${ranked.map((p, i) => `
         <div class="flex items-center gap-3 bg-slate-900/40 border border-slate-700 rounded-lg px-3 py-2.5">
           <div class="w-6 h-6 rounded-full bg-slate-700 text-slate-200 text-xs font-black flex items-center justify-center shrink-0">${i + 1}</div>
-          <div class="flex-1 text-sm font-semibold text-slate-200 truncate">${playerNames[p]}</div>
-          ${burnCounts[p] > 0 ? `<div class="text-[10px] text-orange-300 font-semibold">Kebakar ${burnCounts[p]}&times;</div>` : ''}
+          <div class="flex-1 min-w-0">
+            <div class="text-sm font-semibold text-slate-200 truncate">${playerNames[p]}</div>
+            <div class="flex items-center gap-2 text-[10px] mt-0.5">
+              ${(burnsInflictedCounts[p] || 0) > 0 ? `<span class="text-emerald-300 font-semibold">⚔️ Bakar ${burnsInflictedCounts[p]}&times;</span>` : ''}
+              ${(burnCounts[p] || 0) > 0 ? `<span class="text-orange-300 font-semibold">🔥 Kebakar ${burnCounts[p]}&times;</span>` : ''}
+            </div>
+          </div>
           <div class="text-lg font-black text-white">${totals[p]}</div>
         </div>
       `).join('')}

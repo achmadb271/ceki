@@ -10,9 +10,10 @@
  */
 
 import { getRounds, players, getMatchStartTime, getMatchEndTime } from './store.js';
-import { calculateTotals, getLiveOvertakeWarnings, getTotalProximityWarnings, countBurns, WIN_SCORE } from './scoring.js';
+import { calculateTotals, getLiveOvertakeWarnings, getTotalProximityWarnings, determineWinners, countBurns, WIN_SCORE } from './scoring.js';
 import { checkAndAnnounceBurns } from './burn-announcer.js';
 import { markMatchEndIfNeeded, startMatchTimer, isTimerRunning, formatDuration } from './timer.js';
+import { playWarnSound } from './sound.js';
 
 const tbody = document.getElementById('score-body');
 const tfoot = document.getElementById('score-foot');
@@ -54,7 +55,7 @@ export function renderTable() {
 
 export function renderFooter(isPreview = false) {
     const rounds = getRounds();
-    const { totals, burnHistory, burnedByHistory } = calculateTotals(rounds);
+    const { totals, burnHistory, burnedByHistory, burnCounts, burnsInflictedCounts } = calculateTotals(rounds);
 
     // Update Visual Warna "Gosong" - merah buat yang kebakar, ijo buat penyebabnya (yang nyalip)
     document.querySelectorAll('.score-input').forEach(input => {
@@ -103,6 +104,11 @@ export function renderFooter(isPreview = false) {
             if (liveOvertake.overtaking.has(p)) cell.classList.add('tense-overtaking');
             else if (liveOvertake.atRisk.has(p)) cell.classList.add('tense-atrisk');
         });
+
+        // Mainkan suara peringatan jika ada situasi genting (mau nyalip / terancam)
+        if (liveOvertake.overtaking.size > 0 || liveOvertake.atRisk.size > 0) {
+            playWarnSound();
+        }
     }
 
     // Notif & animasi pas ada yang baru kebakar (cuma pas ronde beneran baru selesai, bukan preview)
@@ -129,7 +135,7 @@ export function renderFooter(isPreview = false) {
     let minScore = 0;
 
     if (isGameOver) {
-        winners = players.filter(p => totals[p] >= WIN_SCORE);
+        winners = determineWinners(totals, burnsInflictedCounts, burnCounts);
         minScore = Math.min(...players.map(p => totals[p]));
         losers = players.filter(p => totals[p] === minScore);
     }
@@ -172,10 +178,10 @@ export function renderFooter(isPreview = false) {
             btnAdd.disabled = true;
             btnAdd.classList.add('opacity-50', 'cursor-not-allowed');
             quickActionsPanel.classList.add('hidden');
+            document.body.classList.remove('keypad-open');
 
             if (gameOverHandler) {
-                const burnCounts = countBurns(burnHistory);
-                gameOverHandler({ winners, losers, minScore, totals, durationText, burnCounts });
+                gameOverHandler({ winners, losers, minScore, totals, durationText, burnCounts, burnsInflictedCounts });
             }
         } else {
             document.querySelectorAll('.score-input').forEach(input => input.disabled = false);

@@ -1,13 +1,31 @@
-# Taruh file audio kamu di sini
+# Panduan File Audio & Meme Ceki
 
-Nama file HARUS persis seperti ini (case-sensitive):
+Taruh file audio kamu di folder ini (`audio/`):
 
-- `burn.mp3` -> dimainin pas ada pemain yang kebakar
-- `win.mp3`  -> dimainin pas ada yang menang
+### 1. Suara Kebakar / Meme (Diacak Otomatis):
 
-Format lain (`.wav`, `.ogg`) juga bisa dipakai, tinggal ganti nama file di
-`js/sound.js` (cari baris `new Audio('audio/burn.mp3')` dan
-`new Audio('audio/win.mp3')`, ganti ekstensinya).
+Sistem akan mengacak salah satu file di bawah ini tiap kali ada pemain yang kebakar:
 
-Kalau file belum ada / namanya salah, app tetap jalan normal - cuma gak ada
-suara yang keluar (gak bikin error/crash).
+- `burn.mp3` (file utama/default)
+- `burn1.mp3`
+- `burn2.mp3`
+- `burn3.mp3`
+- `burn4.mp3`
+- `burn5.mp3`
+  _(Bisa kamu isi suara meme kocak, misal: "Emotional Damage", "Wasted", efek tawa, ledakan, dsb)._
+
+### 2. Suara Peringatan Mau Nyalip / Terancam:
+
+- `warn.mp3` -> otomatis dimainkan saat ronde yang sedang diketik mendeteksi pemain mau kesalip / selisih poin genting.
+
+### 3. Suara Kemenangan (Diacak Otomatis):
+
+- `win.mp3` (file kemenangan utama)
+- `win1.mp3`
+- `win2.mp3`
+- `win3.mp3`
+
+---
+
+> **Catatan:**
+> Jika file `.mp3` belum dimasukkan atau file belum lengkap, aplikasi **tidak akan crash**, melainkan otomatis memainkan efek suara synthesizer retro bawaan (Web Audio API). Suara juga bisa dimatikan/dinyalakan kapan saja lewat tombol 🔊/🔇 di atas layar.

@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body class="bg-slate-900 text-white min-h-screen pb-24 font-sans relative">
+<body class="bg-slate-900 text-white min-h-screen pb-6 font-sans relative">
 
     <div class="max-w-md mx-auto p-2">
         <div class="flex justify-center items-center gap-2 mb-2">
@@ -60,71 +60,80 @@
         </div>
 
         <div id="quick-actions"
-            class="hidden mt-4 bg-slate-800/80 p-3 rounded-xl border border-slate-700 shadow-lg transition-all">
-            <div class="text-center text-xs text-slate-400 font-bold mb-1">KETIK SKOR (Pilih kolom dulu)</div>
-            <div class="text-center text-[10px] text-slate-500 mb-2">🔴 kebakar &nbsp;·&nbsp; 🟡 keancem kesalip
-                &nbsp;·&nbsp; 🟢 lagi nyalip
+            class="hidden fixed bottom-0 inset-x-0 z-40 max-w-md mx-auto bg-slate-900/95 border-t border-slate-700 p-2.5 shadow-2xl backdrop-blur-md rounded-t-2xl">
+            <div class="flex justify-between items-center px-1 mb-2">
+                <div class="flex items-center gap-1.5 min-w-0">
+                    <button id="btn-prev-player" type="button" title="Pemain sebelumnya"
+                        class="text-slate-300 hover:text-white text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700 active:bg-slate-700">◀</button>
+                    <div id="keypad-title" class="text-xs font-bold text-blue-400 truncate max-w-[110px]">R1 · P1</div>
+                    <div id="keypad-value-preview"
+                        class="font-mono text-sm font-black text-amber-300 bg-slate-800/90 px-2 py-0.5 rounded border border-slate-700 min-w-[36px] text-center">0</div>
+                    <button id="btn-next-player" type="button" title="Pemain berikutnya"
+                        class="text-slate-300 hover:text-white text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700 active:bg-slate-700">▶</button>
+                </div>
+                <button id="btn-close-keypad" type="button" title="Tutup keypad"
+                    class="text-slate-400 hover:text-white text-xs px-2.5 py-1 rounded bg-slate-800 border border-slate-700 shrink-0 active:bg-slate-700">✕ Selesai</button>
             </div>
             <div class="grid grid-cols-3 gap-1.5 mb-1.5">
                 <button
-                    class="keypad-btn bg-purple-900/50 hover:bg-purple-800 active:bg-purple-700 text-purple-100 font-bold py-2.5 rounded-lg border border-purple-700 transition-colors text-sm"
+                    class="keypad-btn bg-purple-900/50 hover:bg-purple-800 active:bg-purple-700 text-purple-100 font-bold py-2 rounded-lg border border-purple-700 transition-colors text-xs"
                     data-key="gope">Gope <span class="opacity-70 font-normal">+500</span></button>
                 <button
-                    class="keypad-btn bg-teal-900/50 hover:bg-teal-800 active:bg-teal-700 text-teal-100 font-bold py-2.5 rounded-lg border border-teal-700 transition-colors text-sm"
+                    class="keypad-btn bg-teal-900/50 hover:bg-teal-800 active:bg-teal-700 text-teal-100 font-bold py-2 rounded-lg border border-teal-700 transition-colors text-xs"
                     data-key="triss">Triss <span class="opacity-70 font-normal">+300</span></button>
                 <button
-                    class="keypad-btn bg-indigo-900/50 hover:bg-indigo-800 active:bg-indigo-700 text-indigo-100 font-bold py-2.5 rounded-lg border border-indigo-700 transition-colors text-sm"
+                    class="keypad-btn bg-indigo-900/50 hover:bg-indigo-800 active:bg-indigo-700 text-indigo-100 font-bold py-2 rounded-lg border border-indigo-700 transition-colors text-xs"
                     data-key="nutup">Nutup <span class="opacity-70 font-normal">+250</span></button>
             </div>
             <div class="grid grid-cols-4 gap-1.5">
                 <button
-                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-lg font-bold py-2.5 rounded-lg transition-colors"
                     data-key="7">7</button>
                 <button
-                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-lg font-bold py-2.5 rounded-lg transition-colors"
                     data-key="8">8</button>
                 <button
-                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-lg font-bold py-2.5 rounded-lg transition-colors"
                     data-key="9">9</button>
                 <button
-                    class="keypad-btn bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 text-lg font-bold py-3 rounded-lg border border-red-800 transition-colors"
+                    class="keypad-btn bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 text-base font-bold py-2.5 rounded-lg border border-red-800 transition-colors"
                     data-key="backspace">⌫</button>
 
                 <button
-                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-lg font-bold py-2.5 rounded-lg transition-colors"
                     data-key="4">4</button>
                 <button
-                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-lg font-bold py-2.5 rounded-lg transition-colors"
                     data-key="5">5</button>
                 <button
-                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-lg font-bold py-2.5 rounded-lg transition-colors"
                     data-key="6">6</button>
                 <button
-                    class="keypad-btn bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 text-sm font-bold py-3 rounded-lg border border-red-800 transition-colors"
+                    class="keypad-btn bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 text-sm font-bold py-2.5 rounded-lg border border-red-800 transition-colors"
                     data-key="clear">C</button>
 
                 <button
-                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-lg font-bold py-2.5 rounded-lg transition-colors"
                     data-key="1">1</button>
                 <button
-                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-lg font-bold py-2.5 rounded-lg transition-colors"
                     data-key="2">2</button>
                 <button
-                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg transition-colors"
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-lg font-bold py-2.5 rounded-lg transition-colors"
                     data-key="3">3</button>
                 <button
-                    class="keypad-btn bg-slate-600 hover:bg-slate-500 active:bg-slate-400 text-white text-lg font-bold py-3 rounded-lg border border-slate-500 transition-colors"
+                    class="keypad-btn bg-slate-600 hover:bg-slate-500 active:bg-slate-400 text-white text-base font-bold py-2.5 rounded-lg border border-slate-500 transition-colors"
                     data-key="sign">±</button>
 
                 <button
-                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-xl font-bold py-3 rounded-lg col-span-2 transition-colors"
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-lg font-bold py-2.5 rounded-lg col-span-2 transition-colors"
                     data-key="0">0</button>
                 <button
-                    class="keypad-btn bg-slate-600 hover:bg-slate-500 active:bg-slate-400 text-white text-base font-bold py-3 rounded-lg border border-slate-500 transition-colors"
+                    class="keypad-btn bg-slate-600 hover:bg-slate-500 active:bg-slate-400 text-white text-sm font-bold py-2.5 rounded-lg border border-slate-500 transition-colors"
                     data-key="00">00</button>
                 <button id="keypad-ok"
-                    class="keypad-btn bg-blue-600 hover:bg-blue-500 active:bg-blue-400 text-white text-lg font-bold py-3 rounded-lg shadow-lg transition-colors"
-                    data-key="ok">✔</button>
+                    class="keypad-btn bg-blue-600 hover:bg-blue-500 active:bg-blue-400 text-white text-sm font-bold py-2.5 rounded-lg shadow-lg transition-colors flex items-center justify-center gap-1"
+                    data-key="ok">✔ Lanjut</button>
             </div>
         </div>
 

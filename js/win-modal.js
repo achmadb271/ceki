@@ -22,18 +22,83 @@ const winModalContent = document.getElementById('win-modal-content');
 const winModalBody = document.getElementById('win-modal-body');
 
 let pendingResult = null;
+let confettiAnimationId = null;
+let confettiCanvas = null;
+
+function startConfetti() {
+    stopConfetti();
+    confettiCanvas = document.createElement('canvas');
+    confettiCanvas.id = 'confetti-canvas';
+    document.body.appendChild(confettiCanvas);
+
+    const ctx = confettiCanvas.getContext('2d');
+    let width = (confettiCanvas.width = window.innerWidth);
+    let height = (confettiCanvas.height = window.innerHeight);
+
+    const colors = ['#f59e0b', '#ef4444', '#10b981', '#3b82f6', '#ec4899', '#8b5cf6', '#fbbf24'];
+    const particles = Array.from({ length: 75 }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * -height,
+        r: Math.random() * 5 + 3,
+        d: Math.random() * 30 + 10,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        tilt: Math.random() * 10 - 10,
+        tiltAngle: 0,
+        tiltAngleIncremental: Math.random() * 0.07 + 0.04,
+    }));
+
+    function draw() {
+        if (!confettiCanvas) return;
+        ctx.clearRect(0, 0, width, height);
+
+        particles.forEach((p) => {
+            p.tiltAngle += p.tiltAngleIncremental;
+            p.y += (Math.cos(p.d) + 3 + p.r / 2) * 0.75;
+            p.x += Math.sin(p.d) * 1.5;
+            p.tilt = Math.sin(p.tiltAngle) * 12;
+
+            ctx.beginPath();
+            ctx.lineWidth = p.r;
+            ctx.strokeStyle = p.color;
+            ctx.moveTo(p.x + p.tilt + p.r / 3, p.y);
+            ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
+            ctx.stroke();
+
+            if (p.y > height) {
+                p.x = Math.random() * width;
+                p.y = -15;
+            }
+        });
+
+        confettiAnimationId = requestAnimationFrame(draw);
+    }
+
+    draw();
+}
+
+function stopConfetti() {
+    if (confettiAnimationId) {
+        cancelAnimationFrame(confettiAnimationId);
+        confettiAnimationId = null;
+    }
+    if (confettiCanvas) {
+        confettiCanvas.remove();
+        confettiCanvas = null;
+    }
+}
 
 function open(result) {
     pendingResult = result;
     playWinSound();
     vibrateWin();
+    startConfetti();
     const playerNames = getPlayerNames();
-    const { winners, losers, minScore, totals, durationText, burnCounts } = result;
+    const { winners, losers, minScore, totals, durationText, burnCounts, burnsInflictedCounts = {} } = result;
     const winnerDisplay = winners.map(w => playerNames[w]).join(' & ');
     const loserDisplay = losers.map(l => playerNames[l]).join(' & ');
 
     winModalBody.innerHTML = `
-    <div class="text-3xl font-black mb-1 text-center">🏆 ${winnerDisplay} Menang!</div>
+    <div class="text-3xl font-black mb-1 text-center"><span class="trophy-bounce">🏆</span> ${winnerDisplay} Menang!</div>
     <div class="text-center mt-2">
       <span class="text-sm bg-green-700/40 text-white inline-block px-4 py-1.5 rounded-full border border-green-600">
         Skor Terendah: <span class="text-red-200 font-bold">${loserDisplay} (${minScore})</span>
@@ -45,7 +110,10 @@ function open(result) {
         <div class="bg-slate-900/40 border border-slate-700 rounded-lg p-2 text-center">
           <div class="text-[11px] text-slate-400 truncate">${playerNames[p]}</div>
           <div class="text-lg font-bold ${winners.includes(p) ? 'text-green-400' : (losers.includes(p) ? 'text-red-400' : 'text-slate-200')}">${totals[p]}</div>
-          ${burnCounts[p] > 0 ? `<div class="text-[10px] text-orange-300 font-semibold mt-0.5">🔥 kebakar ${burnCounts[p]}x</div>` : ''}
+          <div class="flex flex-col gap-0.5 mt-1">
+            ${(burnsInflictedCounts[p] || 0) > 0 ? `<div class="text-[10px] text-emerald-300 font-semibold">⚔️ bakar ${burnsInflictedCounts[p]}x</div>` : ''}
+            ${(burnCounts[p] || 0) > 0 ? `<div class="text-[10px] text-orange-300 font-semibold">🔥 kebakar ${burnCounts[p]}x</div>` : ''}
+          </div>
         </div>
       `).join('')}
     </div>
@@ -64,6 +132,7 @@ function open(result) {
 }
 
 function close() {
+    stopConfetti();
     winModal.classList.remove('win-modal-visible');
     setTimeout(() => winModal.classList.add('hidden'), 200);
 }

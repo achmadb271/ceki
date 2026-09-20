@@ -18,7 +18,7 @@ document.querySelectorAll('.name-input').forEach(input => {
     });
 });
 
-/** Dipakai backup.js buat sinkronin ulang value input setelah import data. */
+/** Dipakai buat sinkronin ulang value input nama setelah import data / sync kode. */
 export function refreshNameInputs() {
     const playerNames = getPlayerNames();
     document.querySelectorAll('.name-input').forEach(input => {

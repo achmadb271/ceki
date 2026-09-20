@@ -5,23 +5,89 @@
  * lewat readonly+inputmode="none" di render.js, semua input lewat sini).
  */
 
-import { getRounds, saveRounds, players } from './store.js';
+import { getRounds, saveRounds, players, getPlayerNames } from './store.js';
 import { renderFooter } from './render.js';
 import { pushUndo } from './undo.js';
+import { playKeypadClick } from './sound.js';
 
 const tbody = document.getElementById('score-body');
+const tfoot = document.getElementById('score-foot');
 const quickActionsPanel = document.getElementById('quick-actions');
+const btnCloseKeypad = document.getElementById('btn-close-keypad');
+const btnPrevPlayer = document.getElementById('btn-prev-player');
+const btnNextPlayer = document.getElementById('btn-next-player');
+const keypadTitle = document.getElementById('keypad-title');
+const keypadValuePreview = document.getElementById('keypad-value-preview');
 
 let activeInput = null;
 let keypadBuffer = '';       // digit yang lagi diketik buat kolom aktif
 let keypadFreshStart = true; // true kalau belum ada tombol numpad dipencet sejak fokus ke kolom ini
+let keypadOpenedAt = 0;      // timestamp saat keypad dibuka, pencegah glitch auto-close
 
 const GOPE_VALUE = 500;   // shortcut nilai umum di Ceki
 const NUTUP_VALUE = 250;  // nilai buat yang nutup ronde
 const TRISS_VALUE = 300;  // shortcut nilai umum lainnya
 
+function updateKeypadHeader() {
+    if (!activeInput) return;
+    const index = activeInput.getAttribute('data-idx');
+    const player = activeInput.getAttribute('data-player');
+    const playerNames = getPlayerNames();
+    const pName = playerNames[player] || player.toUpperCase();
+
+    if (keypadTitle) {
+        keypadTitle.textContent = `R${parseInt(index, 10) + 1} · ${pName}`;
+    }
+
+    if (keypadValuePreview) {
+        const val = keypadBuffer !== '' ? keypadBuffer : (activeInput.value !== '' ? activeInput.value : '0');
+        keypadValuePreview.textContent = val;
+    }
+}
+
+function highlightActiveRow(inputEl) {
+    document.querySelectorAll('#score-body tr').forEach(tr => tr.classList.remove('bg-blue-950/40'));
+    if (inputEl) {
+        const tr = inputEl.closest('tr');
+        if (tr) tr.classList.add('bg-blue-950/40');
+    }
+}
+
+function scrollRowIntoSafeViewIfNeeded(inputEl) {
+    if (!inputEl) return;
+    const tr = inputEl.closest('tr') || inputEl;
+    const rect = tr.getBoundingClientRect();
+    const panelHeight = quickActionsPanel.offsetHeight || 250;
+    const safeBottom = window.innerHeight - panelHeight - 12;
+    const safeTop = 60; // di bawah sticky table header
+
+    // Jika baris SUDAH terlihat di layar dengan aman (tidak tertutup keypad dan tidak tertutup header):
+    // TIDAK PERLU SCROLL sama sekali! Ini mencegah glitch/flicker saat ronde masih sedikit (1-5).
+    if (rect.top >= safeTop && rect.bottom <= safeBottom) {
+        return;
+    }
+
+    // Baris di luar area aman (akan tertutup keypad atau di atas header) -> beri padding bawah dan scroll:
+    document.body.classList.add('keypad-open');
+
+    // Beri jeda sebentar agar browser mengaplikasikan padding baru sebelum scroll
+    setTimeout(() => {
+        const updatedRect = tr.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const targetDocTop = updatedRect.top + scrollTop;
+        const desiredTop = Math.max(0, targetDocTop - 65);
+
+        window.scrollTo({
+            top: desiredTop,
+            behavior: 'smooth'
+        });
+    }, 40);
+}
+
 function commitActiveInputAndClosePanel() {
     quickActionsPanel.classList.add('hidden');
+    document.body.classList.remove('keypad-open');
+    highlightActiveRow(null);
     if (activeInput) {
         activeInput.classList.remove('ring-2', 'ring-blue-500');
         saveRounds();
@@ -41,6 +107,7 @@ function syncActiveInputFromBuffer() {
     const isIncomplete = keypadBuffer === '' || keypadBuffer === '-';
     getRounds()[index][player] = isIncomplete ? '' : parseInt(keypadBuffer, 10);
 
+    updateKeypadHeader();
     renderFooter(true); // Preview live tanpa trigger Game Over prematur
 }
 
@@ -58,6 +125,28 @@ function appendToBuffer(str) {
     if (digits === '00') digits = '0';
 
     keypadBuffer = sign + digits;
+}
+
+/**
+ * Pindah ke pemain lain pada ronde yang sama (misal P1 -> P2 -> P3 -> P4)
+ * tanpa menutup keypad, sehingga keypad tetap stabil dan tidak naik-turun.
+ */
+function moveToPlayerInSameRound(direction = 1) {
+    if (!activeInput) return false;
+    const index = activeInput.getAttribute('data-idx');
+    const player = activeInput.getAttribute('data-player');
+    const pIdx = players.indexOf(player);
+    const nextPIdx = pIdx + direction;
+
+    if (nextPIdx >= 0 && nextPIdx < players.length) {
+        const nextPlayer = players[nextPIdx];
+        const nextCell = tbody.querySelector(`.score-input[data-idx="${index}"][data-player="${nextPlayer}"]`);
+        if (nextCell) {
+            activateCell(nextCell);
+            return true;
+        }
+    }
+    return false;
 }
 
 /**
@@ -85,9 +174,16 @@ function applyClosingShortcut(value) {
 
 function handleKeypadKey(key) {
     if (!activeInput || activeInput.disabled) return;
+    playKeypadClick();
 
     if (key === 'ok') {
-        commitActiveInputAndClosePanel();
+        // Jika masih ada player berikutnya di ronde ini, langsung lompat ke player berikutnya!
+        // Tanpa menutup keypad (biar tidak ada animasi naik-turun yang menutupi cell).
+        const hasNext = moveToPlayerInSameRound(1);
+        if (!hasNext) {
+            // Sudah player terakhir di ronde ini (P4) -> commit & tutup
+            commitActiveInputAndClosePanel();
+        }
         return;
     }
 
@@ -148,35 +244,95 @@ function handleKeypadKey(key) {
     syncActiveInputFromBuffer();
 }
 
-tbody.addEventListener('focusin', (e) => {
-    if (e.target.classList.contains('score-input')) {
-        const isNewSession = activeInput !== e.target;
+function activateCell(inputEl) {
+    if (!inputEl || inputEl.disabled) return;
 
-        if (activeInput && isNewSession) {
-            saveRounds();
-            renderFooter(); // Hitung mutlak jika pindah kolom
-        }
+    // Jika cell ini sudah aktif dan keypad sudah terbuka, abaikan panggilan dobel
+    if (activeInput === inputEl && !quickActionsPanel.classList.contains('hidden')) {
+        return;
+    }
 
-        activeInput = e.target;
+    keypadOpenedAt = Date.now();
 
-        document.querySelectorAll('.score-input').forEach(input => input.classList.remove('ring-2', 'ring-blue-500'));
-        activeInput.classList.add('ring-2', 'ring-blue-500');
+    const isNewSession = activeInput !== inputEl;
 
-        if (isNewSession) {
-            pushUndo(); // 1 snapshot per kolom yang mulai diedit, bukan per digit
-            keypadBuffer = '';
-            keypadFreshStart = true;
-        }
+    if (activeInput && isNewSession) {
+        saveRounds();
+        renderFooter(); // Hitung mutlak jika pindah kolom
+    }
 
-        quickActionsPanel.classList.remove('hidden');
+    activeInput = inputEl;
+
+    document.querySelectorAll('.score-input').forEach(input => input.classList.remove('ring-2', 'ring-blue-500'));
+    activeInput.classList.add('ring-2', 'ring-blue-500');
+
+    if (isNewSession) {
+        pushUndo(); // 1 snapshot per kolom yang mulai diedit, bukan per digit
+        keypadBuffer = (activeInput.value || '').toString();
+        keypadFreshStart = true;
+    }
+
+    updateKeypadHeader();
+    highlightActiveRow(activeInput);
+    quickActionsPanel.classList.remove('hidden');
+
+    // Scroll hanya jika cell tertutup keypad (mencegah glitch pada ronde yang sudah muat)
+    scrollRowIntoSafeViewIfNeeded(activeInput);
+}
+
+// Tangani klik langsung pada cell atau padding td agar tidak ada glitch "kebuka lalu ketutup"
+tbody.addEventListener('click', (e) => {
+    const input = e.target.closest('.score-input') || e.target.closest('td')?.querySelector('.score-input');
+    if (input) {
+        e.stopPropagation();
+        activateCell(input);
     }
 });
 
-document.addEventListener('click', (e) => {
-    const isInput = e.target.classList.contains('score-input');
-    const isQuickActionArea = quickActionsPanel.contains(e.target);
+tbody.addEventListener('focusin', (e) => {
+    if (e.target.classList.contains('score-input')) {
+        activateCell(e.target);
+    }
+});
 
-    if (!isInput && !isQuickActionArea) {
+// Cegah klik di dalam area keypad agar tidak dianggap klik di luar
+quickActionsPanel.addEventListener('click', (e) => {
+    e.stopPropagation();
+});
+
+if (btnCloseKeypad) {
+    btnCloseKeypad.addEventListener('click', (e) => {
+        e.stopPropagation();
+        commitActiveInputAndClosePanel();
+    });
+}
+
+if (btnPrevPlayer) {
+    btnPrevPlayer.addEventListener('click', (e) => {
+        e.stopPropagation();
+        playKeypadClick();
+        moveToPlayerInSameRound(-1);
+    });
+}
+
+if (btnNextPlayer) {
+    btnNextPlayer.addEventListener('click', (e) => {
+        e.stopPropagation();
+        playKeypadClick();
+        moveToPlayerInSameRound(1);
+    });
+}
+
+document.addEventListener('click', (e) => {
+    // Abaikan jika keypad baru saja dibuka (mencegah glitch dari event tap/click yang tersisa)
+    if (Date.now() - keypadOpenedAt < 400) return;
+
+    const tableCard = tbody.closest('.bg-slate-800\\/50') || tbody;
+    const isTable = tableCard.contains(e.target);
+    const isKeypad = quickActionsPanel.contains(e.target);
+
+    // Hanya tutup jika klik BENAR-BENAR di luar seluruh kartu tabel skor dan di luar keypad
+    if (!isTable && !isKeypad) {
         if (!quickActionsPanel.classList.contains('hidden')) {
             commitActiveInputAndClosePanel();
         }
@@ -192,5 +348,7 @@ document.querySelectorAll('.keypad-btn').forEach(btn => {
 /** Dipakai main.js pas reset/undo-ke-kosong biar gak ada kolom "aktif" nyangkut. */
 export function clearActiveInput() {
     activeInput = null;
+    highlightActiveRow(null);
     quickActionsPanel.classList.add('hidden');
+    document.body.classList.remove('keypad-open');
 }

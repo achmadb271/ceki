@@ -15,7 +15,7 @@
 @keyframes burnToastIn {
     from {
         opacity: 0;
-        transform: translate(-50%, -20px) scale(0.9);
+        transform: translate(-50%, -24px) scale(0.85);
     }
 
     to {
@@ -32,27 +32,44 @@
 
     to {
         opacity: 0;
-        transform: translate(-50%, -10px) scale(0.95);
+        transform: translate(-50%, -12px) scale(0.95);
     }
 }
 
-@keyframes flameFlicker {
-
-    0%,
-    100% {
+@keyframes flameExplosion {
+    0% {
         transform: scale(1) rotate(0deg);
+        filter: brightness(1);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.8);
     }
 
-    25% {
-        transform: scale(1.08) rotate(-2deg);
+    15% {
+        transform: scale(1.16) rotate(-3deg);
+        filter: brightness(1.7);
+        box-shadow: 0 0 24px 6px rgba(239, 68, 68, 0.9), inset 0 0 14px rgba(249, 115, 22, 0.8);
+    }
+
+    30% {
+        transform: scale(0.94) rotate(3deg);
+        filter: brightness(1.3);
+        box-shadow: 0 0 16px 4px rgba(220, 38, 38, 0.8);
     }
 
     50% {
-        transform: scale(0.97) rotate(2deg);
+        transform: scale(1.12) rotate(-2deg);
+        filter: brightness(1.6);
+        box-shadow: 0 0 22px 5px rgba(239, 68, 68, 0.85);
     }
 
     75% {
-        transform: scale(1.05) rotate(-1deg);
+        transform: scale(0.97) rotate(1deg);
+        filter: brightness(1.2);
+    }
+
+    100% {
+        transform: scale(1) rotate(0deg);
+        filter: brightness(1);
+        box-shadow: 0 0 10px 2px rgba(239, 68, 68, 0.5);
     }
 }
 
@@ -61,15 +78,16 @@
     top: 16px;
     left: 50%;
     z-index: 100;
-    background: linear-gradient(135deg, #7f1d1d, #b91c1c);
-    color: #fef2f2;
-    border: 1px solid #ef4444;
-    padding: 12px 20px;
-    border-radius: 12px;
-    font-weight: 800;
-    font-size: 15px;
-    box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.5);
-    animation: burnToastIn 0.35s ease-out forwards;
+    background: linear-gradient(135deg, #7f1d1d, #dc2626);
+    color: #ffffff;
+    border: 2px solid #fca5a5;
+    padding: 12px 24px;
+    border-radius: 16px;
+    font-weight: 900;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 12px 35px -5px rgba(239, 68, 68, 0.7), 0 0 20px 2px rgba(249, 115, 22, 0.5);
+    animation: burnToastIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     white-space: nowrap;
 }
 
@@ -77,53 +95,60 @@
     animation: burnToastOut 0.35s ease-in forwards;
 }
 
-/* ===== 2. Animasi Flicker (efek kedip pas cell BENERAN kebakar) ===== */
+/* ===== 2. Animasi Flicker / Explosive Burn (efek kedip pas cell BENERAN kebakar) ===== */
 .burn-flicker {
-    animation: flameFlicker 0.4s ease-in-out 3;
+    animation: flameExplosion 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) 2;
+    z-index: 10;
 }
 
 /* ===== 3. Preview "Sikut-sikutan" (highlight pulsing pas ronde masih diketik) =====
    3 warna beda arti:
-   - Merah (di bagian "Animasi Flicker" & style burn di atas)  -> UDAH kebakar
-   - Kuning (tensePulseRisk / .tense-atrisk)                   -> keancem kesalip (selisih tipis, maks 50 poin)
-   - Ijo   (tensePulseOvertake / .tense-overtaking)            -> lagi nyalip / ngedeketin
+   - Merah (flameExplosion & .burn-flicker)                    -> UDAH kebakar
+   - Kuning (tenseRadarAlert / .tense-atrisk)                 -> keancem kesalip (radar danger tremor)
+   - Ijo   (tenseNeonNitro / .tense-overtaking)               -> lagi nyalip / ngedeketin (neon nitro glow)
 */
-@keyframes tensePulseRisk {
+@keyframes tenseRadarAlert {
 
     0%,
     100% {
-        box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.65);
+        box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.75), inset 0 0 8px rgba(234, 179, 8, 0.3);
         border-color: #facc15;
+        transform: scale(1);
     }
 
     50% {
-        box-shadow: 0 0 0 7px rgba(250, 204, 21, 0);
-        border-color: #fde047;
+        box-shadow: 0 0 0 8px rgba(234, 179, 8, 0), inset 0 0 14px rgba(234, 179, 8, 0.55);
+        border-color: #fef08a;
+        transform: scale(1.02);
     }
 }
 
-@keyframes tensePulseOvertake {
+@keyframes tenseNeonNitro {
 
     0%,
     100% {
-        box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.65);
-        border-color: #4ade80;
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.85), 0 0 12px rgba(34, 197, 94, 0.5);
+        border-color: #22c55e;
+        transform: scale(1);
     }
 
     50% {
-        box-shadow: 0 0 0 7px rgba(74, 222, 128, 0);
+        box-shadow: 0 0 0 9px rgba(34, 197, 94, 0), 0 0 22px rgba(34, 197, 94, 0.8);
         border-color: #86efac;
+        transform: scale(1.03);
     }
 }
 
 .tense-atrisk {
     border-width: 2px !important;
-    animation: tensePulseRisk 0.85s ease-in-out infinite;
+    animation: tenseRadarAlert 0.75s ease-in-out infinite;
+    background-color: rgba(113, 63, 18, 0.4) !important;
 }
 
 .tense-overtaking {
     border-width: 2px !important;
-    animation: tensePulseOvertake 0.85s ease-in-out infinite;
+    animation: tenseNeonNitro 0.6s ease-in-out infinite;
+    background-color: rgba(20, 83, 45, 0.5) !important;
 }
 
 /* ===== 4. Toast Umum (pengganti window.alert()) ===== */
@@ -169,7 +194,7 @@
 /* ===== 5. Popup Menang ===== */
 #win-modal {
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.25s ease;
 }
 
 #win-modal.win-modal-visible {
@@ -177,14 +202,44 @@
 }
 
 #win-modal-content {
-    transform: scale(0.82) translateY(10px);
+    transform: scale(0.8) translateY(16px);
     opacity: 0;
-    transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+    transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
 }
 
 #win-modal.win-modal-visible #win-modal-content {
     transform: scale(1) translateY(0);
     opacity: 1;
+    box-shadow: 0 25px 60px -10px rgba(34, 197, 94, 0.65), 0 0 45px 5px rgba(74, 222, 128, 0.45);
+}
+
+@keyframes trophyBounce {
+    0%, 100% {
+        transform: translateY(0) scale(1) rotate(0deg);
+    }
+    25% {
+        transform: translateY(-8px) scale(1.15) rotate(-4deg);
+    }
+    50% {
+        transform: translateY(2px) scale(1.05) rotate(4deg);
+    }
+    75% {
+        transform: translateY(-4px) scale(1.08) rotate(-2deg);
+    }
+}
+
+.trophy-bounce {
+    display: inline-block;
+    animation: trophyBounce 1.4s ease-in-out infinite;
+}
+
+#confetti-canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 68;
+    width: 100%;
+    height: 100%;
 }
 
 /* ===== 6. Notif "Ada Update Baru" ===== */
@@ -196,6 +251,25 @@
 
 #update-banner.update-banner-visible {
     transform: translateY(0);
+}
+
+/* ===== 7. Keypad Bottom Sheet ===== */
+body.keypad-open {
+    padding-bottom: 340px !important;
+}
+
+@keyframes slideUpKeypad {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+#quick-actions:not(.hidden) {
+    animation: slideUpKeypad 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* ===== 7. Popup Skor Sementara ===== */
