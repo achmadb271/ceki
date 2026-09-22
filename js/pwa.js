@@ -2,13 +2,50 @@
  * pwa.js
  * ======
  * Install-to-homescreen prompt, registrasi service worker buat offline
- * support, & notifikasi "ada versi baru" (biar orang yang tab-nya udah lama
- * kebuka / gak pernah hapus cache gak nyangkut di versi lama terus-terusan).
+ * support, & modal pop-up "What's New / Ada Update Baru!" dengan ringkasan
+ * fitur lengkap serta jaminan skor aman.
  */
 
 const btnInstall = document.getElementById('btn-install');
-const updateBanner = document.getElementById('update-banner');
+const updateModal = document.getElementById('update-modal');
+const updateModalContent = document.getElementById('update-modal-content');
+const updateModalList = document.getElementById('update-modal-list');
+const updateModalBadge = document.getElementById('update-modal-badge');
+const btnUpdateNow = document.getElementById('btn-update-now');
+const btnUpdateLater = document.getElementById('btn-update-later');
+const btnCloseUpdateModal = document.getElementById('btn-close-update-modal');
+const updateChip = document.getElementById('update-chip');
+
 let deferredInstallPrompt = null;
+let activeWaitingWorker = null;
+
+// Konfigurasi ringkasan update versi terbaru (mudah diubah tiap rilis)
+const LATEST_RELEASE = {
+    version: 'v2.3',
+    subtitle: 'Update Terbaru',
+    features: [
+        {
+            icon: '🔊',
+            title: 'Audio Meme & Efek Suara',
+            desc: 'Acak audio meme kebakar (burn1, burn2), sound sirine saat mau nyalip, dan feedback sentuhan keypad.'
+        },
+        {
+            icon: '🎴',
+            title: 'Aturan Ceki Disempurnakan',
+            desc: 'Safezone (<100) aman dari kebakaran, penalti minus tetap nancep, & tie-breaker penentu juara 1.'
+        },
+        {
+            icon: '📱',
+            title: 'Keypad Bottom Sheet Responsif',
+            desc: 'Keypad baru lebih nyaman di HP, auto-lanjut antar-pemain, dan kolom skor tidak lagi tertutup.'
+        },
+        {
+            icon: '🎊',
+            title: 'Animasi Keren & Confetti',
+            desc: 'Radar alert kuning, neon hijau nyalip, guncangan ledakan kebakar, & selebrasi kemenangan meriah.'
+        }
+    ]
+};
 
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
@@ -28,13 +65,72 @@ window.addEventListener('appinstalled', () => {
     btnInstall.classList.add('hidden');
 });
 
-function showUpdateBanner(waitingWorker) {
-    updateBanner.classList.remove('hidden');
-    updateBanner.classList.add('update-banner-visible');
-    updateBanner.onclick = () => {
-        updateBanner.textContent = '🔄 Nge-update...';
-        waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-    };
+function renderChangelog() {
+    if (updateModalBadge) {
+        updateModalBadge.textContent = `${LATEST_RELEASE.version} · ${LATEST_RELEASE.subtitle}`;
+    }
+    if (updateModalList) {
+        updateModalList.innerHTML = LATEST_RELEASE.features.map(f => `
+            <div class="flex items-start gap-2.5">
+                <span class="text-base shrink-0 mt-0.5">${f.icon}</span>
+                <div class="min-w-0">
+                    <div class="text-xs font-bold text-slate-100">${f.title}</div>
+                    <div class="text-[11px] text-slate-400 leading-snug">${f.desc}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+function openUpdateModal(waitingWorker) {
+    if (waitingWorker) activeWaitingWorker = waitingWorker;
+    if (updateChip) updateChip.classList.add('hidden');
+    renderChangelog();
+    updateModal.classList.remove('hidden');
+    void updateModalContent.offsetWidth; // trigger reflow biar animasi masuk jalan
+    updateModal.classList.add('update-modal-visible');
+}
+
+function closeUpdateModal(showChip = true) {
+    updateModal.classList.remove('update-modal-visible');
+    setTimeout(() => {
+        updateModal.classList.add('hidden');
+        if (showChip && activeWaitingWorker && updateChip) {
+            updateChip.classList.remove('hidden');
+        }
+    }, 200);
+}
+
+if (btnUpdateNow) {
+    btnUpdateNow.addEventListener('click', () => {
+        if (!activeWaitingWorker) {
+            window.location.reload();
+            return;
+        }
+        btnUpdateNow.disabled = true;
+        btnUpdateNow.innerHTML = '<span>🔄 Memperbarui...</span>';
+        activeWaitingWorker.postMessage({ type: 'SKIP_WAITING' });
+    });
+}
+
+if (btnUpdateLater) {
+    btnUpdateLater.addEventListener('click', () => closeUpdateModal(true));
+}
+
+if (btnCloseUpdateModal) {
+    btnCloseUpdateModal.addEventListener('click', () => closeUpdateModal(true));
+}
+
+if (updateModal) {
+    updateModal.addEventListener('click', (e) => {
+        if (e.target === updateModal) closeUpdateModal(true);
+    });
+}
+
+if (updateChip) {
+    updateChip.addEventListener('click', () => {
+        openUpdateModal(activeWaitingWorker);
+    });
 }
 
 if ('serviceWorker' in navigator) {
@@ -43,7 +139,7 @@ if ('serviceWorker' in navigator) {
             // Kejadian kalau SW baru udah kelar ke-install sebelum tab ini sempet
             // pasang listener-nya (misal tab lama di-resume dari background).
             if (registration.waiting && navigator.serviceWorker.controller) {
-                showUpdateBanner(registration.waiting);
+                openUpdateModal(registration.waiting);
             }
 
             registration.addEventListener('updatefound', () => {
@@ -52,7 +148,7 @@ if ('serviceWorker' in navigator) {
                 newWorker.addEventListener('statechange', () => {
                     // 'installed' + ada controller aktif = ini UPDATE (bukan install pertama kali)
                     if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        showUpdateBanner(newWorker);
+                        openUpdateModal(newWorker);
                     }
                 });
             });
