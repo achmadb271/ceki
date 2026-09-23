@@ -137,23 +137,21 @@ function appendToBuffer(str) {
 }
 
 /**
- * Pindah ke pemain lain pada ronde yang sama (misal P1 -> P2 -> P3 -> P4)
- * tanpa menutup keypad, sehingga keypad tetap stabil dan tidak naik-turun.
+ * Pindah ke pemain lain pada ronde yang sama (misal P1 -> P2 -> P3 -> P4 -> balik P1)
+ * Looping tak terbatas saat tombol panah kiri / kanan ditekan.
  */
 function moveToPlayerInSameRound(direction = 1) {
     if (!activeInput) return false;
     const index = activeInput.getAttribute('data-idx');
     const player = activeInput.getAttribute('data-player');
     const pIdx = players.indexOf(player);
-    const nextPIdx = pIdx + direction;
+    const nextPIdx = (pIdx + direction + players.length) % players.length;
 
-    if (nextPIdx >= 0 && nextPIdx < players.length) {
-        const nextPlayer = players[nextPIdx];
-        const nextCell = tbody.querySelector(`.score-input[data-idx="${index}"][data-player="${nextPlayer}"]`);
-        if (nextCell) {
-            activateCell(nextCell);
-            return true;
-        }
+    const nextPlayer = players[nextPIdx];
+    const nextCell = tbody.querySelector(`.score-input[data-idx="${index}"][data-player="${nextPlayer}"]`);
+    if (nextCell) {
+        activateCell(nextCell);
+        return true;
     }
     return false;
 }
@@ -186,13 +184,8 @@ function handleKeypadKey(key) {
     playKeypadClick();
 
     if (key === 'ok') {
-        // Jika masih ada player berikutnya di ronde ini, langsung lompat ke player berikutnya!
-        // Tanpa menutup keypad (biar tidak ada animasi naik-turun yang menutupi cell).
-        const hasNext = moveToPlayerInSameRound(1);
-        if (!hasNext) {
-            // Sudah player terakhir di ronde ini (P4) -> commit & tutup
-            commitActiveInputAndClosePanel();
-        }
+        // Tombol OK/Selesai langsung simpan dan tutup keypad seketika
+        commitActiveInputAndClosePanel();
         return;
     }
 

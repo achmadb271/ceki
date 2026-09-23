@@ -25,23 +25,23 @@ let swRegistration = null;
 
 // Konfigurasi ringkasan update versi terbaru (mudah diubah tiap rilis)
 const LATEST_RELEASE = {
-    version: 'v3.0',
-    subtitle: 'Update Keypad & PWA Fix',
+    version: 'v3.1',
+    subtitle: 'Navigasi Keypad Lebih Cepat',
     features: [
         {
-            icon: '📱',
-            title: 'Tombol Keypad Lebih Nyaman & Besar',
-            desc: 'Ukuran tombol keypad diperbesar (h-12 / 48px) agar jempol leluasa dan angka jauh lebih jelas.'
+            icon: '✔',
+            title: 'Tombol Selesai Langsung Tutup Keypad',
+            desc: 'Menekan tombol ✔ langsung menyimpan skor dan menutup keypad tanpa langkah ekstra.'
         },
         {
             icon: '🔄',
-            title: 'Perbaikan Update PWA Tangguh',
-            desc: 'Cache Service Worker diperbaiki agar instalasi update tidak pernah gagal atau memicu alert merah.'
+            title: 'Navigasi Panah Looping (Tanpa Mentok)',
+            desc: 'Tombol ◀ dan ▶ kini looping tak terbatas (P1 ke P4, P4 ke P1) untuk ganti pemain lebih gesit.'
         },
         {
-            icon: '🎴',
-            title: 'Aturan Salip dari Posisi Seri',
-            desc: 'Saat seri (>= 100), pemain melaju positif tercepat membakar lawan, tetapi aman jika lawan dapat 0/minus.'
+            icon: '📱',
+            title: 'Tombol Keypad Nyaman & Besar',
+            desc: 'Ukuran tombol keypad besar (h-12 / 48px) agar jempol leluasa dan angka jelas terbaca.'
         },
         {
             icon: '🎨',
