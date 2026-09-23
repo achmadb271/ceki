@@ -6,6 +6,8 @@
  * fitur lengkap serta jaminan skor aman.
  */
 
+import { showAppToast } from './toast.js';
+
 const btnInstall = document.getElementById('btn-install');
 const updateModal = document.getElementById('update-modal');
 const updateModalContent = document.getElementById('update-modal-content');
@@ -15,34 +17,36 @@ const btnUpdateNow = document.getElementById('btn-update-now');
 const btnUpdateLater = document.getElementById('btn-update-later');
 const btnCloseUpdateModal = document.getElementById('btn-close-update-modal');
 const updateChip = document.getElementById('update-chip');
+const btnManualUpdateCheck = document.getElementById('btn-manual-update-check');
 
 let deferredInstallPrompt = null;
 let activeWaitingWorker = null;
+let swRegistration = null;
 
 // Konfigurasi ringkasan update versi terbaru (mudah diubah tiap rilis)
 const LATEST_RELEASE = {
-    version: 'v2.6',
-    subtitle: 'UI/UX Pro & Arcade Edition',
+    version: 'v2.9',
+    subtitle: 'Update Terbaru',
     features: [
         {
+            icon: '🔄',
+            title: 'Deteksi Update Lebih Cepat',
+            desc: 'Pemeriksaan update instan saat dibuka, indikator versi aktif, dan tombol cek update manual.'
+        },
+        {
+            icon: '🎴',
+            title: 'Aturan Salip dari Posisi Seri',
+            desc: 'Saat seri (>= 100), jika melaju positif pemain tercepat membakar lawan, tetapi aman jika lawan dapat 0/minus.'
+        },
+        {
             icon: '🎨',
-            title: 'Warna Identitas 4 Pemain',
-            desc: 'Warna personal tiap pemain (Sky, Purple, Pink, Indigo) tanpa bentrok dengan indikator merah/kuning/hijau.'
+            title: 'Warna Identitas 4 Pemain & Live Rank',
+            desc: 'Warna unik tiap pemain (Sky, Purple, Pink, Indigo), live leaderboard di baris TOT, dan mode spotlight.'
         },
         {
-            icon: '👑',
-            title: 'Live Leaderboard di Baris TOT',
-            desc: 'Badge mahkota 👑, perak 🥈, perunggu 🥉, juru kunci 💀, dan live gap selisih poin dari sang leader.'
-        },
-        {
-            icon: '🔦',
-            title: 'Mode Spotlight Ronde',
-            desc: 'Baris ronde yang sedang diisi menyala jelas, sementara baris lain redup fokus tanpa salah baris.'
-        },
-        {
-            icon: '⚙️',
-            title: 'Manajemen Baris Ronde',
-            desc: 'Tap nomor ronde di kolom R untuk opsi cepat: kosongkan nilai ronde atau hapus baris tertentu.'
+            icon: '📱',
+            title: 'Keypad Responsif & Sticky Header',
+            desc: 'Header nama pemain selalu menempel saat scroll, dan keypad responsif di semua resolusi HP/laptop.'
         }
     ]
 };
@@ -133,33 +137,67 @@ if (updateChip) {
     });
 }
 
+function trackWorkerInstalling(worker) {
+    if (!worker) return;
+    worker.addEventListener('statechange', () => {
+        // 'installed' + ada controller aktif = ini UPDATE (bukan install pertama kali)
+        if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+            openUpdateModal(worker);
+        }
+    });
+}
+
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
+    const initSW = () => {
         navigator.serviceWorker.register('sw.js').then((registration) => {
-            // Kejadian kalau SW baru udah kelar ke-install sebelum tab ini sempet
-            // pasang listener-nya (misal tab lama di-resume dari background).
+            swRegistration = registration;
+
+            // 1. Langsung paksa cek update ke server saat halaman dibuka (jangan tunggu 30 menit)
+            registration.update().catch(() => {});
+
+            // 2. Kejadian kalau SW baru udah kelar ke-install sebelum tab ini sempet pasang listener
             if (registration.waiting && navigator.serviceWorker.controller) {
                 openUpdateModal(registration.waiting);
             }
 
+            // 3. Jika sedang menginstal saat ini
+            if (registration.installing) {
+                trackWorkerInstalling(registration.installing);
+            }
+
+            // 4. Pantau jika ada worker baru yang ditemukan
             registration.addEventListener('updatefound', () => {
-                const newWorker = registration.installing;
-                if (!newWorker) return;
-                newWorker.addEventListener('statechange', () => {
-                    // 'installed' + ada controller aktif = ini UPDATE (bukan install pertama kali)
-                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        openUpdateModal(newWorker);
-                    }
-                });
+                if (registration.installing) {
+                    trackWorkerInstalling(registration.installing);
+                }
             });
 
-            // Match Ceki bisa berjam-jam gak di-reload - cek berkala ke server
-            // siapa tau ada versi baru ke-deploy pas lagi asik main.
-            setInterval(() => registration.update(), 30 * 60 * 1000);
-        }).catch(() => {
-            // gapapa kalau gagal register, app tetap jalan normal (cuma gak offline-ready)
+            // 5. Cek lagi saat tab kembali dibuka / aktif dari background
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    registration.update().catch(() => {});
+                }
+            });
+
+            // 6. Cek saat halaman di-restore dari bfcache (Safari/Chrome mobile)
+            window.addEventListener('pageshow', (e) => {
+                if (e.persisted) {
+                    registration.update().catch(() => {});
+                }
+            });
+
+            // 7. Cek berkala tiap 10 menit
+            setInterval(() => registration.update().catch(() => {}), 10 * 60 * 1000);
+        }).catch((err) => {
+            console.warn('[pwa.js] Gagal register service worker:', err);
         });
-    });
+    };
+
+    if (document.readyState === 'complete') {
+        initSW();
+    } else {
+        window.addEventListener('load', initSW);
+    }
 
     // SW baru resmi ambil alih kontrol -> reload sekali biar pake aset versi baru.
     let hasReloaded = false;
@@ -167,5 +205,40 @@ if ('serviceWorker' in navigator) {
         if (hasReloaded) return;
         hasReloaded = true;
         window.location.reload();
+    });
+}
+
+// Tombol manual cek update
+if (btnManualUpdateCheck) {
+    btnManualUpdateCheck.addEventListener('click', async () => {
+        if (!navigator.onLine) {
+            showAppToast('⚠️ HP sedang offline, tidak dapat memeriksa update.', 'info');
+            return;
+        }
+
+        if (activeWaitingWorker) {
+            openUpdateModal(activeWaitingWorker);
+            return;
+        }
+
+        if (swRegistration) {
+            btnManualUpdateCheck.innerHTML = '<span>🔄 Memeriksa...</span>';
+            try {
+                await swRegistration.update();
+                setTimeout(() => {
+                    btnManualUpdateCheck.innerHTML = `<span>Ceki ${LATEST_RELEASE.version}</span> &middot; <span class="text-blue-400 font-bold">Cek Update</span>`;
+                    if (swRegistration.waiting) {
+                        openUpdateModal(swRegistration.waiting);
+                    } else if (!swRegistration.installing) {
+                        showAppToast(`✅ Aplikasi sudah dalam versi terbaru (${LATEST_RELEASE.version})!`, 'success');
+                    }
+                }, 1200);
+            } catch (err) {
+                btnManualUpdateCheck.innerHTML = `<span>Ceki ${LATEST_RELEASE.version}</span> &middot; <span class="text-blue-400 font-bold">Cek Update</span>`;
+                showAppToast('⚠️ Gagal memeriksa update, coba lagi nanti.', 'error');
+            }
+        } else {
+            showAppToast(`✅ Versi aktif saat ini: ${LATEST_RELEASE.version}`, 'info');
+        }
     });
 }
