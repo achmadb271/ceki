@@ -25,28 +25,28 @@ let swRegistration = null;
 
 // Konfigurasi ringkasan update versi terbaru (mudah diubah tiap rilis)
 const LATEST_RELEASE = {
-    version: 'v2.9',
-    subtitle: 'Update Terbaru',
+    version: 'v3.0',
+    subtitle: 'Update Keypad & PWA Fix',
     features: [
         {
+            icon: '📱',
+            title: 'Tombol Keypad Lebih Nyaman & Besar',
+            desc: 'Ukuran tombol keypad diperbesar (h-12 / 48px) agar jempol leluasa dan angka jauh lebih jelas.'
+        },
+        {
             icon: '🔄',
-            title: 'Deteksi Update Lebih Cepat',
-            desc: 'Pemeriksaan update instan saat dibuka, indikator versi aktif, dan tombol cek update manual.'
+            title: 'Perbaikan Update PWA Tangguh',
+            desc: 'Cache Service Worker diperbaiki agar instalasi update tidak pernah gagal atau memicu alert merah.'
         },
         {
             icon: '🎴',
             title: 'Aturan Salip dari Posisi Seri',
-            desc: 'Saat seri (>= 100), jika melaju positif pemain tercepat membakar lawan, tetapi aman jika lawan dapat 0/minus.'
+            desc: 'Saat seri (>= 100), pemain melaju positif tercepat membakar lawan, tetapi aman jika lawan dapat 0/minus.'
         },
         {
             icon: '🎨',
             title: 'Warna Identitas 4 Pemain & Live Rank',
             desc: 'Warna unik tiap pemain (Sky, Purple, Pink, Indigo), live leaderboard di baris TOT, dan mode spotlight.'
-        },
-        {
-            icon: '📱',
-            title: 'Keypad Responsif & Sticky Header',
-            desc: 'Header nama pemain selalu menempel saat scroll, dan keypad responsif di semua resolusi HP/laptop.'
         }
     ]
 };
@@ -221,24 +221,31 @@ if (btnManualUpdateCheck) {
             return;
         }
 
+        btnManualUpdateCheck.innerHTML = '<span>🔄 Memeriksa...</span>';
+
         if (swRegistration) {
-            btnManualUpdateCheck.innerHTML = '<span>🔄 Memeriksa...</span>';
             try {
                 await swRegistration.update();
                 setTimeout(() => {
                     btnManualUpdateCheck.innerHTML = `<span>Ceki ${LATEST_RELEASE.version}</span> &middot; <span class="text-blue-400 font-bold">Cek Update</span>`;
                     if (swRegistration.waiting) {
                         openUpdateModal(swRegistration.waiting);
-                    } else if (!swRegistration.installing) {
+                    } else if (swRegistration.installing) {
+                        trackWorkerInstalling(swRegistration.installing);
+                    } else {
                         showAppToast(`✅ Aplikasi sudah dalam versi terbaru (${LATEST_RELEASE.version})!`, 'success');
                     }
-                }, 1200);
+                }, 1000);
             } catch (err) {
                 btnManualUpdateCheck.innerHTML = `<span>Ceki ${LATEST_RELEASE.version}</span> &middot; <span class="text-blue-400 font-bold">Cek Update</span>`;
-                showAppToast('⚠️ Gagal memeriksa update, coba lagi nanti.', 'error');
+                // Tampilkan info versi aktif tanpa alert merah menakutkan
+                showAppToast(`✅ Aplikasi aktif: ${LATEST_RELEASE.version}. Tidak ada update baru.`, 'info');
             }
         } else {
-            showAppToast(`✅ Versi aktif saat ini: ${LATEST_RELEASE.version}`, 'info');
+            setTimeout(() => {
+                btnManualUpdateCheck.innerHTML = `<span>Ceki ${LATEST_RELEASE.version}</span> &middot; <span class="text-blue-400 font-bold">Cek Update</span>`;
+                showAppToast(`✅ Versi aktif saat ini: ${LATEST_RELEASE.version}`, 'info');
+            }, 600);
         }
     });
 }

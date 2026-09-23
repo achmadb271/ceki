@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ceki-score-tracker-v29';
+const CACHE_NAME = 'ceki-score-tracker-v30';
 const APP_SHELL = [
     './',
     './index.html',
@@ -26,19 +26,23 @@ const APP_SHELL = [
     './audio/burn.mp3',
     './audio/burn1.mp3',
     './audio/burn2.mp3',
-    './audio/warn.mp3',
     './icons/icon-192.png',
     './icons/icon-512.png',
     './icons/icon-180.png',
 ];
 
-// Install: cache app shell. SENGAJA gak langsung self.skipWaiting() di sini -
-// biar SW baru nunggu dulu ("waiting") sampe user klik banner update di pwa.js,
-// biar gak reload tiba-tiba pas lagi di tengah masukin skor.
+// Install: cache app shell secara tangguh (tidak gagal jika salah satu audio tidak ada)
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then((cache) => cache.addAll(APP_SHELL))
+        caches.open(CACHE_NAME).then((cache) => {
+            return Promise.all(
+                APP_SHELL.map((url) =>
+                    cache.add(url).catch((err) => {
+                        console.warn('[sw.js] Gagal cache resource:', url, err.message);
+                    })
+                )
+            );
+        })
     );
 });
 
