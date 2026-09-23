@@ -49,10 +49,11 @@ function open() {
         </div>
       `).join('')}
     </div>
-    <button id="btn-share-progress-image" class="mt-6 w-full bg-white text-blue-700 hover:bg-slate-100 active:bg-slate-200 font-black py-3 rounded-lg shadow-lg transition-colors text-base">
+    <div class="text-[9px] text-blue-200/50 font-mono tracking-widest text-center mt-3">SCORE TRACKER 1000 &middot; CEKI</div>
+    <button id="btn-share-progress-image" class="mt-4 w-full bg-white text-blue-700 hover:bg-slate-100 active:bg-slate-200 font-black py-3 rounded-xl shadow-lg transition-colors text-base">
       📸 Share Skor Sementara
     </button>
-    <button id="btn-close-progress" class="mt-2 w-full bg-blue-700/40 hover:bg-blue-700/60 text-white font-bold py-2.5 rounded-lg border border-blue-500 transition-colors text-sm">
+    <button id="btn-close-progress" class="mt-2 w-full bg-blue-700/40 hover:bg-blue-700/60 text-white font-bold py-2.5 rounded-xl border border-blue-500 transition-colors text-xs">
       Tutup
     </button>
   `;

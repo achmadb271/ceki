@@ -97,6 +97,11 @@ function open(result) {
     const winnerDisplay = winners.map(w => playerNames[w]).join(' & ');
     const loserDisplay = losers.map(l => playerNames[l]).join(' & ');
 
+    const maxInflicted = Math.max(...players.map(p => burnsInflictedCounts[p] || 0));
+    const executioners = maxInflicted > 0 ? players.filter(p => burnsInflictedCounts[p] === maxInflicted) : [];
+    const maxBurns = Math.max(...players.map(p => burnCounts[p] || 0));
+    const gosongers = maxBurns > 0 ? players.filter(p => burnCounts[p] === maxBurns) : [];
+
     winModalBody.innerHTML = `
     <div class="text-3xl font-black mb-1 text-center"><span class="trophy-bounce">🏆</span> ${winnerDisplay} Menang!</div>
     <div class="text-center mt-2">
@@ -104,12 +109,12 @@ function open(result) {
         Skor Terendah: <span class="text-red-200 font-bold">${loserDisplay} (${minScore})</span>
       </span>
     </div>
-    <div class="text-xs text-green-100/80 mt-3 font-mono text-center">⏱️ Durasi Pertandingan: ${durationText}</div>
-    <div class="grid grid-cols-2 gap-2 mt-5">
+    <div class="text-xs text-green-100/80 mt-2 font-mono text-center">⏱️ Durasi: ${durationText}</div>
+    <div class="grid grid-cols-2 gap-2 mt-4">
       ${players.map(p => `
-        <div class="bg-slate-900/40 border border-slate-700 rounded-lg p-2 text-center">
-          <div class="text-[11px] text-slate-400 truncate">${playerNames[p]}</div>
-          <div class="text-lg font-bold ${winners.includes(p) ? 'text-green-400' : (losers.includes(p) ? 'text-red-400' : 'text-slate-200')}">${totals[p]}</div>
+        <div class="bg-slate-900/40 border border-slate-700/80 rounded-xl p-2.5 text-center">
+          <div class="text-[11px] text-slate-300 font-bold truncate">${playerNames[p]}</div>
+          <div class="text-xl font-black font-mono mt-0.5 ${winners.includes(p) ? 'text-green-300' : (losers.includes(p) ? 'text-red-400' : 'text-slate-100')}">${totals[p]}</div>
           <div class="flex flex-col gap-0.5 mt-1">
             ${(burnsInflictedCounts[p] || 0) > 0 ? `<div class="text-[10px] text-emerald-300 font-semibold">⚔️ bakar ${burnsInflictedCounts[p]}x</div>` : ''}
             ${(burnCounts[p] || 0) > 0 ? `<div class="text-[10px] text-orange-300 font-semibold">🔥 kebakar ${burnCounts[p]}x</div>` : ''}
@@ -117,10 +122,31 @@ function open(result) {
         </div>
       `).join('')}
     </div>
-    <button id="btn-save-history" class="mt-6 w-full bg-white text-green-700 hover:bg-slate-100 active:bg-slate-200 font-black py-3 rounded-lg shadow-lg transition-colors text-lg">
+
+    ${(executioners.length > 0 || gosongers.length > 0) ? `
+      <div class="mt-3.5 bg-slate-900/50 rounded-xl p-2.5 border border-slate-700/60 text-left space-y-1">
+        <div class="text-[10px] text-green-200/70 font-bold uppercase tracking-wider text-center mb-1">🎖️ Gelar Pertandingan</div>
+        ${executioners.length > 0 ? `
+          <div class="flex justify-between items-center text-[11px]">
+            <span class="text-emerald-300 font-semibold flex items-center gap-1">⚔️ The Executioner</span>
+            <span class="text-white font-bold">${executioners.map(p => playerNames[p]).join(', ')} (${maxInflicted}x)</span>
+          </div>
+        ` : ''}
+        ${gosongers.length > 0 ? `
+          <div class="flex justify-between items-center text-[11px]">
+            <span class="text-orange-300 font-semibold flex items-center gap-1">🔥 Mr. Gosong</span>
+            <span class="text-white font-bold">${gosongers.map(p => playerNames[p]).join(', ')} (${maxBurns}x)</span>
+          </div>
+        ` : ''}
+      </div>
+    ` : ''}
+
+    <div class="text-[9px] text-green-200/50 font-mono tracking-widest text-center mt-3">SCORE TRACKER 1000 &middot; CEKI</div>
+
+    <button id="btn-save-history" class="mt-5 w-full bg-white text-green-700 hover:bg-slate-100 active:bg-slate-200 font-black py-3 rounded-xl shadow-lg transition-colors text-base">
       Simpan & Mulai Baru
     </button>
-    <button id="btn-share-image" class="mt-2 w-full bg-green-700/40 hover:bg-green-700/60 text-white font-bold py-2.5 rounded-lg border border-green-500 transition-colors text-sm">
+    <button id="btn-share-image" class="mt-2 w-full bg-green-700/40 hover:bg-green-700/60 text-white font-bold py-2.5 rounded-xl border border-green-500 transition-colors text-xs">
       📸 Share Hasil ke Gambar
     </button>
   `;

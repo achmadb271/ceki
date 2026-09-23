@@ -21,28 +21,28 @@ let activeWaitingWorker = null;
 
 // Konfigurasi ringkasan update versi terbaru (mudah diubah tiap rilis)
 const LATEST_RELEASE = {
-    version: 'v2.5',
-    subtitle: 'Update Terbaru',
+    version: 'v2.6',
+    subtitle: 'UI/UX Pro & Arcade Edition',
     features: [
         {
-            icon: '🎴',
-            title: 'Perbaikan Skor Kebakar Tekor',
-            desc: 'Jika minus lebih besar dari skor lama (misal 400 - 650), skor yang didapat adil di angka -250 (bukan -650).'
+            icon: '🎨',
+            title: 'Warna Identitas 4 Pemain',
+            desc: 'Warna personal tiap pemain (Sky, Purple, Pink, Indigo) tanpa bentrok dengan indikator merah/kuning/hijau.'
         },
         {
-            icon: '⚠️',
-            title: 'Audio Peringatan Sekali Per Ronde',
-            desc: 'Sound warning otomatis berbunyi saat skor mepet (gap <= 50) atau nyalip, maksimal 1x per ronde tanpa spam.'
+            icon: '👑',
+            title: 'Live Leaderboard di Baris TOT',
+            desc: 'Badge mahkota 👑, perak 🥈, perunggu 🥉, juru kunci 💀, dan live gap selisih poin dari sang leader.'
         },
         {
-            icon: '🔊',
-            title: 'Audio Meme & Efek Suara',
-            desc: 'Acak audio meme kebakar (burn1, burn2), sound sirine saat mau nyalip, dan feedback sentuhan keypad.'
+            icon: '🔦',
+            title: 'Mode Spotlight Ronde',
+            desc: 'Baris ronde yang sedang diisi menyala jelas, sementara baris lain redup fokus tanpa salah baris.'
         },
         {
-            icon: '📱',
-            title: 'Keypad Bottom Sheet Responsif',
-            desc: 'Keypad baru lebih nyaman di HP, auto-lanjut antar-pemain, dan kolom skor tidak lagi tertutup.'
+            icon: '⚙️',
+            title: 'Manajemen Baris Ronde',
+            desc: 'Tap nomor ronde di kolom R untuk opsi cepat: kosongkan nilai ronde atau hapus baris tertentu.'
         }
     ]
 };

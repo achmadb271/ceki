@@ -28,28 +28,40 @@ const GOPE_VALUE = 500;   // shortcut nilai umum di Ceki
 const NUTUP_VALUE = 250;  // nilai buat yang nutup ronde
 const TRISS_VALUE = 300;  // shortcut nilai umum lainnya
 
+const PLAYER_THEMES = {
+    p1: { text: 'text-sky-400', border: 'border-sky-500/50', bg: 'bg-sky-500/10' },
+    p2: { text: 'text-purple-400', border: 'border-purple-500/50', bg: 'bg-purple-500/10' },
+    p3: { text: 'text-pink-400', border: 'border-pink-500/50', bg: 'bg-pink-500/10' },
+    p4: { text: 'text-indigo-400', border: 'border-indigo-500/50', bg: 'bg-indigo-500/10' },
+};
+
 function updateKeypadHeader() {
     if (!activeInput) return;
     const index = activeInput.getAttribute('data-idx');
     const player = activeInput.getAttribute('data-player');
     const playerNames = getPlayerNames();
     const pName = playerNames[player] || player.toUpperCase();
+    const theme = PLAYER_THEMES[player] || { text: 'text-blue-400', border: 'border-slate-700', bg: 'bg-slate-800/90' };
 
     if (keypadTitle) {
         keypadTitle.textContent = `R${parseInt(index, 10) + 1} · ${pName}`;
+        keypadTitle.className = `text-xs font-black truncate max-w-[120px] ${theme.text}`;
     }
 
     if (keypadValuePreview) {
         const val = keypadBuffer !== '' ? keypadBuffer : (activeInput.value !== '' ? activeInput.value : '0');
         keypadValuePreview.textContent = val;
+        keypadValuePreview.className = `font-mono text-sm font-black px-2 py-0.5 rounded border min-w-[36px] text-center ${theme.text} ${theme.border} ${theme.bg}`;
     }
 }
 
 function highlightActiveRow(inputEl) {
-    document.querySelectorAll('#score-body tr').forEach(tr => tr.classList.remove('bg-blue-950/40'));
+    document.querySelectorAll('#score-body tr').forEach(tr => {
+        tr.classList.remove('row-spotlight', 'bg-blue-950/40');
+    });
     if (inputEl) {
         const tr = inputEl.closest('tr');
-        if (tr) tr.classList.add('bg-blue-950/40');
+        if (tr) tr.classList.add('row-spotlight');
     }
 }
 

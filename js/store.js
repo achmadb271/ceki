@@ -39,6 +39,22 @@ export function addRound(round) {
     saveRounds();
 }
 
+export function deleteRound(index) {
+    if (index >= 0 && index < state.length) {
+        state.splice(index, 1);
+        saveRounds();
+    }
+}
+
+export function clearRound(index) {
+    if (index >= 0 && index < state.length) {
+        players.forEach(p => {
+            state[index][p] = '';
+        });
+        saveRounds();
+    }
+}
+
 // --- Player names ---
 export function getPlayerNames() {
     return playerNames;

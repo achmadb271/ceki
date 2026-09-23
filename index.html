@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body class="bg-slate-900 text-white min-h-screen pb-6 font-sans relative">
+<body class="bg-slate-950 text-white min-h-screen pb-6 font-sans relative antialiased selection:bg-blue-600 selection:text-white">
 
     <div class="max-w-md mx-auto p-2">
         <div class="flex justify-center items-center gap-2 mb-2">
@@ -33,22 +33,22 @@
                 class="text-xs bg-slate-800/60 w-8 h-8 flex items-center justify-center rounded-full border border-slate-700 text-slate-400 hover:text-slate-200 transition-colors">🔗</button>
         </div>
 
-        <div class="bg-slate-800/50 rounded-xl shadow-xl border border-slate-700">
+        <div class="bg-slate-900/60 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-700/80 overflow-hidden">
             <table class="w-full table-fixed border-collapse">
-                <thead class="sticky top-0 z-20 bg-slate-800 shadow-md">
-                    <tr class="border-b border-slate-700">
-                        <th class="w-10 p-2 text-center text-slate-300 text-sm">R</th>
+                <thead class="sticky top-0 z-20 bg-slate-900/95 backdrop-blur-md shadow-md border-b border-slate-700/80">
+                    <tr class="border-b border-slate-700/80">
+                        <th class="w-10 p-2 text-center text-slate-400 text-xs font-mono font-bold tracking-wider">R</th>
                         <th class="p-1"><input type="text"
-                                class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1 transition-colors"
+                                class="name-input w-full bg-transparent text-center font-black text-sky-400 border-b-2 border-sky-500/40 focus:border-sky-400 focus:outline-none rounded p-1 transition-colors"
                                 data-player="p1"></th>
                         <th class="p-1"><input type="text"
-                                class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1 transition-colors"
+                                class="name-input w-full bg-transparent text-center font-black text-purple-400 border-b-2 border-purple-500/40 focus:border-purple-400 focus:outline-none rounded p-1 transition-colors"
                                 data-player="p2"></th>
                         <th class="p-1"><input type="text"
-                                class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1 transition-colors"
+                                class="name-input w-full bg-transparent text-center font-black text-pink-400 border-b-2 border-pink-500/40 focus:border-pink-400 focus:outline-none rounded p-1 transition-colors"
                                 data-player="p3"></th>
                         <th class="p-1"><input type="text"
-                                class="name-input w-full bg-transparent text-center font-bold text-slate-300 focus:outline-none focus:bg-slate-700 focus:text-white rounded p-1 transition-colors"
+                                class="name-input w-full bg-transparent text-center font-black text-indigo-400 border-b-2 border-indigo-500/40 focus:border-indigo-400 focus:outline-none rounded p-1 transition-colors"
                                 data-player="p4"></th>
                     </tr>
                 </thead>
@@ -301,6 +301,32 @@
                     Hapus Riwayat</button>
             </div>
             <div id="history-list" class="space-y-4 pb-10">
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Opsi Baris Ronde (Hapus / Kosongkan) -->
+    <div id="round-action-modal"
+        class="hidden fixed inset-0 bg-slate-950/80 z-[92] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-slate-800 border-2 border-slate-600 rounded-2xl p-5 max-w-xs w-full shadow-2xl">
+            <div class="flex justify-between items-center mb-2">
+                <div id="round-action-title" class="text-base font-black text-white">⚙️ Ronde 1</div>
+                <button id="btn-close-round-action" type="button" class="text-slate-400 hover:text-white text-xs px-2 py-1 rounded bg-slate-700/60">✕</button>
+            </div>
+            <div class="text-xs text-slate-300 mb-4 leading-relaxed">Pilih tindakan untuk baris ronde ini:</div>
+            <div class="flex flex-col gap-2">
+                <button id="btn-clear-round-row" type="button"
+                    class="w-full bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-amber-300 font-bold py-2.5 px-3 rounded-xl border border-amber-500/40 text-xs flex items-center justify-center gap-2 transition-all">
+                    <span>🧹 Kosongkan Nilai Ronde</span>
+                </button>
+                <button id="btn-delete-round-row" type="button"
+                    class="w-full bg-red-950/60 hover:bg-red-900/70 active:bg-red-800 text-red-200 font-bold py-2.5 px-3 rounded-xl border border-red-700/50 text-xs flex items-center justify-center gap-2 transition-all">
+                    <span>🗑️ Hapus Baris Ronde Ini</span>
+                </button>
+                <button id="btn-cancel-round-action" type="button"
+                    class="w-full bg-slate-800 hover:bg-slate-700 text-slate-400 font-semibold py-2 px-3 rounded-xl text-xs transition-all mt-1">
+                    Batal
+                </button>
             </div>
         </div>
     </div>

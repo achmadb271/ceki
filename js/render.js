@@ -9,15 +9,95 @@
  * yang didaftarin lewat onGameOver(). win-modal.js yang daftarin dirinya.
  */
 
-import { getRounds, players, getMatchStartTime, getMatchEndTime } from './store.js';
-import { calculateTotals, getLiveOvertakeWarnings, getTotalProximityWarnings, determineWinners, countBurns, WIN_SCORE } from './scoring.js';
+import { getRounds, players, getMatchStartTime, getMatchEndTime, deleteRound, clearRound } from './store.js';
+import { calculateTotals, getLiveOvertakeWarnings, getTotalProximityWarnings, determineWinners, rankPlayers, countBurns, WIN_SCORE } from './scoring.js';
 import { checkAndAnnounceBurns, checkAndAnnounceWarning } from './burn-announcer.js';
-import { markMatchEndIfNeeded, startMatchTimer, isTimerRunning, formatDuration } from './timer.js';
+import { markMatchEndIfNeeded, startMatchTimer, isTimerRunning, formatDuration, clearMatchTimer } from './timer.js';
+import { pushUndo } from './undo.js';
+import { showAppToast, showConfirmModal } from './toast.js';
 
 const tbody = document.getElementById('score-body');
 const tfoot = document.getElementById('score-foot');
 const btnAdd = document.getElementById('btn-add');
 const quickActionsPanel = document.getElementById('quick-actions');
+
+const roundActionModal = document.getElementById('round-action-modal');
+const roundActionTitle = document.getElementById('round-action-title');
+const btnClearRoundRow = document.getElementById('btn-clear-round-row');
+const btnDeleteRoundRow = document.getElementById('btn-delete-round-row');
+const btnCancelRoundAction = document.getElementById('btn-cancel-round-action');
+const btnCloseRoundAction = document.getElementById('btn-close-round-action');
+
+let activeActionRoundIdx = -1;
+
+export function openRoundActionModal(index) {
+    activeActionRoundIdx = index;
+    if (roundActionTitle) {
+        roundActionTitle.textContent = `⚙️ Opsi Ronde ${index + 1}`;
+    }
+    if (roundActionModal) {
+        roundActionModal.classList.remove('hidden');
+    }
+}
+
+export function closeRoundActionModal() {
+    activeActionRoundIdx = -1;
+    if (roundActionModal) {
+        roundActionModal.classList.add('hidden');
+    }
+}
+
+if (btnClearRoundRow) {
+    btnClearRoundRow.addEventListener('click', () => {
+        if (activeActionRoundIdx < 0) return;
+        const targetIdx = activeActionRoundIdx;
+        closeRoundActionModal();
+        pushUndo();
+        clearRound(targetIdx);
+        renderTable();
+        renderFooter();
+        showAppToast(`🧹 Nilai Ronde ${targetIdx + 1} dikosongkan.`, 'info');
+    });
+}
+
+if (btnDeleteRoundRow) {
+    btnDeleteRoundRow.addEventListener('click', () => {
+        if (activeActionRoundIdx < 0) return;
+        const targetIdx = activeActionRoundIdx;
+        closeRoundActionModal();
+        showConfirmModal(`Yakin mau hapus baris Ronde ${targetIdx + 1}?`, () => {
+            pushUndo();
+            deleteRound(targetIdx);
+            if (getRounds().length === 0) {
+                clearMatchTimer();
+            }
+            renderTable();
+            renderFooter();
+            showAppToast(`🗑️ Ronde ${targetIdx + 1} berhasil dihapus.`, 'info');
+        });
+    });
+}
+
+if (btnCancelRoundAction) {
+    btnCancelRoundAction.addEventListener('click', closeRoundActionModal);
+}
+if (btnCloseRoundAction) {
+    btnCloseRoundAction.addEventListener('click', closeRoundActionModal);
+}
+if (roundActionModal) {
+    roundActionModal.addEventListener('click', (e) => {
+        if (e.target === roundActionModal) closeRoundActionModal();
+    });
+}
+
+tbody.addEventListener('click', (e) => {
+    const roundBtn = e.target.closest('.round-num-btn');
+    if (roundBtn) {
+        e.stopPropagation();
+        const idx = parseInt(roundBtn.getAttribute('data-round-idx'), 10);
+        openRoundActionModal(idx);
+    }
+});
 
 let gameOverHandler = null;
 /** win-modal.js daftarin fungsinya di sini buat dipanggil pas game over kedetect. */
@@ -43,9 +123,13 @@ export function renderTable() {
 
     rounds.forEach((row, index) => {
         const tr = document.createElement('tr');
-        tr.className = "border-b border-slate-700/50";
+        tr.className = "border-b border-slate-700/50 hover:bg-slate-800/30 transition-colors";
         tr.innerHTML = `
-      <td class="p-1 text-center text-xs font-bold text-slate-500">${index + 1}</td>
+      <td class="p-1 text-center">
+        <button type="button" class="round-num-btn w-7 h-7 rounded-lg bg-slate-800/80 hover:bg-slate-700 active:bg-blue-600 text-slate-400 hover:text-white font-mono text-xs font-bold transition-all border border-slate-700/60 flex items-center justify-center mx-auto" data-round-idx="${index}" title="Opsi Ronde ${index + 1}">
+          ${index + 1}
+        </button>
+      </td>
       ${players.map(p => `<td class="p-1"><input type="text" inputmode="none" readonly data-idx="${index}" data-player="${p}" value="${row[p]}" class="score-input w-full bg-slate-800/80 text-white border border-transparent text-center p-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg transition-all cursor-pointer select-none"></td>`).join('')}
     `;
         tbody.appendChild(tr);
@@ -141,10 +225,38 @@ export function renderFooter(isPreview = false) {
         return 'text-slate-400';
     };
 
+    const rankedPlayers = rankPlayers(totals, burnsInflictedCounts, burnCounts);
+    const leaderPlayer = rankedPlayers[0];
+    const leaderScore = totals[leaderPlayer];
+    const hasAnyPositive = players.some(p => totals[p] > 0);
+
+    const getRankBadge = (p) => {
+        if (!hasAnyPositive && rounds.length === 0) return '';
+        const rankIdx = rankedPlayers.indexOf(p);
+        if (rankIdx === 0 && totals[p] > 0) return '<span class="text-amber-300">👑 #1</span>';
+        if (rankIdx === 1) return '<span class="text-slate-300">🥈 #2</span>';
+        if (rankIdx === 2) return '<span class="text-amber-600">🥉 #3</span>';
+        if (rankIdx === 3 && totals[p] <= 0) return '<span class="text-rose-400">💀 #4</span>';
+        return `<span class="text-slate-400">#${rankIdx + 1}</span>`;
+    };
+
+    const getDiffBadge = (p) => {
+        if (!hasAnyPositive) return '';
+        if (p === leaderPlayer && totals[p] > 0) return '<span class="text-[9px] text-amber-300 font-bold">LEAD</span>';
+        const diff = totals[p] - leaderScore;
+        return `<span class="text-[9px] text-slate-400 font-mono">${diff}</span>`;
+    };
+
     tfoot.innerHTML = `
-    <tr class="bg-slate-900 font-bold text-xl sticky bottom-0 border-t-2 border-slate-600 shadow-[0_-10px_20px_-5px_rgba(0,0,0,0.5)] transition-colors z-30">
-      <td class="p-3 text-center text-blue-400 text-sm">TOT</td>
-      ${players.map(p => `<td data-total-player="${p}" class="p-3 text-center border border-transparent transition-colors ${getColor(p)}">${totals[p]}</td>`).join('')}
+    <tr class="bg-slate-900/95 backdrop-blur-md font-bold sticky bottom-0 border-t-2 border-slate-700 shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.6)] transition-colors z-30">
+      <td class="p-2 text-center text-blue-400 text-xs font-mono font-black">TOT</td>
+      ${players.map(p => `
+        <td data-total-player="${p}" class="p-2 text-center border border-transparent transition-all select-none">
+          <div class="text-[10px] font-black tracking-tight mb-0.5">${getRankBadge(p)}</div>
+          <div class="text-lg md:text-xl font-black font-mono ${getColor(p)}">${totals[p]}</div>
+          <div class="leading-none mt-0.5">${getDiffBadge(p)}</div>
+        </td>
+      `).join('')}
     </tr>
   `;
 
