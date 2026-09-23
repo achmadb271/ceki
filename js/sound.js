@@ -222,9 +222,9 @@ export function playWinSound() {
 let lastWarnPlayedAt = 0;
 export function playWarnSound() {
     if (muted) return;
-    // Anti-spam debounce: maksimal sekali per 2.5 detik saat situasi genting
+    // Debounce ringan 400ms untuk mencegah pemanggilan ganda dalam milidetik yang sama
     const now = Date.now();
-    if (now - lastWarnPlayedAt < 2500) return;
+    if (now - lastWarnPlayedAt < 400) return;
     lastWarnPlayedAt = now;
 
     playAudioFile(WARN_FILE, playSynthWarn);

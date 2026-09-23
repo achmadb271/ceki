@@ -11,9 +11,8 @@
 
 import { getRounds, players, getMatchStartTime, getMatchEndTime } from './store.js';
 import { calculateTotals, getLiveOvertakeWarnings, getTotalProximityWarnings, determineWinners, countBurns, WIN_SCORE } from './scoring.js';
-import { checkAndAnnounceBurns } from './burn-announcer.js';
+import { checkAndAnnounceBurns, checkAndAnnounceWarning } from './burn-announcer.js';
 import { markMatchEndIfNeeded, startMatchTimer, isTimerRunning, formatDuration } from './timer.js';
-import { playWarnSound } from './sound.js';
 
 const tbody = document.getElementById('score-body');
 const tfoot = document.getElementById('score-foot');
@@ -104,11 +103,6 @@ export function renderFooter(isPreview = false) {
             if (liveOvertake.overtaking.has(p)) cell.classList.add('tense-overtaking');
             else if (liveOvertake.atRisk.has(p)) cell.classList.add('tense-atrisk');
         });
-
-        // Mainkan suara peringatan jika ada situasi genting (mau nyalip / terancam)
-        if (liveOvertake.overtaking.size > 0 || liveOvertake.atRisk.size > 0) {
-            playWarnSound();
-        }
     }
 
     // Notif & animasi pas ada yang baru kebakar (cuma pas ronde beneran baru selesai, bukan preview)
@@ -168,6 +162,9 @@ export function renderFooter(isPreview = false) {
         else if (totalClosing.has(p)) cell.classList.add('tense-overtaking');
         else if (totalAtRisk.has(p)) cell.classList.add('tense-atrisk');
     });
+
+    // Peringatan suara sekali per ronde saat pemain berada di zona bahaya (gap <= 50 atau live overtake)
+    checkAndAnnounceWarning(rounds, liveOvertake, totalAtRisk, totalClosing, isGameOver);
 
     if (!isPreview) {
         if (isGameOver) {

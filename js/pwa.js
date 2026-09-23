@@ -21,9 +21,14 @@ let activeWaitingWorker = null;
 
 // Konfigurasi ringkasan update versi terbaru (mudah diubah tiap rilis)
 const LATEST_RELEASE = {
-    version: 'v2.3',
+    version: 'v2.4',
     subtitle: 'Update Terbaru',
     features: [
+        {
+            icon: '⚠️',
+            title: 'Audio Peringatan Sekali Per Ronde',
+            desc: 'Sound warning otomatis berbunyi saat skor mepet (gap <= 50) atau nyalip, maksimal 1x per ronde tanpa spam.'
+        },
         {
             icon: '🔊',
             title: 'Audio Meme & Efek Suara',
@@ -38,11 +43,6 @@ const LATEST_RELEASE = {
             icon: '📱',
             title: 'Keypad Bottom Sheet Responsif',
             desc: 'Keypad baru lebih nyaman di HP, auto-lanjut antar-pemain, dan kolom skor tidak lagi tertutup.'
-        },
-        {
-            icon: '🎊',
-            title: 'Animasi Keren & Confetti',
-            desc: 'Radar alert kuning, neon hijau nyalip, guncangan ledakan kebakar, & selebrasi kemenangan meriah.'
         }
     ]
 };

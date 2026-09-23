@@ -29,7 +29,7 @@
 import { getRounds, addRound, resetMatchOnly } from './store.js';
 import { renderTable, renderFooter } from './render.js';
 import { pushUndo, popUndo, resetUndoStack } from './undo.js';
-import { resetBurnAnnouncer } from './burn-announcer.js';
+import { resetBurnAnnouncer, syncAnnouncersToRounds } from './burn-announcer.js';
 import { clearActiveInput } from './keypad.js';
 import { startNewMatchTimer, clearMatchTimer, initTimerFromSavedState } from './timer.js';
 import { showAppToast, showConfirmModal } from './toast.js';
@@ -59,6 +59,7 @@ btnAdd.addEventListener('click', () => {
 
 btnUndo.addEventListener('click', () => {
     if (!popUndo()) return;
+    syncAnnouncersToRounds(getRounds().length);
     if (getRounds().length === 0) {
         clearMatchTimer(); // undo balik ke kondisi bener-bener kosong -> timer dianggap belum mulai
     }

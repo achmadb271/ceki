@@ -189,7 +189,7 @@ export function getTotalProximityWarnings(totals) {
         if (totals[a] < BURN_THRESHOLD) return;
         players.forEach(b => {
             if (a === b) return;
-            if (totals[a] > totals[b] && (totals[a] - totals[b]) <= PROXIMITY_GAP) {
+            if (totals[a] >= totals[b] && (totals[a] - totals[b]) <= PROXIMITY_GAP) {
                 atRisk.add(a);
                 closing.add(b);
             }
