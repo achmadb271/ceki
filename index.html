@@ -33,11 +33,11 @@
                 class="text-xs bg-slate-800/60 w-8 h-8 flex items-center justify-center rounded-full border border-slate-700 text-slate-400 hover:text-slate-200 transition-colors">🔗</button>
         </div>
 
-        <div class="bg-slate-900/60 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-700/80 overflow-hidden">
+        <div class="bg-slate-900/60 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-700/80">
             <table class="w-full table-fixed border-collapse">
-                <thead class="sticky top-0 z-20 bg-slate-900/95 backdrop-blur-md shadow-md border-b border-slate-700/80">
+                <thead class="table-header-sticky sticky top-0 z-20 bg-slate-900/95 backdrop-blur-md shadow-md border-b border-slate-700/80">
                     <tr class="border-b border-slate-700/80">
-                        <th class="w-10 p-2 text-center text-slate-400 text-xs font-mono font-bold tracking-wider">R</th>
+                        <th class="w-10 p-2 text-center text-slate-400 text-xs font-mono font-bold tracking-wider rounded-tl-2xl">R</th>
                         <th class="p-1"><input type="text"
                                 class="name-input w-full bg-transparent text-center font-black text-sky-400 border-b-2 border-sky-500/40 focus:border-sky-400 focus:outline-none rounded p-1 transition-colors"
                                 data-player="p1"></th>
@@ -48,7 +48,7 @@
                                 class="name-input w-full bg-transparent text-center font-black text-pink-400 border-b-2 border-pink-500/40 focus:border-pink-400 focus:outline-none rounded p-1 transition-colors"
                                 data-player="p3"></th>
                         <th class="p-1"><input type="text"
-                                class="name-input w-full bg-transparent text-center font-black text-indigo-400 border-b-2 border-indigo-500/40 focus:border-indigo-400 focus:outline-none rounded p-1 transition-colors"
+                                class="name-input w-full bg-transparent text-center font-black text-indigo-400 border-b-2 border-indigo-500/40 focus:border-indigo-400 focus:outline-none rounded p-1 transition-colors rounded-tr-2xl"
                                 data-player="p4"></th>
                     </tr>
                 </thead>
@@ -60,8 +60,8 @@
         </div>
 
         <div id="quick-actions"
-            class="hidden fixed bottom-0 inset-x-0 z-40 max-w-md mx-auto bg-slate-900/95 border-t border-slate-700 p-2.5 shadow-2xl backdrop-blur-md rounded-t-2xl">
-            <div class="flex justify-between items-center px-1 mb-2">
+            class="hidden fixed bottom-0 inset-x-0 z-40 max-w-md mx-auto bg-slate-900/95 border-t border-slate-700 p-2 sm:p-2.5 shadow-2xl backdrop-blur-md rounded-t-2xl pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+            <div class="flex justify-between items-center px-1 mb-1.5 sm:mb-2">
                 <div class="flex items-center gap-1.5 min-w-0">
                     <button id="btn-prev-player" type="button" title="Pemain sebelumnya"
                         class="text-slate-300 hover:text-white text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700 active:bg-slate-700">◀</button>
@@ -74,84 +74,84 @@
                 <button id="btn-close-keypad" type="button" title="Tutup keypad"
                     class="text-slate-400 hover:text-white text-xs px-2.5 py-1 rounded bg-slate-800 border border-slate-700 shrink-0 active:bg-slate-700">✕ Selesai</button>
             </div>
-            <div class="grid grid-cols-3 gap-1.5 mb-1.5">
+            <div class="grid grid-cols-3 gap-1 sm:gap-1.5 mb-1 sm:mb-1.5">
                 <button
-                    class="keypad-btn bg-purple-900/50 hover:bg-purple-800 active:bg-purple-700 text-purple-100 font-bold py-2 rounded-lg border border-purple-700 transition-colors text-xs"
+                    class="keypad-btn bg-purple-900/50 hover:bg-purple-800 active:bg-purple-700 text-purple-100 font-bold h-8 sm:h-9 rounded-lg border border-purple-700 transition-colors text-xs flex items-center justify-center gap-1"
                     data-key="gope">Gope <span class="opacity-70 font-normal">+500</span></button>
                 <button
-                    class="keypad-btn bg-teal-900/50 hover:bg-teal-800 active:bg-teal-700 text-teal-100 font-bold py-2 rounded-lg border border-teal-700 transition-colors text-xs"
+                    class="keypad-btn bg-teal-900/50 hover:bg-teal-800 active:bg-teal-700 text-teal-100 font-bold h-8 sm:h-9 rounded-lg border border-teal-700 transition-colors text-xs flex items-center justify-center gap-1"
                     data-key="triss">Triss <span class="opacity-70 font-normal">+300</span></button>
                 <button
-                    class="keypad-btn bg-indigo-900/50 hover:bg-indigo-800 active:bg-indigo-700 text-indigo-100 font-bold py-2 rounded-lg border border-indigo-700 transition-colors text-xs"
+                    class="keypad-btn bg-indigo-900/50 hover:bg-indigo-800 active:bg-indigo-700 text-indigo-100 font-bold h-8 sm:h-9 rounded-lg border border-indigo-700 transition-colors text-xs flex items-center justify-center gap-1"
                     data-key="nutup">Nutup <span class="opacity-70 font-normal">+250</span></button>
             </div>
-            <div class="grid grid-cols-4 gap-1.5">
+            <div class="grid grid-cols-4 gap-1 sm:gap-1.5">
                 <button
-                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-lg font-bold py-2.5 rounded-lg transition-colors"
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-base sm:text-lg font-bold h-9 sm:h-11 rounded-lg transition-colors flex items-center justify-center"
                     data-key="7">7</button>
                 <button
-                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-lg font-bold py-2.5 rounded-lg transition-colors"
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-base sm:text-lg font-bold h-9 sm:h-11 rounded-lg transition-colors flex items-center justify-center"
                     data-key="8">8</button>
                 <button
-                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-lg font-bold py-2.5 rounded-lg transition-colors"
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-base sm:text-lg font-bold h-9 sm:h-11 rounded-lg transition-colors flex items-center justify-center"
                     data-key="9">9</button>
                 <button
-                    class="keypad-btn bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 text-base font-bold py-2.5 rounded-lg border border-red-800 transition-colors"
+                    class="keypad-btn bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 text-sm sm:text-base font-bold h-9 sm:h-11 rounded-lg border border-red-800 transition-colors flex items-center justify-center"
                     data-key="backspace">⌫</button>
 
                 <button
-                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-lg font-bold py-2.5 rounded-lg transition-colors"
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-base sm:text-lg font-bold h-9 sm:h-11 rounded-lg transition-colors flex items-center justify-center"
                     data-key="4">4</button>
                 <button
-                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-lg font-bold py-2.5 rounded-lg transition-colors"
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-base sm:text-lg font-bold h-9 sm:h-11 rounded-lg transition-colors flex items-center justify-center"
                     data-key="5">5</button>
                 <button
-                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-lg font-bold py-2.5 rounded-lg transition-colors"
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-base sm:text-lg font-bold h-9 sm:h-11 rounded-lg transition-colors flex items-center justify-center"
                     data-key="6">6</button>
                 <button
-                    class="keypad-btn bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 text-sm font-bold py-2.5 rounded-lg border border-red-800 transition-colors"
+                    class="keypad-btn bg-red-900/50 hover:bg-red-800 active:bg-red-700 text-red-200 text-xs sm:text-sm font-bold h-9 sm:h-11 rounded-lg border border-red-800 transition-colors flex items-center justify-center"
                     data-key="clear">C</button>
 
                 <button
-                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-lg font-bold py-2.5 rounded-lg transition-colors"
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-base sm:text-lg font-bold h-9 sm:h-11 rounded-lg transition-colors flex items-center justify-center"
                     data-key="1">1</button>
                 <button
-                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-lg font-bold py-2.5 rounded-lg transition-colors"
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-base sm:text-lg font-bold h-9 sm:h-11 rounded-lg transition-colors flex items-center justify-center"
                     data-key="2">2</button>
                 <button
-                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-lg font-bold py-2.5 rounded-lg transition-colors"
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-base sm:text-lg font-bold h-9 sm:h-11 rounded-lg transition-colors flex items-center justify-center"
                     data-key="3">3</button>
                 <button
-                    class="keypad-btn bg-slate-600 hover:bg-slate-500 active:bg-slate-400 text-white text-base font-bold py-2.5 rounded-lg border border-slate-500 transition-colors"
+                    class="keypad-btn bg-slate-600 hover:bg-slate-500 active:bg-slate-400 text-white text-sm sm:text-base font-bold h-9 sm:h-11 rounded-lg border border-slate-500 transition-colors flex items-center justify-center"
                     data-key="sign">±</button>
 
                 <button
-                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-lg font-bold py-2.5 rounded-lg col-span-2 transition-colors"
+                    class="keypad-btn bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white text-base sm:text-lg font-bold h-9 sm:h-11 rounded-lg col-span-2 transition-colors flex items-center justify-center"
                     data-key="0">0</button>
                 <button
-                    class="keypad-btn bg-slate-600 hover:bg-slate-500 active:bg-slate-400 text-white text-sm font-bold py-2.5 rounded-lg border border-slate-500 transition-colors"
+                    class="keypad-btn bg-slate-600 hover:bg-slate-500 active:bg-slate-400 text-white text-xs sm:text-sm font-bold h-9 sm:h-11 rounded-lg border border-slate-500 transition-colors flex items-center justify-center"
                     data-key="00">00</button>
                 <button id="keypad-ok"
-                    class="keypad-btn bg-blue-600 hover:bg-blue-500 active:bg-blue-400 text-white text-sm font-bold py-2.5 rounded-lg shadow-lg transition-colors flex items-center justify-center gap-1"
+                    class="keypad-btn bg-blue-600 hover:bg-blue-500 active:bg-blue-400 text-white text-xs sm:text-sm font-bold h-9 sm:h-11 rounded-lg shadow-lg transition-colors flex items-center justify-center gap-1"
                     data-key="ok">✔ Lanjut</button>
             </div>
         </div>
 
-        <div class="mt-6 flex gap-2">
+        <div class="mt-3.5 sm:mt-5 flex gap-2">
             <button id="btn-add"
-                class="flex-[2] bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-3 px-2 rounded-lg shadow-lg transition-colors text-sm">
+                class="flex-[2] bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-2.5 sm:py-3 px-2 rounded-xl shadow-lg transition-colors text-sm">
                 + Ronde Baru
             </button>
             <button id="btn-undo" disabled
-                class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-2 rounded-lg border border-slate-600 transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed">
+                class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 sm:py-3 px-2 rounded-xl border border-slate-600 transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed">
                 ↩️ Undo
             </button>
             <button id="btn-open-history"
-                class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-2 rounded-lg border border-slate-600 transition-colors text-sm">
+                class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 sm:py-3 px-2 rounded-xl border border-slate-600 transition-colors text-sm">
                 Riwayat
             </button>
             <button id="btn-reset"
-                class="flex-1 bg-red-900/50 hover:bg-red-800 text-red-200 font-semibold py-3 px-2 rounded-lg border border-red-800 transition-colors text-sm">
+                class="flex-1 bg-red-900/50 hover:bg-red-800 text-red-200 font-semibold py-2.5 sm:py-3 px-2 rounded-xl border border-red-800 transition-colors text-sm">
                 Reset
             </button>
         </div>

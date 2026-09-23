@@ -248,7 +248,7 @@ export function renderFooter(isPreview = false) {
     };
 
     tfoot.innerHTML = `
-    <tr class="bg-slate-900/95 backdrop-blur-md font-bold sticky bottom-0 border-t-2 border-slate-700 shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.6)] transition-colors z-30">
+    <tr class="bg-slate-900/95 backdrop-blur-md font-bold border-t-2 border-slate-700 shadow-md transition-colors">
       <td class="p-2 text-center text-blue-400 text-xs font-mono font-black">TOT</td>
       ${players.map(p => `
         <td data-total-player="${p}" class="p-2 text-center border border-transparent transition-all select-none">

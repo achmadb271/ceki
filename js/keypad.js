@@ -69,9 +69,9 @@ function scrollRowIntoSafeViewIfNeeded(inputEl) {
     if (!inputEl) return;
     const tr = inputEl.closest('tr') || inputEl;
     const rect = tr.getBoundingClientRect();
-    const panelHeight = quickActionsPanel.offsetHeight || 250;
+    const panelHeight = quickActionsPanel.offsetHeight || 240;
     const safeBottom = window.innerHeight - panelHeight - 12;
-    const safeTop = 60; // di bawah sticky table header
+    const safeTop = 55; // di bawah sticky table header
 
     // Jika baris SUDAH terlihat di layar dengan aman (tidak tertutup keypad dan tidak tertutup header):
     // TIDAK PERLU SCROLL sama sekali! Ini mencegah glitch/flicker saat ronde masih sedikit (1-5).
@@ -79,15 +79,12 @@ function scrollRowIntoSafeViewIfNeeded(inputEl) {
         return;
     }
 
-    // Baris di luar area aman (akan tertutup keypad atau di atas header) -> beri padding bawah dan scroll:
-    document.body.classList.add('keypad-open');
-
     // Beri jeda sebentar agar browser mengaplikasikan padding baru sebelum scroll
     setTimeout(() => {
         const updatedRect = tr.getBoundingClientRect();
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
         const targetDocTop = updatedRect.top + scrollTop;
-        const desiredTop = Math.max(0, targetDocTop - 65);
+        const desiredTop = Math.max(0, targetDocTop - 60);
 
         window.scrollTo({
             top: desiredTop,
@@ -286,6 +283,9 @@ function activateCell(inputEl) {
 
     updateKeypadHeader();
     highlightActiveRow(activeInput);
+
+    // Selalu tambahkan keypad-open agar body memiliki ruang bawah dan halaman dapat discroll
+    document.body.classList.add('keypad-open');
     quickActionsPanel.classList.remove('hidden');
 
     // Scroll hanya jika cell tertutup keypad (mencegah glitch pada ronde yang sudah muat)

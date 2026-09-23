@@ -265,7 +265,17 @@
 
 /* ===== 7. Keypad Bottom Sheet ===== */
 body.keypad-open {
-    padding-bottom: 340px !important;
+    padding-bottom: 270px !important;
+}
+
+/* Sticky table header */
+thead.table-header-sticky,
+thead.table-header-sticky th {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 20 !important;
+    background-color: #0f172a !important;
 }
 
 /* ===== 8. Spotlight / Focus Mode ===== */
