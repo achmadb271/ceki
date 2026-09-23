@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ceki-score-tracker-v27';
+const CACHE_NAME = 'ceki-score-tracker-v28';
 const APP_SHELL = [
     './',
     './index.html',

@@ -54,18 +54,22 @@ export function calculateTotals(rows) {
                 if (prevTotals[playerA] < BURN_THRESHOLD) return;
 
                 // Cari semua kandidat penantang yang memenuhi syarat menyalip playerA:
-                // 1. Penantang playerB sebelumnya di bawah playerA (wasAhead: prevTotals[A] > prevTotals[B])
-                // 2. Total akhir penantang sekarang di atas total akhir playerA (nowBehind: tempTotals[B] > tempTotals[A])
-                // 3. Poin yang didapat penantang di ronde ini harus POSITIF (gain > 0)
+                // 1. Sebelumnya playerA di atas playerB (wasAhead), dan sekarang playerB melampaui playerA dengan poin positif (gainB > 0).
+                // 2. ATAU sebelumnya playerA dan playerB seri (wasTied), keduanya sama-sama dapat poin positif (gainA > 0 && gainB > 0),
+                //    tetapi perolehan playerB melampaui perolehan playerA (nowBehind).
                 const candidates = [];
                 players.forEach(playerB => {
                     if (playerA !== playerB) {
                         const wasAhead = prevTotals[playerA] > prevTotals[playerB];
+                        const wasTied = prevTotals[playerA] === prevTotals[playerB];
                         const nowBehind = tempTotals[playerB] > tempTotals[playerA];
                         const playerBGainThisRound = parseInt(row[playerB]) || 0;
-                        const genuineGain = playerBGainThisRound > 0;
+                        const playerAGainThisRound = parseInt(row[playerA]) || 0;
 
-                        if (wasAhead && nowBehind && genuineGain) {
+                        const isOvertaken = (wasAhead && nowBehind && playerBGainThisRound > 0) ||
+                                            (wasTied && nowBehind && playerBGainThisRound > 0 && playerAGainThisRound > 0);
+
+                        if (isOvertaken) {
                             candidates.push(playerB);
                         }
                     }
@@ -148,11 +152,15 @@ export function getLiveOvertakeWarnings(rows) {
         players.forEach(b => {
             if (a !== b) {
                 const wasAhead = prevTotals[a] > prevTotals[b];
+                const wasTied = prevTotals[a] === prevTotals[b];
                 const nowBehind = previewTemp[b] > previewTemp[a];
                 const playerBGainSoFar = parseInt(row[b]) || 0;
-                const genuineGain = playerBGainSoFar > 0;
+                const playerAGainSoFar = parseInt(row[a]) || 0;
 
-                if (wasAhead && nowBehind && genuineGain) {
+                const isOvertaken = (wasAhead && nowBehind && playerBGainSoFar > 0) ||
+                                    (wasTied && nowBehind && playerBGainSoFar > 0 && playerAGainSoFar > 0);
+
+                if (isOvertaken) {
                     candidates.push(b);
                 }
             }

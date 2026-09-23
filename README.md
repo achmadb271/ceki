@@ -16,9 +16,10 @@ Aplikasi ini mengadopsi aturan standar permainan Ceki tongkrongan dengan perhitu
 
 - **Ambang Kebakar**: Pemain baru bisa terbakar jika total skornya sebelum ronde tersebut sudah mencapai minimal **100 poin** (`BURN_THRESHOLD = 100`). Di bawah 100 poin, posisi masih aman/wajar disalip.
 - **Syarat Menyalip yang Sah**:
-  1. Penantang sebelumnya berada di bawah skor korban.
+  1. Penantang sebelumnya berada di bawah skor korban, ATAU keduanya sebelumnya berada dalam posisi seri/imbang ($\ge 100$).
   2. Total akhir penantang setelah ronde tersebut lebih tinggi ($>$) dari skor korban (seri tidak membakar).
   3. Poin yang didapat penantang pada ronde tersebut harus **positif ($> 0$)** — jika penantang $+0$ dan lawan turun karena minus sendiri (_jatuh sendiri_), lawan **tidak kebakar**.
+  4. **Aturan Menyalip dari Posisi Seri**: Jika sebelumnya berada di skor seri yang sama ($\ge 100$), pemain hanya kebakar jika ia juga memperoleh poin positif ($> 0$) tetapi disalip oleh pemain lain yang melaju lebih cepat (contoh: seri di 200, lalu P1 $+20$ dan P2 $+5$ $\rightarrow$ P2 kebakar). Jika dari posisi seri lawan memperoleh $+0$ atau minus, lawan **tidak kebakar** (aman).
 - **Safezone ($0 \le \text{skor} < 100$)**:
   - Pemain dengan skor $\ge 100$ yang mengalami penurunan ke zona aman ($0$ s.d. $99$) terlindungi dari kebakar, selama tidak ada lawan yang melampaui skor lama pemain tersebut.
 - **Hukuman Kebakar**:
