@@ -21,9 +21,14 @@ let activeWaitingWorker = null;
 
 // Konfigurasi ringkasan update versi terbaru (mudah diubah tiap rilis)
 const LATEST_RELEASE = {
-    version: 'v2.4',
+    version: 'v2.5',
     subtitle: 'Update Terbaru',
     features: [
+        {
+            icon: '🎴',
+            title: 'Perbaikan Skor Kebakar Tekor',
+            desc: 'Jika minus lebih besar dari skor lama (misal 400 - 650), skor yang didapat adil di angka -250 (bukan -650).'
+        },
         {
             icon: '⚠️',
             title: 'Audio Peringatan Sekali Per Ronde',
@@ -33,11 +38,6 @@ const LATEST_RELEASE = {
             icon: '🔊',
             title: 'Audio Meme & Efek Suara',
             desc: 'Acak audio meme kebakar (burn1, burn2), sound sirine saat mau nyalip, dan feedback sentuhan keypad.'
-        },
-        {
-            icon: '🎴',
-            title: 'Aturan Ceki Disempurnakan',
-            desc: 'Safezone (<100) aman dari kebakaran, penalti minus tetap nancep, & tie-breaker penentu juara 1.'
         },
         {
             icon: '📱',

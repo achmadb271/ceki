@@ -96,10 +96,11 @@ export function calculateTotals(rows) {
             });
 
             burnedPlayers.forEach(p => {
-                const roundScore = parseInt(row[p]) || 0;
-                // Opsi C: Skor sebelum ronde hangus ke 0. Jika ronde ini kena minus,
-                // minusnya tetap masuk (0 + roundScore). Jika ronde ini >= 0, skor direset ke 0.
-                tempTotals[p] = Math.min(0, roundScore);
+                // Hukuman Skor Kebakar:
+                // - Jika total (skor lama + poin ronde ini) masih positif, hangus direset ke 0.
+                // - Jika minusnya lebih besar dari skor lama (total < 0), skor tetap di angka minus tersebut (tekor).
+                //   Contoh: 400 + (-650) = -250 (bukan -650).
+                tempTotals[p] = Math.min(0, tempTotals[p]);
                 burnedInThisRound.push(p);
                 burnCounts[p] = (burnCounts[p] || 0) + 1;
             });

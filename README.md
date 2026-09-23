@@ -21,10 +21,11 @@ Aplikasi ini mengadopsi aturan standar permainan Ceki tongkrongan dengan perhitu
   3. Poin yang didapat penantang pada ronde tersebut harus **positif ($> 0$)** — jika penantang $+0$ dan lawan turun karena minus sendiri (_jatuh sendiri_), lawan **tidak kebakar**.
 - **Safezone ($0 \le \text{skor} < 100$)**:
   - Pemain dengan skor $\ge 100$ yang mengalami penurunan ke zona aman ($0$ s.d. $99$) terlindungi dari kebakar, selama tidak ada lawan yang melampaui skor lama pemain tersebut.
-- **Hukuman Kebakar (Penalti Minus Tetap Masuk)**:
-  - Skor lama yang hangus direset ke **$0$**.
-  - Jika pada ronde saat terbakar pemain tersebut terkena penalti minus, **poin minusnya tetap masuk penuh** ($\text{Skor} = 0 + \text{poin\_ronde}$).
-  - _Contoh_: Punya 600 poin lalu disalip lawan dan terkena $-300$, skor akhir menjadi $\mathbf{-300}$ (bukan diputihkan jadi 0).
+- **Hukuman Kebakar**:
+  - Jika total kalkulasi $(\text{Skor Lama} + \text{poin\_ronde})$ masih bernilai positif $(\ge 0)$, maka seluruh sisa poin positif tersebut **hangus direset ke $0$**.
+  - Jika terkena penalti minus besar hingga totalnya jatuh ke angka minus $(< 0)$, maka skor yang diterima adalah **total minus tersebut** $(\text{Skor Lama} + \text{poin\_ronde}$, tidak direset ke 0 lalu dikenakan minus penuh yang tidak adil).
+  - _Contoh 1_: Punya 400 poin, ronde ini $-100$ ($400 - 100 = 300$). Disalip lawan $\rightarrow$ sisa 300 hangus menjadi **$0$**.
+  - _Contoh 2_: Punya 400 poin, ronde ini $-650$ ($400 - 650 = -250$). Disalip lawan $\rightarrow$ pemain kebakar dan skor akhirnya menjadi $\mathbf{-250}$ (bukan $-650$).
 - **Penantang Terkuat (Highest Burner Priority)**:
   - Jika ada beberapa pemain yang menyalip seorang korban sekaligus, kredit **⚔️ membakar** diberikan kepada pemain dengan total skor tertinggi di ronde tersebut.
 
