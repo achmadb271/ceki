@@ -25,9 +25,14 @@ let swRegistration = null;
 
 // Konfigurasi ringkasan update versi terbaru (mudah diubah tiap rilis)
 const LATEST_RELEASE = {
-    version: 'v3.1',
-    subtitle: 'Navigasi Keypad Lebih Cepat',
+    version: 'v3.2',
+    subtitle: 'Rotasi Audio Seimbang',
     features: [
+        {
+            icon: '🔥',
+            title: 'Audio Meme Kebakar Seimbang (50/50)',
+            desc: 'File burn1 duplikat telah dihapus, rotasi burn vs burn2 kini seimbang dan sering muncul bergantian.'
+        },
         {
             icon: '✔',
             title: 'Tombol Selesai Langsung Tutup Keypad',
@@ -42,11 +47,6 @@ const LATEST_RELEASE = {
             icon: '📱',
             title: 'Tombol Keypad Nyaman & Besar',
             desc: 'Ukuran tombol keypad besar (h-12 / 48px) agar jempol leluasa dan angka jelas terbaca.'
-        },
-        {
-            icon: '🎨',
-            title: 'Warna Identitas 4 Pemain & Live Rank',
-            desc: 'Warna unik tiap pemain (Sky, Purple, Pink, Indigo), live leaderboard di baris TOT, dan mode spotlight.'
         }
     ]
 };

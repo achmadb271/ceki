@@ -18,9 +18,8 @@ let muted = localStorage.getItem(MUTE_KEY) === 'true';
 
 // Gunakan URL absolut yang di-resolve berdasarkan lokasi modul saat ini (aman untuk GitHub Pages subpath)
 const BURN_FILES = [
-    new URL('../audio/burn1.mp3', import.meta.url).href,
-    new URL('../audio/burn2.mp3', import.meta.url).href,
     new URL('../audio/burn.mp3', import.meta.url).href,
+    new URL('../audio/burn2.mp3', import.meta.url).href,
 ];
 
 const WIN_FILES = [
