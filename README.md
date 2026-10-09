@@ -49,7 +49,7 @@ Jika ada dua pemain atau lebih mencapai skor tertinggi yang sama saat game over:
   - **Gope (+500)**: Otomatis mengisi +500 ke pemain aktif, pemain lain di ronde itu diisi 0, lalu langsung commit ronde.
   - **Triss (+300)** & **Nutup (+250)**: Shortcut otomatis untuk menutup ronde dengan cepat.
 - 🔊 **Audio Meme & Sound FX Cerdas**:
-  - Mendukung pemutaran audio meme acak saat ada yang kebakar (`audio/burn1.mp3`, `burn2.mp3`, dst.).
+  - Mendukung pemutaran audio saat ada yang kebakar (`audio/burn.mp3`, `burn2.mp3`, dst.).
   - Peringatan suara otomatis (`audio/warn.mp3`) saat situasi genting terdeteksi (ada yang mau nyalip / terancam).
   - Feedback audio klik retro di tombol keypad.
   - Fallback otomatis ke Web Audio API Synthesizer jika file audio eksternal belum ada.
@@ -58,7 +58,7 @@ Jika ada dua pemain atau lebih mencapai skor tertinggi yang sama saat game over:
   - 🟢 **Neon Nitro (Hijau)**: Efek pendaran neon saat pemain sedang melaju mengejar/menyalip lawan.
   - 🔴 **Explosive Burn (Merah)**: Guncangan ledakan dan kilatan api pada cell yang terbakar.
   - 🎊 **Victory Confetti**: Hujan konfeti kanvas meriah saat ada pemain yang memenangkan pertandingan.
-- � **Grafik Garis Drama Skor (Match Progression Chart)**:
+- 📈 **Grafik Garis Drama Skor (Match Progression Chart)**:
   - Visualisasi grafik garis perjalanan skor dari ronde awal hingga akhir (Canvas murni, 100% offline & HiDPI Retina crisp).
   - Menandai titik kobaran api 🔥 di ronde di mana pemain terbakar / reset skor.
   - Ditampilkan di popup kemenangan maupun popup skor sementara, dan otomatis ikut terfoto saat share gambar PNG.
@@ -77,7 +77,7 @@ Jika ada dua pemain atau lebih mencapai skor tertinggi yang sama saat game over:
 
 ```text
 ceki-main/
-├── audio/               # Aset suara (burn1.mp3, burn2.mp3, warn.mp3, dll)
+├── audio/               # Aset suara (burn.mp3, warn.mp3, dll)
 │   └── README.md        # Panduan penamaan file audio & meme
 ├── icons/               # Ikon PWA (180px, 192px, 512px)
 ├── js/

@@ -2,8 +2,8 @@
  * sound.js
  * ========
  * Efek suara cerdas & audio meme Ceki:
- *   - Acak suara kebakar: audio/burn1.mp3, burn2.mp3, burn.mp3
- *   - Acak suara menang: audio/win.mp3, win1.mp3
+ *   - Suara kebakar: audio/burn.mp3
+ *   - Suara menang: audio/win.mp3, win1.mp3
  *   - Suara peringatan mau nyalip / terancam: audio/warn.mp3
  *   - Suara feedback sentuhan tombol keypad
  * Menggunakan Web Audio API Buffer Engine (anti-blokir autoplay mobile, bebas delay),
@@ -51,12 +51,16 @@ async function loadBuffer(url) {
     if (!ctx) return null;
     try {
         const res = await fetch(url);
-        if (!res.ok) return null;
+        if (!res.ok) {
+            audioBufferCache.set(url, null);
+            return null;
+        }
         const arrayBuf = await res.arrayBuffer();
         const audioBuf = await ctx.decodeAudioData(arrayBuf);
         audioBufferCache.set(url, audioBuf);
         return audioBuf;
     } catch (e) {
+        audioBufferCache.set(url, null);
         return null;
     }
 }
@@ -80,7 +84,7 @@ async function playAudioFile(url, synthFallback) {
     const ctx = getAudioContext();
     if (ctx) {
         let buf = audioBufferCache.get(url);
-        if (!buf) {
+        if (buf === undefined) {
             buf = await loadBuffer(url);
         }
         if (buf && playBuffer(buf)) {
@@ -88,13 +92,9 @@ async function playAudioFile(url, synthFallback) {
         }
     }
 
-    // Fallback: HTML5 Audio jika Web Audio Buffer gagal
-    try {
-        const audio = new Audio(url);
-        audio.currentTime = 0;
-        await audio.play();
-    } catch (err) {
-        if (synthFallback) synthFallback();
+    // Jika file audio tidak ada atau gagal di-buffer, jalankan synthesizer fallback
+    if (synthFallback && typeof synthFallback === 'function') {
+        synthFallback();
     }
 }
 
@@ -204,11 +204,8 @@ export function playKeypadClick() {
 
 export function playBurnSound() {
     if (muted) return;
-    // Pilih acak dari pool file audio kebakar yang tersedia
     const chosen = BURN_FILES[Math.floor(Math.random() * BURN_FILES.length)];
-    playAudioFile(chosen, () => {
-        playAudioFile(BURN_FILES[0], playSynthBurn);
-    });
+    playAudioFile(chosen, playSynthBurn);
 }
 
 export function playWinSound() {
