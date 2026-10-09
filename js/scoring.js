@@ -31,6 +31,7 @@ export function calculateTotals(rows) {
     let burnedByHistory = [];      // Simpan data siapa yang JADI PENYEBAB gosong (yang nyalip) di tiap ronde
     let burnCounts = { p1: 0, p2: 0, p3: 0, p4: 0 };           // Berapa kali tiap pemain kena bakar
     let burnsInflictedCounts = { p1: 0, p2: 0, p3: 0, p4: 0 }; // Berapa kali tiap pemain ngebakar orang lain
+    let progressionHistory = [{ p1: 0, p2: 0, p3: 0, p4: 0 }]; // Snapshot kumulatif skor tiap ronde (R0 = 0)
 
     for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
@@ -118,6 +119,7 @@ export function calculateTotals(rows) {
         burnHistory.push(burnedInThisRound);
         burnedByHistory.push([...new Set(burnedByInThisRound)]);
         currentTotals = tempTotals;
+        progressionHistory.push({ ...currentTotals });
     }
 
     return {
@@ -125,7 +127,8 @@ export function calculateTotals(rows) {
         burnHistory,
         burnedByHistory,
         burnCounts,
-        burnsInflictedCounts
+        burnsInflictedCounts,
+        progressionHistory,
     };
 }
 

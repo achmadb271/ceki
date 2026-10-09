@@ -58,8 +58,12 @@ Jika ada dua pemain atau lebih mencapai skor tertinggi yang sama saat game over:
   - 🟢 **Neon Nitro (Hijau)**: Efek pendaran neon saat pemain sedang melaju mengejar/menyalip lawan.
   - 🔴 **Explosive Burn (Merah)**: Guncangan ledakan dan kilatan api pada cell yang terbakar.
   - 🎊 **Victory Confetti**: Hujan konfeti kanvas meriah saat ada pemain yang memenangkan pertandingan.
-- 🔗 **Pindah Progress Antar-HP (Sync Kode & QR)**:
-  - Lanjutkan match di HP teman tanpa server/database! Cukup generate kode atau QR code di HP asal, lalu scan atau tempel di HP pengganti.
+- � **Grafik Garis Drama Skor (Match Progression Chart)**:
+  - Visualisasi grafik garis perjalanan skor dari ronde awal hingga akhir (Canvas murni, 100% offline & HiDPI Retina crisp).
+  - Menandai titik kobaran api 🔥 di ronde di mana pemain terbakar / reset skor.
+  - Ditampilkan di popup kemenangan maupun popup skor sementara, dan otomatis ikut terfoto saat share gambar PNG.
+- 🔗 **Pindah Progress Antar-HP (Sync Kode & QR Jumbo)**:
+  - Lanjutkan match di HP teman tanpa server/database! Generate QR code berukuran besar (hingga 280px) dengan modul tebal dan viewfinder kamera luas agar HP pengganti dapat memindai seketika.
 - 📸 **Share Gambar PNG**:
   - Ekspor hasil akhir kemenangan atau klasemen sementara menjadi gambar PNG jernih siap bagikan ke WhatsApp atau media sosial via Web Share API.
 - 💡 **Screen Wake Lock**:
@@ -78,6 +82,7 @@ ceki-main/
 ├── icons/               # Ikon PWA (180px, 192px, 512px)
 ├── js/
 │   ├── burn-announcer.js# Pengatur notifikasi & suara kebakar (anti-dobel)
+│   ├── chart.js         # Grafik garis drama skor pertandingan (Canvas HiDPI)
 │   ├── haptics.js       # Efek getar HP (Vibration API)
 │   ├── history-modal.js # Modal riwayat pertandingan
 │   ├── keypad.js        # Logika virtual numpad & ergonomi bottom sheet

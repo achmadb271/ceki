@@ -2,13 +2,10 @@
 
 Taruh file audio kamu di folder ini (`audio/`):
 
-### 1. Suara Kebakar / Meme (Diacak Otomatis):
+### 1. Suara Kebakar / Meme:
 
-Sistem akan mengacak file audio di bawah ini tiap kali ada pemain yang kebakar (probabilitas seimbang):
-
-- `burn.mp3` (suara kebakar 1)
-- `burn2.mp3` (suara kebakar 2 / meme)
-- `burn3.mp3`, `burn4.mp3`, dst. (opsional jika ingin tambah lagi)
+- `burn.mp3` (suara kebakar aktif saat ini)
+- `burn2.mp3`, `burn3.mp3`, dst. (opsional jika ingin tambah variasi acak di masa depan)
   _(Bisa kamu isi suara meme kocak, misal: "Emotional Damage", "Wasted", efek tawa, ledakan, dsb)._
 
 ### 2. Suara Peringatan Mau Nyalip / Terancam:

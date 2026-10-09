@@ -278,6 +278,18 @@ thead.table-header-sticky th {
     background-color: #0f172a !important;
 }
 
+/* ===== 8. QR Code Rendering ===== */
+#qr-code-canvas img,
+#qr-code-canvas canvas {
+    display: block !important;
+    margin: 0 auto !important;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+    max-width: 100% !important;
+    height: auto !important;
+}
+
 /* ===== 8. Spotlight / Focus Mode ===== */
 body.keypad-open #score-body tr {
     opacity: 0.35;

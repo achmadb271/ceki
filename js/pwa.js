@@ -25,28 +25,28 @@ let swRegistration = null;
 
 // Konfigurasi ringkasan update versi terbaru (mudah diubah tiap rilis)
 const LATEST_RELEASE = {
-    version: 'v3.2',
-    subtitle: 'Rotasi Audio Seimbang',
+    version: 'v3.3',
+    subtitle: 'Grafik Drama Skor & QR Jumbo',
     features: [
         {
-            icon: '🔥',
-            title: 'Audio Meme Kebakar Seimbang (50/50)',
-            desc: 'File burn1 duplikat telah dihapus, rotasi burn vs burn2 kini seimbang dan sering muncul bergantian.'
+            icon: '📈',
+            title: 'Grafik Garis Drama Skor Pertandingan',
+            desc: 'Visualisasi grafik perjalanan skor dari ronde awal hingga akhir, lengkap dengan titik kobaran api 🔥 saat pemain kebakar!'
         },
         {
-            icon: '✔',
-            title: 'Tombol Selesai Langsung Tutup Keypad',
-            desc: 'Menekan tombol ✔ langsung menyimpan skor dan menutup keypad tanpa langkah ekstra.'
+            icon: '📷',
+            title: 'QR Pindah Device Lebih Besar & Cepat Terbaca',
+            desc: 'Ukuran QR code diperbesar (hingga 280px) dengan modul tebal dan viewfinder kamera luas agar HP pengganti scan seketika.'
         },
         {
-            icon: '🔄',
-            title: 'Navigasi Panah Looping (Tanpa Mentok)',
-            desc: 'Tombol ◀ dan ▶ kini looping tak terbatas (P1 ke P4, P4 ke P1) untuk ganti pemain lebih gesit.'
+            icon: '🔊',
+            title: 'Sinkronisasi Audio burn.mp3 & warn.mp3',
+            desc: 'File suara kebakar dan efek peringatan telah diselaraskan dengan aset audio terbaru.'
         },
         {
-            icon: '📱',
-            title: 'Tombol Keypad Nyaman & Besar',
-            desc: 'Ukuran tombol keypad besar (h-12 / 48px) agar jempol leluasa dan angka jelas terbaca.'
+            icon: '📸',
+            title: 'Grafik Otomatis Ikut Ter-Share ke Gambar',
+            desc: 'Saat klik "Share Hasil ke Gambar", grafik garis ikut terfoto rapi untuk dibagikan ke grup WhatsApp.'
         }
     ]
 };

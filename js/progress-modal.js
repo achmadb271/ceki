@@ -13,6 +13,7 @@ import { calculateTotals, rankPlayers, countBurns } from './scoring.js';
 import { formatDuration } from './timer.js';
 import { shareProgressAsImage } from './share.js';
 import { showAppToast } from './toast.js';
+import { drawProgressionChart, PLAYER_COLORS } from './chart.js';
 
 const btnShowProgress = document.getElementById('btn-show-progress');
 const progressModal = document.getElementById('progress-modal');
@@ -27,14 +28,14 @@ function open() {
     }
 
     const playerNames = getPlayerNames();
-    const { totals, burnCounts, burnsInflictedCounts } = calculateTotals(rounds);
+    const { totals, burnCounts, burnsInflictedCounts, progressionHistory, burnHistory } = calculateTotals(rounds);
     const ranked = rankPlayers(totals, burnsInflictedCounts, burnCounts);
     const durationText = getMatchStartTime() ? formatDuration(Date.now() - getMatchStartTime()) : '00:00';
 
     progressModalBody.innerHTML = `
     <div class="text-2xl font-black mb-1 text-center">📊 Skor Sementara</div>
     <div class="text-xs text-blue-100/80 mt-2 font-mono text-center">⏱️ Durasi: ${durationText} &middot; ${rounds.length} ronde</div>
-    <div class="flex flex-col gap-2 mt-5">
+    <div class="flex flex-col gap-2 mt-4">
       ${ranked.map((p, i) => `
         <div class="flex items-center gap-3 bg-slate-900/40 border border-slate-700 rounded-lg px-3 py-2.5">
           <div class="w-6 h-6 rounded-full bg-slate-700 text-slate-200 text-xs font-black flex items-center justify-center shrink-0">${i + 1}</div>
@@ -49,6 +50,31 @@ function open() {
         </div>
       `).join('')}
     </div>
+
+    <!-- Grafik Garis Drama Skor Pertandingan -->
+    <div class="mt-4 bg-slate-950/70 rounded-2xl p-3 border border-slate-700/80 shadow-inner">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-black text-slate-200 flex items-center gap-1.5">
+          📈 Grafik Drama Skor
+        </span>
+        <span class="text-[10px] text-slate-400 font-mono">${rounds.length} ronde</span>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mb-2.5 text-[11px] font-bold">
+        ${players.map(p => `
+          <div class="flex items-center gap-1.5 bg-slate-900/80 px-2 py-1 rounded-lg border border-slate-800">
+            <span class="w-2.5 h-2.5 rounded-full inline-block shrink-0 shadow-sm" style="background-color: ${PLAYER_COLORS[p]}"></span>
+            <span class="text-slate-300 truncate">${playerNames[p]}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="relative w-full overflow-hidden rounded-xl border border-slate-800 bg-[#090d16]">
+        <canvas id="progress-progression-chart" class="w-full block"></canvas>
+      </div>
+      <div class="text-[10px] text-slate-400 mt-2 text-center flex items-center justify-center gap-1">
+        <span>🔥 Menandakan titik ronde pemain terbakar / reset</span>
+      </div>
+    </div>
+
     <div class="text-[9px] text-blue-200/50 font-mono tracking-widest text-center mt-3">SCORE TRACKER 1000 &middot; CEKI</div>
     <button id="btn-share-progress-image" class="mt-4 w-full bg-white text-blue-700 hover:bg-slate-100 active:bg-slate-200 font-black py-3 rounded-xl shadow-lg transition-colors text-base">
       📸 Share Skor Sementara
@@ -61,6 +87,14 @@ function open() {
     progressModal.classList.remove('hidden');
     void progressModalContent.offsetWidth; // trigger reflow biar animasi masuk jalan
     progressModal.classList.add('progress-modal-visible');
+
+    const chartCanvas = document.getElementById('progress-progression-chart');
+    if (chartCanvas) {
+        drawProgressionChart(chartCanvas, progressionHistory, burnHistory, playerNames);
+        requestAnimationFrame(() => {
+            drawProgressionChart(chartCanvas, progressionHistory, burnHistory, playerNames);
+        });
+    }
 }
 
 function close() {

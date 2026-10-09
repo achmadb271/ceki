@@ -6,7 +6,7 @@
  * & confirm-modal) dengan animasi masuk, biar momen menangnya lebih berasa.
  */
 
-import { players, getPlayerNames, addHistoryEntry, resetMatchOnly } from './store.js';
+import { players, getPlayerNames, addHistoryEntry, resetMatchOnly, getRounds } from './store.js';
 import { renderTable, renderFooter, onGameOver } from './render.js';
 import { clearMatchTimer } from './timer.js';
 import { resetUndoStack } from './undo.js';
@@ -16,6 +16,8 @@ import { showAppToast } from './toast.js';
 import { shareResultAsImage } from './share.js';
 import { playWinSound } from './sound.js';
 import { vibrateWin } from './haptics.js';
+import { calculateTotals } from './scoring.js';
+import { drawProgressionChart, PLAYER_COLORS } from './chart.js';
 
 const winModal = document.getElementById('win-modal');
 const winModalContent = document.getElementById('win-modal-content');
@@ -102,6 +104,9 @@ function open(result) {
     const maxBurns = Math.max(...players.map(p => burnCounts[p] || 0));
     const gosongers = maxBurns > 0 ? players.filter(p => burnCounts[p] === maxBurns) : [];
 
+    const rounds = getRounds();
+    const { progressionHistory, burnHistory } = calculateTotals(rounds);
+
     winModalBody.innerHTML = `
     <div class="text-3xl font-black mb-1 text-center"><span class="trophy-bounce">🏆</span> ${winnerDisplay} Menang!</div>
     <div class="text-center mt-2">
@@ -109,7 +114,7 @@ function open(result) {
         Skor Terendah: <span class="text-red-200 font-bold">${loserDisplay} (${minScore})</span>
       </span>
     </div>
-    <div class="text-xs text-green-100/80 mt-2 font-mono text-center">⏱️ Durasi: ${durationText}</div>
+    <div class="text-xs text-green-100/80 mt-2 font-mono text-center">⏱️ Durasi: ${durationText} &middot; ${rounds.length} ronde</div>
     <div class="grid grid-cols-2 gap-2 mt-4">
       ${players.map(p => `
         <div class="bg-slate-900/40 border border-slate-700/80 rounded-xl p-2.5 text-center">
@@ -121,6 +126,30 @@ function open(result) {
           </div>
         </div>
       `).join('')}
+    </div>
+
+    <!-- Grafik Garis Drama Skor Pertandingan -->
+    <div class="mt-4 bg-slate-950/70 rounded-2xl p-3 border border-slate-700/80 shadow-inner">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-black text-slate-200 flex items-center gap-1.5">
+          📈 Grafik Drama Skor
+        </span>
+        <span class="text-[10px] text-slate-400 font-mono">${rounds.length} ronde</span>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mb-2.5 text-[11px] font-bold">
+        ${players.map(p => `
+          <div class="flex items-center gap-1.5 bg-slate-900/80 px-2 py-1 rounded-lg border border-slate-800">
+            <span class="w-2.5 h-2.5 rounded-full inline-block shrink-0 shadow-sm" style="background-color: ${PLAYER_COLORS[p]}"></span>
+            <span class="text-slate-300 truncate">${playerNames[p]}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="relative w-full overflow-hidden rounded-xl border border-slate-800 bg-[#090d16]">
+        <canvas id="win-progression-chart" class="w-full block"></canvas>
+      </div>
+      <div class="text-[10px] text-slate-400 mt-2 text-center flex items-center justify-center gap-1">
+        <span>🔥 Menandakan titik ronde pemain terbakar / reset</span>
+      </div>
     </div>
 
     ${(executioners.length > 0 || gosongers.length > 0) ? `
@@ -155,6 +184,14 @@ function open(result) {
     // Trigger reflow biar transisi masuk jalan (bukan langsung full-state)
     void winModalContent.offsetWidth;
     winModal.classList.add('win-modal-visible');
+
+    const chartCanvas = document.getElementById('win-progression-chart');
+    if (chartCanvas) {
+        drawProgressionChart(chartCanvas, progressionHistory, burnHistory, playerNames);
+        requestAnimationFrame(() => {
+            drawProgressionChart(chartCanvas, progressionHistory, burnHistory, playerNames);
+        });
+    }
 }
 
 function close() {

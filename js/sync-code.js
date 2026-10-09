@@ -126,9 +126,17 @@ function syncFromCode(raw) {
 function startScanner() {
     qrScannerBox.classList.remove('hidden');
     html5QrCode = new Html5Qrcode('qr-reader');
+    
+    // Gunakan qrbox dinamis 85% viewport kamera agar bidikan fokus jauh lebih leluasa
+    const qrboxFunction = (viewfinderWidth, viewfinderHeight) => {
+        const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+        const boxSize = Math.max(200, Math.floor(minEdge * 0.85));
+        return { width: boxSize, height: boxSize };
+    };
+
     html5QrCode.start(
         { facingMode: 'environment' },
-        { fps: 10, qrbox: 220 },
+        { fps: 10, qrbox: qrboxFunction },
         (decodedText) => {
             stopScanner();
             syncFromCode(decodedText);
@@ -177,15 +185,20 @@ btnGenerateCode.addEventListener('click', () => {
     const code = generateCode();
     generatedCodeText.value = code;
 
+    generatedCodeBox.classList.remove('hidden');
     qrCodeCanvas.innerHTML = ''; // bersihin QR sebelumnya biar gak numpuk
+
+    // Ukuran dinamis responsif dihitung dari lebar modal agar optimal dan besar (hingga 280px)
+    const modalContent = syncModal.querySelector('.bg-slate-800');
+    const modalWidth = modalContent ? modalContent.clientWidth : window.innerWidth;
+    const qrSize = Math.min(280, Math.max(240, modalWidth - 64));
+
     qrCodeInstance = new QRCode(qrCodeCanvas, {
         text: code,
-        width: 200,
-        height: 200,
-        correctLevel: QRCode.CorrectLevel.M,
+        width: qrSize,
+        height: qrSize,
+        correctLevel: QRCode.CorrectLevel.L, // Level L (Low redundancy) membuat modul blok hitam-putih lebih tebal & kontras tinggi
     });
-
-    generatedCodeBox.classList.remove('hidden');
 });
 
 btnCopyCode.addEventListener('click', async () => {
