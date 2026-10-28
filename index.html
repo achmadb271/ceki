@@ -180,12 +180,21 @@
                 </button>
             </div>
 
-            <!-- Tombol Utama Pemicu Menu (Satu Tombol di Atas Cek Update) -->
-            <button id="btn-menu-toggle" type="button"
-                class="group flex items-center justify-center gap-2 bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-slate-300 hover:text-white px-4 py-2 rounded-full border border-slate-700 shadow-md transition-all text-xs font-bold">
-                <span id="menu-toggle-icon" class="text-sm transition-transform duration-300 inline-block">⚡</span>
-                <span id="menu-toggle-label">Fitur &amp; Alat</span>
-            </button>
+            <!-- Pasangan Kapsul Timer & Kapsul Fitur Bersanding Rapi -->
+            <div class="flex items-center justify-center gap-2 flex-wrap">
+                <!-- Kapsul Timer (Jelas, Font Mono Bold, Ukuran Pas & Nyaman Dibaca) -->
+                <div id="match-timer"
+                    class="flex items-center gap-1.5 bg-slate-800/90 text-slate-200 px-3.5 py-2 rounded-full border border-slate-700 shadow-md font-mono text-xs font-bold tracking-wider select-none">
+                    ⏱️ 00:00
+                </div>
+
+                <!-- Tombol Utama Pemicu Menu (Satu Tombol di Atas Cek Update) -->
+                <button id="btn-menu-toggle" type="button"
+                    class="group flex items-center justify-center gap-2 bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-slate-300 hover:text-white px-4 py-2 rounded-full border border-slate-700 shadow-md transition-all text-xs font-bold">
+                    <span id="menu-toggle-icon" class="text-sm transition-transform duration-300 inline-block">⚡</span>
+                    <span id="menu-toggle-label">Fitur &amp; Alat</span>
+                </button>
+            </div>
         </div>
 
         <div class="mt-2.5 text-center">

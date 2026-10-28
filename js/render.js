@@ -249,10 +249,7 @@ export function renderFooter(isPreview = false) {
 
     tfoot.innerHTML = `
     <tr class="bg-slate-900/95 backdrop-blur-md font-bold border-t-2 border-slate-700 shadow-md transition-colors">
-      <td class="p-1.5 text-center border border-transparent select-none">
-        <div class="text-[11px] font-mono font-black text-blue-400 tracking-wider leading-none">TOT</div>
-        <div id="match-timer" class="text-[9px] font-mono font-bold text-slate-400 mt-1 tracking-tight whitespace-nowrap leading-none">⏱️ 00:00</div>
-      </td>
+      <td class="p-2 text-center text-blue-400 text-xs font-mono font-black select-none">TOT</td>
       ${players.map(p => `
         <td data-total-player="${p}" class="p-2 text-center border border-transparent transition-all select-none">
           <div class="text-[10px] font-black tracking-tight mb-0.5">${getRankBadge(p)}</div>
