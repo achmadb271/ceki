@@ -268,30 +268,23 @@ body.keypad-open {
     padding-bottom: 330px !important;
 }
 
-/* Sticky floating pill bar & timer */
-#sticky-top-bar {
+/* Sticky table header multi-row (Row 1: Timer & Buttons, Row 2: Player Names) */
+thead.table-header-sticky tr:nth-child(1) th {
     position: -webkit-sticky !important;
     position: sticky !important;
-    top: 4px !important;
-    z-index: 30 !important;
-}
-
-/* Sticky table header */
-thead.table-header-sticky,
-thead.table-header-sticky th {
-    position: -webkit-sticky !important;
-    position: sticky !important;
-    top: 46px !important;
-    z-index: 20 !important;
+    top: 0 !important;
+    z-index: 25 !important;
     background-color: #0f172a !important;
-}
-
-thead.table-header-sticky th:first-child {
     border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
 }
 
-thead.table-header-sticky th:last-child {
-    border-top-right-radius: 1rem;
+thead.table-header-sticky tr:nth-child(2) th {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 44px !important;
+    z-index: 24 !important;
+    background-color: #0f172a !important;
 }
 
 /* ===== 8. QR Code Rendering ===== */
