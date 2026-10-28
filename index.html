@@ -21,41 +21,41 @@
 <body class="bg-slate-950 text-white min-h-screen pb-6 font-sans relative antialiased selection:bg-blue-600 selection:text-white">
 
     <div class="max-w-md mx-auto p-2">
-        <!-- Top Action Bar & Timer (Sticky - Tidak pernah tenggelam saat scroll) -->
-        <div id="sticky-top-bar" class="sticky top-0 z-30 bg-slate-950/95 backdrop-blur-md pt-2 pb-2 -mx-2 px-2 border-b border-slate-800/60 shadow-sm">
-            <div class="flex justify-center items-center gap-1.5 flex-wrap">
+        <!-- Top Action Bar & Timer (Floating Pill Capsule - Tidak Kotak) -->
+        <div id="sticky-top-bar" class="sticky top-1 z-30 flex justify-center py-1 pointer-events-none mb-1">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/90 backdrop-blur-xl border border-slate-700/80 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.6)] pointer-events-auto">
                 <div id="match-timer"
-                    class="text-xs font-mono font-bold text-slate-400 bg-slate-800/60 px-3 py-1.5 rounded-full border border-slate-700 tracking-wider">
+                    class="text-xs font-mono font-bold text-slate-300 bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700 tracking-wider">
                     ⏱️ 00:00</div>
                 <button id="btn-mute-toggle"
-                    class="text-xs bg-slate-800/60 w-8 h-8 flex items-center justify-center rounded-full border border-slate-700 text-slate-400 hover:text-slate-200 transition-colors">🔊</button>
+                    class="text-xs bg-slate-800/80 w-7 h-7 flex items-center justify-center rounded-full border border-slate-700 text-slate-400 hover:text-slate-200 transition-colors">🔊</button>
                 <button id="btn-show-progress" title="Share skor sementara"
-                    class="text-xs bg-slate-800/60 w-8 h-8 flex items-center justify-center rounded-full border border-slate-700 text-slate-400 hover:text-slate-200 transition-colors">📸</button>
+                    class="text-xs bg-slate-800/80 w-7 h-7 flex items-center justify-center rounded-full border border-slate-700 text-slate-400 hover:text-slate-200 transition-colors">📸</button>
                 <button id="btn-open-sync" title="Pindah progress ke HP lain pake kode"
-                    class="text-xs bg-slate-800/60 w-8 h-8 flex items-center justify-center rounded-full border border-slate-700 text-slate-400 hover:text-slate-200 transition-colors">🔗</button>
+                    class="text-xs bg-slate-800/80 w-7 h-7 flex items-center justify-center rounded-full border border-slate-700 text-slate-400 hover:text-slate-200 transition-colors">🔗</button>
                 <button id="btn-open-donate" title="Traktir Kopi / Donasi QRIS"
-                    class="text-xs bg-slate-800/60 w-8 h-8 flex items-center justify-center rounded-full border border-slate-700 text-amber-400 hover:text-amber-300 transition-colors">☕</button>
+                    class="text-xs bg-slate-800/80 w-7 h-7 flex items-center justify-center rounded-full border border-slate-700 text-amber-400 hover:text-amber-300 transition-colors">☕</button>
                 <button id="btn-open-feedback" title="Kirim Masukan / Lapor Bug"
-                    class="text-xs bg-slate-800/60 w-8 h-8 flex items-center justify-center rounded-full border border-slate-700 text-sky-400 hover:text-sky-300 transition-colors">💬</button>
+                    class="text-xs bg-slate-800/80 w-7 h-7 flex items-center justify-center rounded-full border border-slate-700 text-sky-400 hover:text-sky-300 transition-colors">💬</button>
             </div>
         </div>
 
-        <div class="bg-slate-900/60 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-700/80 mt-2">
+        <div class="bg-slate-900/60 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-700/80">
             <table class="w-full table-fixed border-collapse">
                 <thead class="table-header-sticky sticky top-[48px] z-20 bg-slate-900/95 backdrop-blur-md shadow-md border-b border-slate-700/80">
                     <tr class="border-b border-slate-700/80">
                         <th class="w-10 p-2 text-center text-slate-400 text-xs font-mono font-bold tracking-wider rounded-tl-2xl">R</th>
                         <th class="p-1"><input type="text"
-                                class="name-input w-full bg-transparent text-center font-black text-sky-400 border-b-2 border-sky-500/40 focus:border-sky-400 focus:outline-none rounded p-1 transition-colors"
+                                class="name-input w-full bg-slate-800/40 hover:bg-slate-800/70 text-center font-black text-sky-400 border border-sky-500/30 focus:border-sky-400 focus:bg-slate-800/90 rounded-xl py-1 px-1.5 transition-all outline-none"
                                 data-player="p1"></th>
                         <th class="p-1"><input type="text"
-                                class="name-input w-full bg-transparent text-center font-black text-purple-400 border-b-2 border-purple-500/40 focus:border-purple-400 focus:outline-none rounded p-1 transition-colors"
+                                class="name-input w-full bg-slate-800/40 hover:bg-slate-800/70 text-center font-black text-purple-400 border border-purple-500/30 focus:border-purple-400 focus:bg-slate-800/90 rounded-xl py-1 px-1.5 transition-all outline-none"
                                 data-player="p2"></th>
                         <th class="p-1"><input type="text"
-                                class="name-input w-full bg-transparent text-center font-black text-pink-400 border-b-2 border-pink-500/40 focus:border-pink-400 focus:outline-none rounded p-1 transition-colors"
+                                class="name-input w-full bg-slate-800/40 hover:bg-slate-800/70 text-center font-black text-pink-400 border border-pink-500/30 focus:border-pink-400 focus:bg-slate-800/90 rounded-xl py-1 px-1.5 transition-all outline-none"
                                 data-player="p3"></th>
                         <th class="p-1"><input type="text"
-                                class="name-input w-full bg-transparent text-center font-black text-indigo-400 border-b-2 border-indigo-500/40 focus:border-indigo-400 focus:outline-none rounded p-1 transition-colors rounded-tr-2xl"
+                                class="name-input w-full bg-slate-800/40 hover:bg-slate-800/70 text-center font-black text-indigo-400 border border-indigo-500/30 focus:border-indigo-400 focus:bg-slate-800/90 rounded-xl py-1 px-1.5 transition-all outline-none rounded-tr-2xl"
                                 data-player="p4"></th>
                     </tr>
                 </thead>

@@ -268,11 +268,11 @@ body.keypad-open {
     padding-bottom: 330px !important;
 }
 
-/* Sticky top action bar & timer */
+/* Sticky floating pill bar & timer */
 #sticky-top-bar {
     position: -webkit-sticky !important;
     position: sticky !important;
-    top: 0 !important;
+    top: 4px !important;
     z-index: 30 !important;
 }
 
@@ -281,9 +281,17 @@ thead.table-header-sticky,
 thead.table-header-sticky th {
     position: -webkit-sticky !important;
     position: sticky !important;
-    top: 48px !important;
+    top: 46px !important;
     z-index: 20 !important;
     background-color: #0f172a !important;
+}
+
+thead.table-header-sticky th:first-child {
+    border-top-left-radius: 1rem;
+}
+
+thead.table-header-sticky th:last-child {
+    border-top-right-radius: 1rem;
 }
 
 /* ===== 8. QR Code Rendering ===== */
