@@ -107,7 +107,7 @@ if (btnMenuToggle && quickMenuItems) {
         isMenuOpen = false;
         quickMenuItems.classList.remove('menu-expanded');
         if (menuToggleIcon) menuToggleIcon.style.transform = 'rotate(0deg)';
-        if (menuToggleLabel) menuToggleLabel.textContent = 'Fitur & Alat';
+        if (menuToggleLabel) menuToggleLabel.textContent = 'Menu';
         btnMenuToggle.classList.remove('bg-slate-700', 'border-slate-500', 'text-white');
         closeTimeout = setTimeout(() => {
             if (!isMenuOpen) {

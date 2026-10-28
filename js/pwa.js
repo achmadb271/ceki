@@ -26,27 +26,27 @@ let swRegistration = null;
 // Konfigurasi ringkasan update versi terbaru (mudah diubah tiap rilis)
 const LATEST_RELEASE = {
     version: 'v3.4',
-    subtitle: 'Donasi QRIS & Form Feedback',
+    subtitle: 'Donasi QRIS, Feedback & UI Ramping',
     features: [
         {
             icon: '☕',
             title: 'Traktir Kopi Dev via QRIS (0% Fee)',
-            desc: 'Dukung terus pengembangan Ceki Tracker langsung lewat scan QRIS m-Banking & e-Wallet favoritmu tanpa potongan platform.'
+            desc: 'Dukung pengembangan Ceki Tracker langsung lewat scan QRIS m-Banking & e-Wallet favoritmu tanpa potongan platform.'
         },
         {
             icon: '💬',
-            title: 'Form Masukan & Lapor Bug ke Email',
+            title: 'Form Masukan & Lapor Bug',
             desc: 'Punya ide fitur baru atau mau lapor error? Kirim masukan langsung dari dalam aplikasi ke email developer!'
         },
         {
             icon: '📈',
-            title: 'Grafik Garis Drama Skor Pertandingan',
-            desc: 'Visualisasi perjalanan skor tiap ronde lengkap dengan titik api 🔥 saat pemain kebakar.'
+            title: 'Grafik Drama Skor di Riwayat Game',
+            desc: 'Sentuh kartu pertandingan di menu Riwayat untuk membuka grafik perjalanan skor lengkap dengan titik kebakar 🔥.'
         },
         {
-            icon: '📷',
-            title: 'QR Pindah Device Lebih Besar & Cepat Terbaca',
-            desc: 'Ukuran QR code diperbesar (hingga 280px) dengan modul tebal dan viewfinder kamera luas agar HP pengganti scan seketika.'
+            icon: '⚡',
+            title: 'Menu Popout Halus & Timer Lega',
+            desc: 'Aksi terlipat rapi dalam tombol Menu dengan animasi halus, timer ukuran pas, dan header tabel bebas bocor saat ronde banyak.'
         }
     ]
 };
