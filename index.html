@@ -21,25 +21,28 @@
 <body class="bg-slate-950 text-white min-h-screen pb-6 font-sans relative antialiased selection:bg-blue-600 selection:text-white">
 
     <div class="max-w-md mx-auto p-2">
-        <div class="flex justify-center items-center gap-1.5 mb-2 flex-wrap">
-            <div id="match-timer"
-                class="text-xs font-mono font-bold text-slate-400 bg-slate-800/60 px-3 py-1.5 rounded-full border border-slate-700 tracking-wider">
-                ⏱️ 00:00</div>
-            <button id="btn-mute-toggle"
-                class="text-xs bg-slate-800/60 w-8 h-8 flex items-center justify-center rounded-full border border-slate-700 text-slate-400 hover:text-slate-200 transition-colors">🔊</button>
-            <button id="btn-show-progress" title="Share skor sementara"
-                class="text-xs bg-slate-800/60 w-8 h-8 flex items-center justify-center rounded-full border border-slate-700 text-slate-400 hover:text-slate-200 transition-colors">📸</button>
-            <button id="btn-open-sync" title="Pindah progress ke HP lain pake kode"
-                class="text-xs bg-slate-800/60 w-8 h-8 flex items-center justify-center rounded-full border border-slate-700 text-slate-400 hover:text-slate-200 transition-colors">🔗</button>
-            <button id="btn-open-donate" title="Traktir Kopi / Donasi QRIS"
-                class="text-xs bg-slate-800/60 w-8 h-8 flex items-center justify-center rounded-full border border-slate-700 text-amber-400 hover:text-amber-300 transition-colors">☕</button>
-            <button id="btn-open-feedback" title="Kirim Masukan / Lapor Bug"
-                class="text-xs bg-slate-800/60 w-8 h-8 flex items-center justify-center rounded-full border border-slate-700 text-sky-400 hover:text-sky-300 transition-colors">💬</button>
+        <!-- Top Action Bar & Timer (Sticky - Tidak pernah tenggelam saat scroll) -->
+        <div id="sticky-top-bar" class="sticky top-0 z-30 bg-slate-950/95 backdrop-blur-md pt-2 pb-2 -mx-2 px-2 border-b border-slate-800/60 shadow-sm">
+            <div class="flex justify-center items-center gap-1.5 flex-wrap">
+                <div id="match-timer"
+                    class="text-xs font-mono font-bold text-slate-400 bg-slate-800/60 px-3 py-1.5 rounded-full border border-slate-700 tracking-wider">
+                    ⏱️ 00:00</div>
+                <button id="btn-mute-toggle"
+                    class="text-xs bg-slate-800/60 w-8 h-8 flex items-center justify-center rounded-full border border-slate-700 text-slate-400 hover:text-slate-200 transition-colors">🔊</button>
+                <button id="btn-show-progress" title="Share skor sementara"
+                    class="text-xs bg-slate-800/60 w-8 h-8 flex items-center justify-center rounded-full border border-slate-700 text-slate-400 hover:text-slate-200 transition-colors">📸</button>
+                <button id="btn-open-sync" title="Pindah progress ke HP lain pake kode"
+                    class="text-xs bg-slate-800/60 w-8 h-8 flex items-center justify-center rounded-full border border-slate-700 text-slate-400 hover:text-slate-200 transition-colors">🔗</button>
+                <button id="btn-open-donate" title="Traktir Kopi / Donasi QRIS"
+                    class="text-xs bg-slate-800/60 w-8 h-8 flex items-center justify-center rounded-full border border-slate-700 text-amber-400 hover:text-amber-300 transition-colors">☕</button>
+                <button id="btn-open-feedback" title="Kirim Masukan / Lapor Bug"
+                    class="text-xs bg-slate-800/60 w-8 h-8 flex items-center justify-center rounded-full border border-slate-700 text-sky-400 hover:text-sky-300 transition-colors">💬</button>
+            </div>
         </div>
 
-        <div class="bg-slate-900/60 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-700/80">
+        <div class="bg-slate-900/60 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-700/80 mt-2">
             <table class="w-full table-fixed border-collapse">
-                <thead class="table-header-sticky sticky top-0 z-20 bg-slate-900/95 backdrop-blur-md shadow-md border-b border-slate-700/80">
+                <thead class="table-header-sticky sticky top-[48px] z-20 bg-slate-900/95 backdrop-blur-md shadow-md border-b border-slate-700/80">
                     <tr class="border-b border-slate-700/80">
                         <th class="w-10 p-2 text-center text-slate-400 text-xs font-mono font-bold tracking-wider rounded-tl-2xl">R</th>
                         <th class="p-1"><input type="text"

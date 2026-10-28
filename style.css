@@ -268,12 +268,20 @@ body.keypad-open {
     padding-bottom: 330px !important;
 }
 
+/* Sticky top action bar & timer */
+#sticky-top-bar {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 30 !important;
+}
+
 /* Sticky table header */
 thead.table-header-sticky,
 thead.table-header-sticky th {
     position: -webkit-sticky !important;
     position: sticky !important;
-    top: 0 !important;
+    top: 48px !important;
     z-index: 20 !important;
     background-color: #0f172a !important;
 }
