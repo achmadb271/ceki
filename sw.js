@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ceki-score-tracker-v33';
+const CACHE_NAME = 'ceki-score-tracker-v34';
 const APP_SHELL = [
     './',
     './index.html',
@@ -22,6 +22,8 @@ const APP_SHELL = [
     './js/progress-modal.js',
     './js/sync-code.js',
     './js/history-modal.js',
+    './js/donation-modal.js',
+    './js/feedback-modal.js',
     './js/pwa.js',
     './js/main.js',
     './audio/burn.mp3',
@@ -29,6 +31,8 @@ const APP_SHELL = [
     './icons/icon-192.png',
     './icons/icon-512.png',
     './icons/icon-180.png',
+    './icons/qris.jpeg',
+    './icons/qris.png',
 ];
 
 // Install: cache app shell secara tangguh (tidak gagal jika salah satu audio tidak ada)

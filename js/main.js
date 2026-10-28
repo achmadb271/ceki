@@ -39,6 +39,8 @@ import './win-modal.js';
 import './progress-modal.js';
 import './sync-code.js';
 import './history-modal.js';
+import './donation-modal.js';
+import './feedback-modal.js';
 import './pwa.js';
 
 const btnAdd = document.getElementById('btn-add');

@@ -25,28 +25,28 @@ let swRegistration = null;
 
 // Konfigurasi ringkasan update versi terbaru (mudah diubah tiap rilis)
 const LATEST_RELEASE = {
-    version: 'v3.3',
-    subtitle: 'Grafik Drama Skor & QR Jumbo',
+    version: 'v3.4',
+    subtitle: 'Donasi QRIS & Form Feedback',
     features: [
+        {
+            icon: '☕',
+            title: 'Traktir Kopi Dev via QRIS (0% Fee)',
+            desc: 'Dukung terus pengembangan Ceki Tracker langsung lewat scan QRIS m-Banking & e-Wallet favoritmu tanpa potongan platform.'
+        },
+        {
+            icon: '💬',
+            title: 'Form Masukan & Lapor Bug ke Email',
+            desc: 'Punya ide fitur baru atau mau lapor error? Kirim masukan langsung dari dalam aplikasi ke email developer!'
+        },
         {
             icon: '📈',
             title: 'Grafik Garis Drama Skor Pertandingan',
-            desc: 'Visualisasi grafik perjalanan skor dari ronde awal hingga akhir, lengkap dengan titik kobaran api 🔥 saat pemain kebakar!'
+            desc: 'Visualisasi perjalanan skor tiap ronde lengkap dengan titik api 🔥 saat pemain kebakar.'
         },
         {
             icon: '📷',
             title: 'QR Pindah Device Lebih Besar & Cepat Terbaca',
             desc: 'Ukuran QR code diperbesar (hingga 280px) dengan modul tebal dan viewfinder kamera luas agar HP pengganti scan seketika.'
-        },
-        {
-            icon: '🔊',
-            title: 'Sinkronisasi Audio burn.mp3 & warn.mp3',
-            desc: 'File suara kebakar dan efek peringatan telah diselaraskan dengan aset audio terbaru.'
-        },
-        {
-            icon: '📸',
-            title: 'Grafik Otomatis Ikut Ter-Share ke Gambar',
-            desc: 'Saat klik "Share Hasil ke Gambar", grafik garis ikut terfoto rapi untuk dibagikan ke grup WhatsApp.'
         }
     ]
 };

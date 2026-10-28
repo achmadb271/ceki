@@ -62,6 +62,10 @@ Jika ada dua pemain atau lebih mencapai skor tertinggi yang sama saat game over:
   - Visualisasi grafik garis perjalanan skor dari ronde awal hingga akhir (Canvas murni, 100% offline & HiDPI Retina crisp).
   - Menandai titik kobaran api 🔥 di ronde di mana pemain terbakar / reset skor.
   - Ditampilkan di popup kemenangan maupun popup skor sementara, dan otomatis ikut terfoto saat share gambar PNG.
+- ☕ **Donasi & Traktir Kopi QRIS**:
+  - Dukung pengembangan aplikasi secara langsung via QRIS m-Banking dan e-Wallet dengan 0% fee potongan platform.
+- 💬 **Form Masukan & Lapor Bug Pengguna**:
+  - Pengguna dapat mengirim saran fitur atau lapor error langsung dari aplikasi ke email developer tanpa repot.
 - 🔗 **Pindah Progress Antar-HP (Sync Kode & QR Jumbo)**:
   - Lanjutkan match di HP teman tanpa server/database! Generate QR code berukuran besar (hingga 280px) dengan modul tebal dan viewfinder kamera luas agar HP pengganti dapat memindai seketika.
 - 📸 **Share Gambar PNG**:
@@ -83,6 +87,8 @@ ceki-main/
 ├── js/
 │   ├── burn-announcer.js# Pengatur notifikasi & suara kebakar (anti-dobel)
 │   ├── chart.js         # Grafik garis drama skor pertandingan (Canvas HiDPI)
+│   ├── donation-modal.js# Modal donasi & traktir kopi QRIS (0% fee)
+│   ├── feedback-modal.js# Modal form masukan pengguna kirim ke email
 │   ├── haptics.js       # Efek getar HP (Vibration API)
 │   ├── history-modal.js # Modal riwayat pertandingan
 │   ├── keypad.js        # Logika virtual numpad & ergonomi bottom sheet
@@ -104,20 +110,33 @@ ceki-main/
 ├── index.html           # Struktur layout utama
 ├── manifest.json        # Konfigurasi PWA Web App Manifest
 ├── style.css            # Custom animasi & styling tema gelap
-└── sw.js                # Service Worker untuk caching aset offline
+├── sw.js                # Service Worker untuk caching aset offline
+└── vercel.json          # Konfigurasi deployment Vercel (anti-stale PWA header)
 ```
 
 ---
 
-## 🚀 Cara Menjalankan
+## 🚀 Cara Menjalankan & Deployment
+
+### 1. Menjalankan di Komputer Lokal:
 
 Karena project ini menggunakan JavaScript ES Modules (`import`/`export`), aplikasi perlu dijalankan melalui local web server:
 
-1. **Menggunakan VS Code Live Server**:
-   - Klik kanan `index.html` $\rightarrow$ pilih **"Open with Live Server"**.
-2. **Menggunakan Node.js / npx**:
-   ```bash
-   npx serve .
-   ```
-3. Buka browser di URL yang tertera (misal: `http://localhost:3000` atau `http://localhost:5500`).
-4. Buka di browser HP dalam satu jaringan Wi-Fi yang sama untuk langsung mencoba pengalaman mobile dan menginstalnya ke layar utama ponsel.
+- **Menggunakan VS Code Live Server**:
+  Klik kanan `index.html` $\rightarrow$ pilih **"Open with Live Server"**.
+- **Menggunakan Node.js / npx**:
+  ```bash
+  npx serve .
+  ```
+
+---
+
+### 2. Deployment ke Vercel (Rekomendasi 1-Klik Gratis):
+
+1. Masuk ke [vercel.com](https://vercel.com) dan login dengan akun GitHub kamu.
+2. Klik **"Add New..."** $\rightarrow$ **"Project"**.
+3. Pilih repository **`achmadb271/ceki`** lalu klik **"Import"**.
+4. Biarkan semua setting default (Framework Preset: _Other_, Root Directory: `./`).
+5. Klik **"Deploy"**.
+6. Dalam 15 detik, aplikasi Ceki kamu sudah aktif di URL publik HTTPS (misal: `ceki.vercel.app`) dan siap diinstall ke HP semua orang!
+7. Setiap kali kamu `git push` perubahan baru ke branch `main`, Vercel otomatis meng-update aplikasinya secara instan.

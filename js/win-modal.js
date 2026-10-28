@@ -204,7 +204,9 @@ winModalBody.addEventListener('click', (e) => {
     if (e.target.id === 'btn-save-history') {
         if (!pendingResult) return;
         const playerNames = getPlayerNames();
-        const { winners, losers, minScore, totals, durationText } = pendingResult;
+        const { winners, losers, minScore, totals, durationText, burnCounts, burnsInflictedCounts = {} } = pendingResult;
+        const rounds = getRounds();
+        const { progressionHistory, burnHistory } = calculateTotals(rounds);
 
         addHistoryEntry({
             date: new Date().toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
@@ -213,6 +215,12 @@ winModalBody.addEventListener('click', (e) => {
             minScore: minScore,
             duration: durationText,
             scores: Object.fromEntries(players.map(p => [playerNames[p], totals[p]])),
+            rounds: JSON.parse(JSON.stringify(rounds)),
+            progressionHistory: progressionHistory,
+            burnHistory: burnHistory,
+            playerNames: { ...playerNames },
+            burnCounts: { ...burnCounts },
+            burnsInflictedCounts: { ...burnsInflictedCounts }
         });
 
         resetMatchOnly();
