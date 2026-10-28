@@ -21,14 +21,15 @@ export function formatDuration(ms) {
 }
 
 export function updateTimerDisplay() {
-    if (!matchTimerEl) return;
+    const el = document.getElementById('match-timer');
+    if (!el) return;
     const start = getMatchStartTime();
     if (!start) {
-        matchTimerEl.textContent = '⏱️ 00:00';
+        el.textContent = '⏱️ 00:00';
         return;
     }
     const end = getMatchEndTime() || Date.now();
-    matchTimerEl.textContent = '⏱️ ' + formatDuration(end - start);
+    el.textContent = '⏱️ ' + formatDuration(end - start);
 }
 
 export function startMatchTimer() {

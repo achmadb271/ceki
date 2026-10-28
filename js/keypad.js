@@ -71,7 +71,7 @@ function scrollRowIntoSafeViewIfNeeded(inputEl) {
     const rect = tr.getBoundingClientRect();
     const panelHeight = quickActionsPanel.offsetHeight || 240;
     const safeBottom = window.innerHeight - panelHeight - 12;
-    const safeTop = 100; // di bawah sticky top bar (48px) + sticky table header (42px) + buffer
+    const safeTop = 55; // di bawah sticky table header
 
     // Jika baris SUDAH terlihat di layar dengan aman (tidak tertutup keypad dan tidak tertutup header):
     // TIDAK PERLU SCROLL sama sekali! Ini mencegah glitch/flicker saat ronde masih sedikit (1-5).
@@ -84,7 +84,7 @@ function scrollRowIntoSafeViewIfNeeded(inputEl) {
         const updatedRect = tr.getBoundingClientRect();
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
         const targetDocTop = updatedRect.top + scrollTop;
-        const desiredTop = Math.max(0, targetDocTop - 105);
+        const desiredTop = Math.max(0, targetDocTop - 60);
 
         window.scrollTo({
             top: desiredTop,

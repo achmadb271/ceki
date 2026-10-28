@@ -268,23 +268,35 @@ body.keypad-open {
     padding-bottom: 330px !important;
 }
 
-/* Sticky table header multi-row (Row 1: Timer & Buttons, Row 2: Player Names) */
-thead.table-header-sticky tr:nth-child(1) th {
+/* Sticky table header */
+thead.table-header-sticky,
+thead.table-header-sticky th {
     position: -webkit-sticky !important;
     position: sticky !important;
     top: 0 !important;
-    z-index: 25 !important;
+    z-index: 20 !important;
     background-color: #0f172a !important;
+}
+
+thead.table-header-sticky th:first-child {
     border-top-left-radius: 1rem;
+}
+
+thead.table-header-sticky th:last-child {
     border-top-right-radius: 1rem;
 }
 
-thead.table-header-sticky tr:nth-child(2) th {
-    position: -webkit-sticky !important;
-    position: sticky !important;
-    top: 44px !important;
-    z-index: 24 !important;
-    background-color: #0f172a !important;
+/* Staggered Popout Menu (Muncul Halus Satu per Satu) */
+.quick-action-btn {
+    opacity: 0;
+    transform: translateY(14px) scale(0.5);
+    transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.22s ease, background-color 0.15s ease;
+    transition-delay: var(--item-delay, 0ms);
+}
+
+#quick-menu-items.menu-expanded .quick-action-btn {
+    opacity: 1;
+    transform: translateY(0) scale(1);
 }
 
 /* ===== 8. QR Code Rendering ===== */

@@ -82,6 +82,49 @@ btnReset.addEventListener('click', () => {
     });
 });
 
+// Menu Fitur Interaktif (Staggered Popout di atas Cek Update)
+const btnMenuToggle = document.getElementById('btn-menu-toggle');
+const quickMenuItems = document.getElementById('quick-menu-items');
+const menuToggleIcon = document.getElementById('menu-toggle-icon');
+const menuToggleLabel = document.getElementById('menu-toggle-label');
+
+if (btnMenuToggle && quickMenuItems) {
+    function toggleQuickMenu() {
+        const isClosed = quickMenuItems.classList.contains('hidden');
+        if (isClosed) {
+            quickMenuItems.classList.remove('hidden');
+            void quickMenuItems.offsetWidth; // trigger reflow
+            quickMenuItems.classList.add('menu-expanded');
+            if (menuToggleIcon) menuToggleIcon.style.transform = 'rotate(45deg)';
+            if (menuToggleLabel) menuToggleLabel.textContent = 'Tutup Menu';
+            btnMenuToggle.classList.add('bg-slate-700', 'border-slate-500', 'text-white');
+        } else {
+            quickMenuItems.classList.remove('menu-expanded');
+            if (menuToggleIcon) menuToggleIcon.style.transform = 'rotate(0deg)';
+            if (menuToggleLabel) menuToggleLabel.textContent = 'Fitur & Alat';
+            btnMenuToggle.classList.remove('bg-slate-700', 'border-slate-500', 'text-white');
+            setTimeout(() => {
+                quickMenuItems.classList.add('hidden');
+            }, 250);
+        }
+    }
+
+    btnMenuToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleQuickMenu();
+    });
+
+    // Klik di luar container menu otomatis melipat kembali
+    document.addEventListener('click', (e) => {
+        const container = document.getElementById('quick-menu-container');
+        if (container && !container.contains(e.target)) {
+            if (!quickMenuItems.classList.contains('hidden')) {
+                toggleQuickMenu();
+            }
+        }
+    });
+}
+
 // Inisialisasi
 renderTable();
 renderFooter();

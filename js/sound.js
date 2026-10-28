@@ -226,14 +226,18 @@ export function playWarnSound() {
 }
 
 function updateMuteIcon() {
-    btnMuteToggle.textContent = muted ? '🔇' : '🔊';
-    btnMuteToggle.setAttribute('aria-label', muted ? 'Bunyikan suara' : 'Matikan suara');
+    const btn = document.getElementById('btn-mute-toggle');
+    if (!btn) return;
+    btn.textContent = muted ? '🔇' : '🔊';
+    btn.setAttribute('aria-label', muted ? 'Bunyikan suara' : 'Matikan suara');
 }
 
-btnMuteToggle.addEventListener('click', () => {
-    muted = !muted;
-    localStorage.setItem(MUTE_KEY, String(muted));
-    updateMuteIcon();
-});
+if (btnMuteToggle) {
+    btnMuteToggle.addEventListener('click', () => {
+        muted = !muted;
+        localStorage.setItem(MUTE_KEY, String(muted));
+        updateMuteIcon();
+    });
+}
 
 updateMuteIcon();
