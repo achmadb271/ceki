@@ -140,3 +140,17 @@ Karena project ini menggunakan JavaScript ES Modules (`import`/`export`), aplika
 5. Klik **"Deploy"**.
 6. Dalam 15 detik, aplikasi Ceki kamu sudah aktif di URL publik HTTPS (misal: `ceki.vercel.app`) dan siap diinstall ke HP semua orang!
 7. Setiap kali kamu `git push` perubahan baru ke branch `main`, Vercel otomatis meng-update aplikasinya secara instan.
+
+---
+
+### 3. Deployment ke GitHub Pages (Dual Deployment):
+
+Aplikasi ini mendukung arsitektur _dual-deployment_ sehingga dapat aktif bersamaan di Vercel dan GitHub Pages:
+
+1. Pastikan visibility repository GitHub disetel ke **Public** (karena akun GitHub Free memerlukan status Public untuk mengaktifkan fitur Pages gratis).
+2. Di halaman repository GitHub (`achmadb271/ceki`), buka tab **Settings** $\rightarrow$ **Pages**.
+3. Pada bagian **Build and deployment** $\rightarrow$ **Source**, pilih **"Deploy from a branch"**.
+4. Pilih Branch: **`main`** dan Folder: **`/(root)`**, lalu klik **Save**.
+5. Tunggu sekitar 1-2 menit hingga status Pages aktif di:
+   `https://achmadb271.github.io/ceki/`
+6. Setiap kali kamu menjalankan `git push origin main`, kedua platform (Vercel & GitHub Pages) akan langsung ter-update secara otomatis!

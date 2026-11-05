@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ceki-score-tracker-v34';
+const CACHE_NAME = 'ceki-score-tracker-v35';
 const APP_SHELL = [
     './',
     './index.html',
@@ -32,7 +32,6 @@ const APP_SHELL = [
     './icons/icon-512.png',
     './icons/icon-180.png',
     './icons/qris.jpeg',
-    './icons/qris.png',
 ];
 
 // Install: cache app shell secara tangguh (tidak gagal jika salah satu audio tidak ada)
@@ -68,7 +67,7 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Fetch: cache-first untuk app shell, network-first untuk sisanya (misal CDN library)
+// Fetch: offline fallback tangguh untuk navigasi app shell, cache-first untuk aset statis
 self.addEventListener('fetch', (event) => {
     const req = event.request;
     if (req.method !== 'GET') return;
@@ -79,15 +78,46 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+    // Khusus permintaan navigasi halaman (buka PWA dari homescreen / reload tab):
+    // Prioritaskan network jika online agar selalu dapat versi terbaru,
+    // tapi jika offline / 404 / gagal, WAJIB fallback ke cached app shell (index.html)!
+    if (req.mode === 'navigate') {
+        event.respondWith(
+            fetch(req)
+                .then((networkRes) => {
+                    if (networkRes && networkRes.status === 200) {
+                        const resClone = networkRes.clone();
+                        caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
+                        return networkRes;
+                    }
+                    // Jika server membalas non-200 (misal 404 path redirect), fallback ke app shell
+                    return caches.match(req).then((cached) => {
+                        return cached || caches.match('./') || caches.match('./index.html') || networkRes;
+                    });
+                })
+                .catch(() => {
+                    // Offline / jaringan terputus -> ambil index.html dari cache
+                    return caches.match(req).then((cached) => {
+                        return cached || caches.match('./') || caches.match('./index.html');
+                    });
+                })
+        );
+        return;
+    }
+
+    // Aset statis (JS, CSS, Icon, Audio, dan CDN scripts)
     event.respondWith(
-        caches.match(req).then((cached) => {
+        caches.match(req, { ignoreSearch: true }).then((cached) => {
             if (cached) return cached;
             return fetch(req)
                 .then((res) => {
-                    // simpan salinan ke cache biar makin lengkap offline-nya (khusus same-origin)
-                    if (res && res.status === 200 && new URL(req.url).origin === self.location.origin) {
-                        const resClone = res.clone();
-                        caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
+                    // Simpan salinan ke cache jika same-origin atau CDN terpercaya
+                    if (res && res.status === 200) {
+                        const origin = new URL(req.url).origin;
+                        if (origin === self.location.origin || origin.includes('cdnjs.cloudflare.com') || origin.includes('cdn.tailwindcss.com')) {
+                            const resClone = res.clone();
+                            caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
+                        }
                     }
                     return res;
                 })

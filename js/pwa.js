@@ -25,9 +25,19 @@ let swRegistration = null;
 
 // Konfigurasi ringkasan update versi terbaru (mudah diubah tiap rilis)
 const LATEST_RELEASE = {
-    version: 'v3.4',
-    subtitle: 'Donasi QRIS, Feedback & UI Ramping',
+    version: 'v3.5',
+    subtitle: 'Anti-404 PWA & Dual Deployment',
     features: [
+        {
+            icon: '🛡️',
+            title: 'PWA Launch Anti-404 & Offline Resilient',
+            desc: 'Aplikasi yang diinstall ke layar utama kini dijamin selalu terbuka mulus tanpa kendala 404 berkat navigation fallback terintegrasi.'
+        },
+        {
+            icon: '🚀',
+            title: 'Dukungan Dual-Deployment',
+            desc: 'Dapat diakses dan diinstall sama baiknya dari domain Vercel maupun GitHub Pages.'
+        },
         {
             icon: '☕',
             title: 'Traktir Kopi Dev via QRIS (0% Fee)',
@@ -37,16 +47,6 @@ const LATEST_RELEASE = {
             icon: '💬',
             title: 'Form Masukan & Lapor Bug',
             desc: 'Punya ide fitur baru atau mau lapor error? Kirim masukan langsung dari dalam aplikasi ke email developer!'
-        },
-        {
-            icon: '📈',
-            title: 'Grafik Drama Skor di Riwayat Game',
-            desc: 'Sentuh kartu pertandingan di menu Riwayat untuk membuka grafik perjalanan skor lengkap dengan titik kebakar 🔥.'
-        },
-        {
-            icon: '⚡',
-            title: 'Menu Popout Halus & Timer Lega',
-            desc: 'Aksi terlipat rapi dalam tombol Menu dengan animasi halus, timer ukuran pas, dan header tabel bebas bocor saat ronde banyak.'
         }
     ]
 };
@@ -149,7 +149,7 @@ function trackWorkerInstalling(worker) {
 
 if ('serviceWorker' in navigator) {
     const initSW = () => {
-        navigator.serviceWorker.register('sw.js').then((registration) => {
+        navigator.serviceWorker.register('sw.js', { scope: './' }).then((registration) => {
             swRegistration = registration;
 
             // 1. Langsung paksa cek update ke server saat halaman dibuka (jangan tunggu 30 menit)
