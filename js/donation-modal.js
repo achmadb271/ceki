@@ -2,8 +2,6 @@
  * donation-modal.js
  * =================
  * Modal Donasi & Traktir Kopi Developer via QRIS Statis (0% Fee).
- * Mendukung semua m-Banking (BCA, Mandiri, BRI, BNI, dll) dan e-Wallet (GoPay, OVO, Dana, ShopeePay).
- * Mendukung format gambar QRIS: qris.jpeg, qris.jpg, dan qris.png di folder icons/.
  */
 
 import { showAppToast } from './toast.js';
@@ -17,8 +15,8 @@ const QRIS_CANDIDATES = [
 const donateModal = document.getElementById('donate-modal');
 const donateModalContent = document.getElementById('donate-modal-content');
 const btnOpenDonate = document.getElementById('btn-open-donate');
-const btnOpenDonateFooter = document.getElementById('btn-open-donate-footer');
 const btnCloseDonate = document.getElementById('btn-close-donate');
+const btnDismissDonate = document.getElementById('btn-dismiss-donate');
 
 const qrisImage = document.getElementById('qris-image');
 const qrisPlaceholder = document.getElementById('qris-placeholder');
@@ -33,7 +31,6 @@ export function openDonateModal() {
         let candidateIndex = 0;
 
         qrisImage.onerror = () => {
-            // Jika ekstensi gagal load, coba ekstensi berikutnya (jpeg -> jpg -> png)
             candidateIndex++;
             if (candidateIndex < QRIS_CANDIDATES.length) {
                 activeQrisSrc = QRIS_CANDIDATES[candidateIndex];
@@ -50,34 +47,25 @@ export function openDonateModal() {
             if (qrisPlaceholder) qrisPlaceholder.classList.add('hidden');
         };
 
-        // Pastikan src terisi
         if (!qrisImage.getAttribute('src')) {
             qrisImage.src = QRIS_CANDIDATES[0];
         }
     }
 
     donateModal.classList.remove('hidden');
-    void donateModalContent.offsetWidth; // trigger reflow
-    donateModal.classList.add('donate-modal-visible');
+    void donateModalContent.offsetWidth;
+    donateModal.classList.add('is-visible');
 }
 
 export function closeDonateModal() {
     if (!donateModal) return;
-    donateModal.classList.remove('donate-modal-visible');
-    setTimeout(() => {
-        donateModal.classList.add('hidden');
-    }, 200);
+    donateModal.classList.remove('is-visible');
+    setTimeout(() => donateModal.classList.add('hidden'), 200);
 }
 
-if (btnOpenDonate) {
-    btnOpenDonate.addEventListener('click', openDonateModal);
-}
-if (btnOpenDonateFooter) {
-    btnOpenDonateFooter.addEventListener('click', openDonateModal);
-}
-if (btnCloseDonate) {
-    btnCloseDonate.addEventListener('click', closeDonateModal);
-}
+if (btnOpenDonate) btnOpenDonate.addEventListener('click', openDonateModal);
+if (btnCloseDonate) btnCloseDonate.addEventListener('click', closeDonateModal);
+if (btnDismissDonate) btnDismissDonate.addEventListener('click', closeDonateModal);
 if (donateModal) {
     donateModal.addEventListener('click', (e) => {
         if (e.target === donateModal) closeDonateModal();
@@ -100,9 +88,9 @@ if (btnDownloadQris) {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            showAppToast('📥 Gambar QRIS berhasil diunduh!', 'success');
+            showAppToast('Gambar QRIS berhasil diunduh.', 'success');
         } catch (err) {
-            showAppToast('⚠️ File QRIS belum ditemukan di folder icons/.', 'info');
+            showAppToast('File QRIS belum ditemukan di folder icons/.', 'info');
         }
     });
 }

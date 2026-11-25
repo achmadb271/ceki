@@ -1,510 +1,369 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="dark">
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Score Tracker 1000</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Ceki — Score Tracker</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#09090b">
     <link rel="icon" href="icons/icon-192.png">
     <link rel="apple-touch-icon" href="icons/icon-180.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script>
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('score_tracker_theme');
+                if (t !== 'light' && t !== 'dark') {
+                    t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                }
+                document.documentElement.setAttribute('data-theme', t);
+                var m = document.querySelector('meta[name="theme-color"]');
+                if (m) m.setAttribute('content', t === 'light' ? '#f4f4f6' : '#09090b');
+            } catch (e) {}
+        })();
+    </script>
     <link rel="stylesheet" href="style.css">
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.4/html5-qrcode.min.js"></script>
 </head>
 
-<body class="bg-slate-950 text-white min-h-screen pb-6 font-sans relative antialiased selection:bg-blue-600 selection:text-white">
-
-    <div class="max-w-md mx-auto p-2">
-        <div class="bg-slate-900/60 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-700/80">
-            <table class="w-full table-fixed border-collapse">
-                <thead class="table-header-sticky sticky top-0 z-20 bg-slate-900/95 backdrop-blur-md shadow-md border-b border-slate-700/80">
-                    <tr class="border-b border-slate-700/80">
-                        <th class="w-10 p-2 text-center text-slate-400 text-xs font-mono font-bold tracking-wider rounded-tl-2xl">R</th>
-                        <th class="p-1"><input type="text"
-                                class="name-input w-full bg-slate-800/40 hover:bg-slate-800/70 text-center font-black text-sky-400 border border-sky-500/30 focus:border-sky-400 focus:bg-slate-800/90 rounded-xl py-1 px-1.5 transition-all outline-none"
-                                data-player="p1"></th>
-                        <th class="p-1"><input type="text"
-                                class="name-input w-full bg-slate-800/40 hover:bg-slate-800/70 text-center font-black text-purple-400 border border-purple-500/30 focus:border-purple-400 focus:bg-slate-800/90 rounded-xl py-1 px-1.5 transition-all outline-none"
-                                data-player="p2"></th>
-                        <th class="p-1"><input type="text"
-                                class="name-input w-full bg-slate-800/40 hover:bg-slate-800/70 text-center font-black text-pink-400 border border-pink-500/30 focus:border-pink-400 focus:bg-slate-800/90 rounded-xl py-1 px-1.5 transition-all outline-none"
-                                data-player="p3"></th>
-                        <th class="p-1"><input type="text"
-                                class="name-input w-full bg-slate-800/40 hover:bg-slate-800/70 text-center font-black text-indigo-400 border border-indigo-500/30 focus:border-indigo-400 focus:bg-slate-800/90 rounded-xl py-1 px-1.5 transition-all outline-none rounded-tr-2xl"
-                                data-player="p4"></th>
-                    </tr>
-                </thead>
-                <tbody id="score-body">
-                </tbody>
-                <tfoot id="score-foot">
-                </tfoot>
-            </table>
-        </div>
-
-        <div id="quick-actions"
-            class="hidden fixed bottom-0 inset-x-0 z-40 max-w-md mx-auto bg-slate-900/95 border-t border-slate-700/80 p-2.5 sm:p-3 shadow-2xl backdrop-blur-md rounded-t-2xl pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-            <div class="flex justify-between items-center px-1 mb-2">
-                <div class="flex items-center gap-1.5 min-w-0">
-                    <button id="btn-prev-player" type="button" title="Pemain sebelumnya"
-                        class="text-slate-200 hover:text-white text-sm w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 active:bg-slate-700 flex items-center justify-center">◀</button>
-                    <div id="keypad-title" class="text-sm font-black text-blue-400 truncate max-w-[120px]">R1 · P1</div>
-                    <div id="keypad-value-preview"
-                        class="font-mono text-base font-black text-amber-300 bg-slate-800/90 px-2.5 py-0.5 rounded-lg border border-slate-700 min-w-[40px] text-center">0</div>
-                    <button id="btn-next-player" type="button" title="Pemain berikutnya"
-                        class="text-slate-200 hover:text-white text-sm w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 active:bg-slate-700 flex items-center justify-center">▶</button>
+<body>
+    <!-- Sticky Top App Bar -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div class="topbar-left">
+                <div class="brand">
+                    <span class="brand-mark" aria-hidden="true">C</span>
+                    <span class="brand-title">Ceki</span>
                 </div>
-                <button id="btn-close-keypad" type="button" title="Tutup keypad"
-                    class="text-slate-300 hover:text-white text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 shrink-0 active:bg-slate-700">✕ Selesai</button>
-            </div>
-            <div class="grid grid-cols-3 gap-1.5 mb-2">
-                <button
-                    class="keypad-btn bg-purple-900/60 hover:bg-purple-800 active:bg-purple-700 text-purple-100 font-black h-10 sm:h-11 rounded-xl border border-purple-600/70 transition-colors text-xs sm:text-sm flex items-center justify-center gap-1 shadow-sm"
-                    data-key="gope">Gope <span class="opacity-75 font-normal text-[11px]">+500</span></button>
-                <button
-                    class="keypad-btn bg-teal-900/60 hover:bg-teal-800 active:bg-teal-700 text-teal-100 font-black h-10 sm:h-11 rounded-xl border border-teal-600/70 transition-colors text-xs sm:text-sm flex items-center justify-center gap-1 shadow-sm"
-                    data-key="triss">Triss <span class="opacity-75 font-normal text-[11px]">+300</span></button>
-                <button
-                    class="keypad-btn bg-indigo-900/60 hover:bg-indigo-800 active:bg-indigo-700 text-indigo-100 font-black h-10 sm:h-11 rounded-xl border border-indigo-600/70 transition-colors text-xs sm:text-sm flex items-center justify-center gap-1 shadow-sm"
-                    data-key="nutup">Nutup <span class="opacity-75 font-normal text-[11px]">+250</span></button>
-            </div>
-            <div class="grid grid-cols-4 gap-1.5">
-                <button
-                    class="keypad-btn bg-slate-700/90 hover:bg-slate-600 active:bg-slate-500 text-white text-xl sm:text-2xl font-bold h-12 sm:h-13 rounded-xl transition-all flex items-center justify-center shadow-sm"
-                    data-key="7">7</button>
-                <button
-                    class="keypad-btn bg-slate-700/90 hover:bg-slate-600 active:bg-slate-500 text-white text-xl sm:text-2xl font-bold h-12 sm:h-13 rounded-xl transition-all flex items-center justify-center shadow-sm"
-                    data-key="8">8</button>
-                <button
-                    class="keypad-btn bg-slate-700/90 hover:bg-slate-600 active:bg-slate-500 text-white text-xl sm:text-2xl font-bold h-12 sm:h-13 rounded-xl transition-all flex items-center justify-center shadow-sm"
-                    data-key="9">9</button>
-                <button
-                    class="keypad-btn bg-red-950/70 hover:bg-red-900 active:bg-red-800 text-red-200 text-lg sm:text-xl font-bold h-12 sm:h-13 rounded-xl border border-red-700/60 transition-all flex items-center justify-center shadow-sm"
-                    data-key="backspace">⌫</button>
-
-                <button
-                    class="keypad-btn bg-slate-700/90 hover:bg-slate-600 active:bg-slate-500 text-white text-xl sm:text-2xl font-bold h-12 sm:h-13 rounded-xl transition-all flex items-center justify-center shadow-sm"
-                    data-key="4">4</button>
-                <button
-                    class="keypad-btn bg-slate-700/90 hover:bg-slate-600 active:bg-slate-500 text-white text-xl sm:text-2xl font-bold h-12 sm:h-13 rounded-xl transition-all flex items-center justify-center shadow-sm"
-                    data-key="5">5</button>
-                <button
-                    class="keypad-btn bg-slate-700/90 hover:bg-slate-600 active:bg-slate-500 text-white text-xl sm:text-2xl font-bold h-12 sm:h-13 rounded-xl transition-all flex items-center justify-center shadow-sm"
-                    data-key="6">6</button>
-                <button
-                    class="keypad-btn bg-red-950/70 hover:bg-red-900 active:bg-red-800 text-red-200 text-base sm:text-lg font-bold h-12 sm:h-13 rounded-xl border border-red-700/60 transition-all flex items-center justify-center shadow-sm"
-                    data-key="clear">C</button>
-
-                <button
-                    class="keypad-btn bg-slate-700/90 hover:bg-slate-600 active:bg-slate-500 text-white text-xl sm:text-2xl font-bold h-12 sm:h-13 rounded-xl transition-all flex items-center justify-center shadow-sm"
-                    data-key="1">1</button>
-                <button
-                    class="keypad-btn bg-slate-700/90 hover:bg-slate-600 active:bg-slate-500 text-white text-xl sm:text-2xl font-bold h-12 sm:h-13 rounded-xl transition-all flex items-center justify-center shadow-sm"
-                    data-key="2">2</button>
-                <button
-                    class="keypad-btn bg-slate-700/90 hover:bg-slate-600 active:bg-slate-500 text-white text-xl sm:text-2xl font-bold h-12 sm:h-13 rounded-xl transition-all flex items-center justify-center shadow-sm"
-                    data-key="3">3</button>
-                <button
-                    class="keypad-btn bg-slate-600/90 hover:bg-slate-500 active:bg-slate-400 text-white text-lg sm:text-xl font-bold h-12 sm:h-13 rounded-xl border border-slate-500 transition-all flex items-center justify-center shadow-sm"
-                    data-key="sign">±</button>
-
-                <button
-                    class="keypad-btn bg-slate-700/90 hover:bg-slate-600 active:bg-slate-500 text-white text-xl sm:text-2xl font-bold h-12 sm:h-13 rounded-xl col-span-2 transition-all flex items-center justify-center shadow-sm"
-                    data-key="0">0</button>
-                <button
-                    class="keypad-btn bg-slate-600/90 hover:bg-slate-500 active:bg-slate-400 text-white text-base sm:text-lg font-bold h-12 sm:h-13 rounded-xl border border-slate-500 transition-all flex items-center justify-center shadow-sm"
-                    data-key="00">00</button>
-                <button id="keypad-ok"
-                    class="keypad-btn bg-blue-600 hover:bg-blue-500 active:bg-blue-400 text-white text-sm sm:text-base font-black h-12 sm:h-13 rounded-xl shadow-lg transition-all flex items-center justify-center gap-1"
-                    data-key="ok">✔ Selesai</button>
-            </div>
-        </div>
-
-        <div class="mt-3.5 sm:mt-5 flex gap-2">
-            <button id="btn-add"
-                class="flex-[2] bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold py-2.5 sm:py-3 px-2 rounded-xl shadow-lg transition-colors text-sm">
-                + Ronde Baru
-            </button>
-            <button id="btn-undo" disabled
-                class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 sm:py-3 px-2 rounded-xl border border-slate-600 transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed">
-                ↩️ Undo
-            </button>
-            <button id="btn-open-history"
-                class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 sm:py-3 px-2 rounded-xl border border-slate-600 transition-colors text-sm">
-                Riwayat
-            </button>
-            <button id="btn-reset"
-                class="flex-1 bg-red-900/50 hover:bg-red-800 text-red-200 font-semibold py-2.5 sm:py-3 px-2 rounded-xl border border-red-800 transition-colors text-sm">
-                Reset
-            </button>
-        </div>
-
-        <button id="btn-install"
-            class="hidden mt-2 w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 px-2 rounded-lg border border-slate-700 transition-colors text-xs">
-            ⬇️ Install App ke HP
-        </button>
-
-        <!-- Menu Fitur Interaktif dengan Animasi Muncul Halus Satu per Satu (Staggered Popout) -->
-        <div id="quick-menu-container" class="mt-4 flex flex-col items-center justify-center">
-            <!-- Wadah Icon-Icon Aksi (Muncul Bertahap / Staggered) -->
-            <div id="quick-menu-items" class="hidden flex items-center justify-center gap-2 mb-2.5 flex-wrap">
-                <button id="btn-mute-toggle" type="button" title="Suara / Mute"
-                    class="quick-action-btn w-10 h-10 rounded-full bg-slate-800/95 hover:bg-slate-700 active:scale-90 text-base flex items-center justify-center border border-slate-700 text-slate-300 hover:text-white shadow-lg transition-all"
-                    style="--item-delay: 0ms;">
-                    🔊
-                </button>
-                <button id="btn-show-progress" type="button" title="Share skor sementara"
-                    class="quick-action-btn w-10 h-10 rounded-full bg-slate-800/95 hover:bg-slate-700 active:scale-90 text-base flex items-center justify-center border border-slate-700 text-slate-300 hover:text-white shadow-lg transition-all"
-                    style="--item-delay: 50ms;">
-                    📸
-                </button>
-                <button id="btn-open-sync" type="button" title="Pindah progress ke HP lain pake kode"
-                    class="quick-action-btn w-10 h-10 rounded-full bg-slate-800/95 hover:bg-slate-700 active:scale-90 text-base flex items-center justify-center border border-slate-700 text-slate-300 hover:text-white shadow-lg transition-all"
-                    style="--item-delay: 100ms;">
-                    🔗
-                </button>
-                <button id="btn-open-donate" type="button" title="Traktir Kopi / Donasi QRIS"
-                    class="quick-action-btn w-10 h-10 rounded-full bg-slate-800/95 hover:bg-slate-700 active:scale-90 text-base flex items-center justify-center border border-amber-500/50 text-amber-300 hover:text-amber-200 shadow-lg transition-all"
-                    style="--item-delay: 150ms;">
-                    ☕
-                </button>
-                <button id="btn-open-feedback" type="button" title="Kirim Masukan / Lapor Bug"
-                    class="quick-action-btn w-10 h-10 rounded-full bg-slate-800/95 hover:bg-slate-700 active:scale-90 text-base flex items-center justify-center border border-sky-500/50 text-sky-300 hover:text-sky-200 shadow-lg transition-all"
-                    style="--item-delay: 200ms;">
-                    💬
-                </button>
-            </div>
-
-            <!-- Pasangan Kapsul Timer & Kapsul Fitur Bersanding Rapi -->
-            <div class="flex items-center justify-center gap-2 flex-wrap">
-                <!-- Kapsul Timer (Jelas, Font Mono Bold, Ukuran Pas & Nyaman Dibaca) -->
-                <div id="match-timer"
-                    class="flex items-center gap-1.5 bg-slate-800/90 text-slate-200 px-3.5 py-2 rounded-full border border-slate-700 shadow-md font-mono text-xs font-bold tracking-wider select-none">
-                    ⏱️ 00:00
+                <div id="match-timer" class="timer-pill" title="Durasi pertandingan">
+                    <span class="timer-dot" aria-hidden="true"></span>
+                    <svg class="icon icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span id="match-timer-text">00:00</span>
                 </div>
-
-                <!-- Tombol Utama Pemicu Menu (Satu Tombol di Atas Cek Update) -->
-                <button id="btn-menu-toggle" type="button"
-                    class="group flex items-center justify-center gap-2 bg-slate-800/90 hover:bg-slate-700 active:scale-95 text-slate-300 hover:text-white px-4 py-2 rounded-full border border-slate-700 shadow-md transition-all text-xs font-bold">
-                    <span id="menu-toggle-icon" class="text-sm transition-transform duration-300 inline-block">⚡</span>
-                    <span id="menu-toggle-label">Menu</span>
-                </button>
             </div>
-        </div>
 
-        <div class="mt-2.5 text-center">
-            <button id="btn-manual-update-check" type="button"
-                class="text-[11px] font-mono text-slate-500 hover:text-slate-300 transition-colors py-1 px-3 rounded-full hover:bg-slate-800/60 active:scale-95 inline-flex items-center gap-1.5 border border-slate-800">
-                <span>Ceki v3.4</span> &middot; <span class="text-blue-400 font-bold">Cek Update</span>
-            </button>
-        </div>
-    </div>
+            <div id="quick-menu-container" class="topbar-actions">
+                <button id="btn-theme-toggle" type="button" class="icon-btn" aria-label="Ganti tema" title="Ganti tema"></button>
+                <button id="btn-mute-toggle" type="button" class="icon-btn" aria-label="Suara" title="Suara / Mute"></button>
+                <button id="btn-menu-toggle" type="button" class="icon-btn" aria-label="Menu lainnya" aria-expanded="false" title="Menu lainnya">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                </button>
 
-    <!-- Tombol Mengambang (Pill) Update: muncul jika user memilih 'Nanti Saja' agar bisa buka modal lagi -->
-    <button id="update-chip"
-        class="hidden fixed bottom-4 right-4 z-[65] bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-2.5 px-4 rounded-full shadow-[0_10px_25px_-5px_rgba(37,99,235,0.6)] border border-blue-400 flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95 animate-bounce">
-        <span>🔄 Update Tersedia</span>
-    </button>
-
-    <!-- Popup Update Baru: modal card lengkap dengan ringkasan update & jaminan skor aman -->
-    <div id="update-modal"
-        class="hidden fixed inset-0 bg-slate-950/90 z-[85] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div id="update-modal-content"
-            class="bg-slate-800 border-2 border-blue-500 rounded-2xl p-5 max-w-sm w-full shadow-[0_20px_50px_-10px_rgba(37,99,235,0.5)] max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-2.5">
-                    <span class="text-3xl">🚀</span>
-                    <div>
-                        <div class="text-lg font-black text-white leading-tight">Versi Baru Tersedia!</div>
-                        <div id="update-modal-badge" class="text-xs text-blue-400 font-bold">v3.4 &middot; Donasi QRIS, Feedback &amp; UI Ramping</div>
+                <!-- Menu Popover -->
+                <div id="quick-menu-items" class="menu-popover hidden" role="menu">
+                    <button id="btn-install" type="button" class="menu-item menu-item-highlight hidden" role="menuitem">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                        <span>Install Aplikasi</span>
+                    </button>
+                    <button id="btn-show-progress" type="button" class="menu-item" role="menuitem">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
+                        <span>Share Skor Sementara</span>
+                    </button>
+                    <button id="btn-open-sync" type="button" class="menu-item" role="menuitem">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg>
+                        <span>Pindah Progress (QR)</span>
+                    </button>
+                    <div class="menu-divider"></div>
+                    <button id="btn-open-donate" type="button" class="menu-item menu-item-accent" role="menuitem">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6" y1="2" y2="4"/><line x1="10" x2="10" y1="2" y2="4"/><line x1="14" x2="14" y1="2" y2="4"/></svg>
+                        <span>Traktir Kopi (QRIS)</span>
+                    </button>
+                    <button id="btn-open-feedback" type="button" class="menu-item" role="menuitem">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        <span>Kirim Masukan</span>
+                    </button>
+                    <div class="menu-divider"></div>
+                    <div class="menu-version-row">
+                        <span id="app-version-label">Ceki v4.1</span>
+                        <button id="btn-manual-update-check" type="button" class="menu-update-link">Cek Update</button>
                     </div>
                 </div>
-                <button id="btn-close-update-modal" type="button"
-                    class="text-slate-400 hover:text-white text-xs px-2.5 py-1 rounded-lg bg-slate-700/60 border border-slate-600 transition-colors">✕</button>
             </div>
+        </div>
+    </header>
 
-            <div class="text-xs text-slate-300 mb-3 leading-relaxed">
-                Ada fitur baru &amp; peningkatan kualitas yang siap digunakan di match kamu:
-            </div>
+    <!-- Main Scoreboard -->
+    <main class="app-shell">
+        <section id="scoreboard-card" class="scoreboard-card" aria-label="Tabel Skor">
+            <table class="score-table">
+                <thead class="score-thead">
+                    <tr>
+                        <th class="col-round" scope="col">R</th>
+                        <th scope="col"><input type="text" class="name-input" data-player="p1" maxlength="16" aria-label="Nama Pemain 1"></th>
+                        <th scope="col"><input type="text" class="name-input" data-player="p2" maxlength="16" aria-label="Nama Pemain 2"></th>
+                        <th scope="col"><input type="text" class="name-input" data-player="p3" maxlength="16" aria-label="Nama Pemain 3"></th>
+                        <th scope="col"><input type="text" class="name-input" data-player="p4" maxlength="16" aria-label="Nama Pemain 4"></th>
+                    </tr>
+                </thead>
+                <tbody id="score-body"></tbody>
+            </table>
+        </section>
+    </main>
 
-            <!-- List Ringkasan Fitur / Changelog -->
-            <div id="update-modal-list" class="space-y-2 mb-3 bg-slate-900/60 p-3 rounded-xl border border-slate-700/60">
-            </div>
-
-            <!-- Notif Penenang: Skor Tetap Aman -->
-            <div class="bg-emerald-950/40 border border-emerald-600/40 rounded-xl p-2.5 mb-4 flex items-start gap-2.5">
-                <span class="text-base shrink-0">🛡️</span>
-                <div class="text-[11px] text-emerald-200 leading-snug">
-                    <strong class="text-emerald-300">Skor Kamu Aman:</strong> Ronde dan pertandingan yang sedang berjalan tersimpan di memori HP &amp; tidak akan hilang saat reload.
-                </div>
-            </div>
-
-            <div class="flex flex-col gap-2">
-                <button id="btn-update-now" type="button"
-                    class="w-full bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-black py-3 px-4 rounded-xl shadow-lg transition-all text-sm flex items-center justify-center gap-2">
-                    <span>🔄 Update &amp; Reload Sekarang</span>
+    <!-- Sticky Bottom Dock: Totals + Primary Actions -->
+    <div id="bottom-dock" class="bottom-dock">
+        <div class="bottom-dock-inner">
+            <div id="score-foot" class="totals-bar" aria-live="polite"></div>
+            <div class="action-bar">
+                <button id="btn-add" type="button" class="btn btn-primary">
+                    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+                    <span>Ronde Baru</span>
                 </button>
-                <button id="btn-update-later" type="button"
-                    class="w-full bg-slate-700/60 hover:bg-slate-700 active:bg-slate-600 text-slate-300 font-bold py-2.5 px-4 rounded-xl border border-slate-600 transition-colors text-xs">
-                    Nanti Saja
+                <button id="btn-undo" type="button" disabled class="btn btn-secondary" title="Undo">
+                    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+                    <span class="btn-label-hide-xs">Undo</span>
+                </button>
+                <button id="btn-open-history" type="button" class="btn btn-secondary" title="Riwayat">
+                    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+                    <span class="btn-label-hide-xs">Riwayat</span>
+                </button>
+                <button id="btn-reset" type="button" class="btn btn-danger-soft" title="Reset Skor">
+                    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                    <span class="btn-label-hide-xs">Reset</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Popup Menang: full-screen overlay dengan animasi masuk (gantiin banner ijo lama) -->
-    <div id="win-modal"
-        class="hidden fixed inset-0 bg-slate-950/90 z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div id="win-modal-content"
-            class="bg-gradient-to-b from-green-600 to-green-700 border-2 border-green-400 rounded-2xl p-5 sm:p-6 max-w-md w-full shadow-[0_20px_50px_-10px_rgba(34,197,94,0.6)] max-h-[90vh] overflow-y-auto">
+    <!-- Custom Ergonomic Keypad Bottom Sheet -->
+    <div id="quick-actions" class="keypad-sheet hidden" role="dialog" aria-label="Keypad Skor">
+        <div class="keypad-header">
+            <div class="keypad-nav">
+                <button id="btn-prev-player" type="button" class="keypad-nav-btn" title="Pemain sebelumnya" aria-label="Pemain sebelumnya">
+                    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <div id="keypad-title" class="keypad-title">R1 · P1</div>
+                <div id="keypad-value-preview" class="keypad-preview">0</div>
+                <button id="btn-next-player" type="button" class="keypad-nav-btn" title="Pemain berikutnya" aria-label="Pemain berikutnya">
+                    <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+            </div>
+            <button id="btn-close-keypad" type="button" class="keypad-close-btn" title="Tutup keypad">
+                <span>Tutup</span>
+            </button>
+        </div>
+
+        <div class="keypad-shortcuts">
+            <button type="button" class="keypad-btn shortcut-btn" data-key="gope">Gope <span>+500</span></button>
+            <button type="button" class="keypad-btn shortcut-btn" data-key="triss">Triss <span>+300</span></button>
+            <button type="button" class="keypad-btn shortcut-btn" data-key="nutup">Nutup <span>+250</span></button>
+        </div>
+
+        <div class="keypad-grid">
+            <button type="button" class="keypad-btn" data-key="7">7</button>
+            <button type="button" class="keypad-btn" data-key="8">8</button>
+            <button type="button" class="keypad-btn" data-key="9">9</button>
+            <button type="button" class="keypad-btn keypad-btn-danger" data-key="backspace" aria-label="Hapus digit">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" x2="12" y1="9" y2="15"/><line x1="12" x2="18" y1="9" y2="15"/></svg>
+            </button>
+
+            <button type="button" class="keypad-btn" data-key="4">4</button>
+            <button type="button" class="keypad-btn" data-key="5">5</button>
+            <button type="button" class="keypad-btn" data-key="6">6</button>
+            <button type="button" class="keypad-btn keypad-btn-danger" data-key="clear" aria-label="Kosongkan">C</button>
+
+            <button type="button" class="keypad-btn" data-key="1">1</button>
+            <button type="button" class="keypad-btn" data-key="2">2</button>
+            <button type="button" class="keypad-btn" data-key="3">3</button>
+            <button type="button" class="keypad-btn keypad-btn-muted" data-key="sign" aria-label="Plus atau minus">±</button>
+
+            <button type="button" class="keypad-btn keypad-btn-zero" data-key="0">0</button>
+            <button type="button" class="keypad-btn keypad-btn-muted" data-key="00">00</button>
+            <button id="keypad-ok" type="button" class="keypad-btn keypad-btn-ok" data-key="ok">Lanjut</button>
+        </div>
+    </div>
+
+    <!-- Floating Update Chip -->
+    <button id="update-chip" type="button" class="update-chip hidden">
+        <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+        <span>Update Tersedia</span>
+    </button>
+
+    <!-- Update Modal -->
+    <div id="update-modal" class="modal-backdrop modal-backdrop-high hidden" role="dialog" aria-modal="true">
+        <div id="update-modal-content" class="modal-card modal-card-update">
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-title">Versi Baru Tersedia</h2>
+                    <div id="update-modal-badge" class="modal-subtitle">v4.0</div>
+                </div>
+                <button id="btn-close-update-modal" type="button" class="modal-close-btn" aria-label="Tutup">✕</button>
+            </div>
+            <div id="update-modal-list" class="changelog-list"></div>
+            <div class="info-box info-box-success">
+                <span>Skor dan pertandingan yang sedang berjalan tersimpan lokal dan aman saat aplikasi dimuat ulang.</span>
+            </div>
+            <div class="modal-actions">
+                <button id="btn-update-now" type="button" class="btn btn-primary btn-full">Update &amp; Muat Ulang</button>
+                <button id="btn-update-later" type="button" class="btn btn-secondary btn-full btn-sm">Nanti Saja</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div id="win-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+        <div id="win-modal-content" class="modal-card modal-card-win modal-card-lg">
             <div id="win-modal-body"></div>
         </div>
     </div>
 
-    <!-- Popup Skor Sementara: sengaja biru, biar gak ketuker sama popup menang yang ijo -->
-    <div id="progress-modal"
-        class="hidden fixed inset-0 bg-slate-950/90 z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div id="progress-modal-content"
-            class="bg-gradient-to-b from-blue-600 to-blue-700 border-2 border-blue-400 rounded-2xl p-5 sm:p-6 max-w-md w-full shadow-[0_20px_50px_-10px_rgba(37,99,235,0.6)] max-h-[90vh] overflow-y-auto">
+    <!-- Progress Modal -->
+    <div id="progress-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+        <div id="progress-modal-content" class="modal-card modal-card-progress modal-card-lg">
             <div id="progress-modal-body"></div>
         </div>
     </div>
 
-    <!-- Popup Sync Kode: pindahin progress match ke HP lain lewat kode (bukan real-time, manual transfer) -->
-    <div id="sync-modal"
-        class="hidden fixed inset-0 bg-slate-950/90 z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div
-            class="bg-slate-800 border-2 border-slate-600 rounded-2xl p-6 max-w-sm w-full shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-1">
-                <div class="text-xl font-black">🔗 Pindah Progress</div>
-                <button id="btn-close-sync" class="text-slate-400 hover:text-white text-sm px-2">✕</button>
-            </div>
-            <div class="text-xs text-slate-400 mb-4">Buat lanjutin match di HP lain. Generate
-                kode/QR di HP ini, terus scan atau masukin kodenya di HP pengganti.</div>
-
-            <div class="text-sm font-bold text-slate-300 mb-2">1. Generate di HP ini</div>
-            <button id="btn-generate-code"
-                class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-lg transition-colors text-sm mb-2">
-                Generate Kode & QR
-            </button>
-            <div id="generated-code-box" class="hidden mb-4">
-                <div class="bg-white rounded-2xl p-3 sm:p-4 mb-2 shadow-xl border-2 border-slate-200 flex flex-col items-center justify-center">
-                    <div id="qr-code-canvas" class="flex justify-center items-center overflow-hidden"></div>
-                    <span class="text-[11px] font-bold text-slate-500 mt-2 tracking-wide">Arahkan kamera HP pengganti ke QR ini</span>
-                </div>
-                <textarea id="generated-code-text" readonly rows="2"
-                    class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-[10px] text-slate-400 font-mono resize-none"></textarea>
-                <div class="flex gap-2 mt-2">
-                    <button id="btn-copy-code"
-                        class="flex-1 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold py-2 rounded-lg transition-colors">📋
-                        Copy</button>
-                    <button id="btn-share-code"
-                        class="flex-1 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold py-2 rounded-lg transition-colors">📤
-                        Share</button>
-                </div>
-            </div>
-
-            <div class="border-t border-slate-700 my-4"></div>
-
-            <div class="text-sm font-bold text-slate-300 mb-2">2. Di HP pengganti: scan atau tempel kode</div>
-            <button id="btn-open-scanner"
-                class="w-full bg-purple-700 hover:bg-purple-600 text-white font-bold py-2.5 rounded-lg transition-colors text-sm mb-2">
-                📷 Scan QR Pake Kamera
-            </button>
-            <div id="qr-scanner-box" class="hidden mb-2">
-                <div id="qr-reader" class="rounded-lg overflow-hidden"></div>
-                <button id="btn-cancel-scan"
-                    class="w-full bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold py-2 rounded-lg transition-colors mt-2">
-                    Batal Scan
-                </button>
-            </div>
-            <div class="text-center text-[10px] text-slate-500 my-2">— atau tempel manual —</div>
-            <textarea id="import-code-input" rows="2" placeholder="Tempel kode di sini..."
-                class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-xs text-slate-300 font-mono resize-none mb-2"></textarea>
-            <button id="btn-import-code"
-                class="w-full bg-teal-700 hover:bg-teal-600 text-white font-bold py-2.5 rounded-lg transition-colors text-sm">
-                Sinkronkan
-            </button>
-        </div>
-    </div>
-
-    <div id="history-modal"
-        class="hidden fixed inset-0 bg-slate-950/95 z-50 p-4 overflow-y-auto flex flex-col backdrop-blur-sm">
-        <div class="max-w-md mx-auto w-full">
-            <div class="flex justify-between items-center mb-4 mt-4">
-                <h2 class="text-2xl font-bold text-white">Riwayat Game</h2>
-                <button id="btn-close-history"
-                    class="text-red-400 font-bold text-sm px-4 py-2 bg-red-900/30 hover:bg-red-900/50 rounded-lg border border-red-900 transition-colors">Tutup</button>
-            </div>
-            <div class="flex gap-2 mb-6">
-                <button id="btn-clear-history"
-                    class="flex-1 bg-red-900/30 hover:bg-red-900/50 text-red-300 text-xs font-bold py-2.5 rounded-lg border border-red-900 transition-colors">🗑️
-                    Hapus Riwayat</button>
-            </div>
-            <div id="history-list" class="space-y-4 pb-10">
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Opsi Baris Ronde (Hapus / Kosongkan) -->
-    <div id="round-action-modal"
-        class="hidden fixed inset-0 bg-slate-950/80 z-[92] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-slate-800 border-2 border-slate-600 rounded-2xl p-5 max-w-xs w-full shadow-2xl">
-            <div class="flex justify-between items-center mb-2">
-                <div id="round-action-title" class="text-base font-black text-white">⚙️ Ronde 1</div>
-                <button id="btn-close-round-action" type="button" class="text-slate-400 hover:text-white text-xs px-2 py-1 rounded bg-slate-700/60">✕</button>
-            </div>
-            <div class="text-xs text-slate-300 mb-4 leading-relaxed">Pilih tindakan untuk baris ronde ini:</div>
-            <div class="flex flex-col gap-2">
-                <button id="btn-clear-round-row" type="button"
-                    class="w-full bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-amber-300 font-bold py-2.5 px-3 rounded-xl border border-amber-500/40 text-xs flex items-center justify-center gap-2 transition-all">
-                    <span>🧹 Kosongkan Nilai Ronde</span>
-                </button>
-                <button id="btn-delete-round-row" type="button"
-                    class="w-full bg-red-950/60 hover:bg-red-900/70 active:bg-red-800 text-red-200 font-bold py-2.5 px-3 rounded-xl border border-red-700/50 text-xs flex items-center justify-center gap-2 transition-all">
-                    <span>🗑️ Hapus Baris Ronde Ini</span>
-                </button>
-                <button id="btn-cancel-round-action" type="button"
-                    class="w-full bg-slate-800 hover:bg-slate-700 text-slate-400 font-semibold py-2 px-3 rounded-xl text-xs transition-all mt-1">
-                    Batal
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Donasi / Traktir Kopi QRIS -->
-    <div id="donate-modal"
-        class="hidden fixed inset-0 bg-slate-950/90 z-[75] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div id="donate-modal-content"
-            class="bg-slate-900 border-2 border-amber-500/80 rounded-2xl p-5 max-w-sm w-full shadow-[0_20px_50px_-10px_rgba(245,158,11,0.4)] max-h-[90vh] overflow-y-auto text-center">
-            <div class="flex justify-between items-center mb-3">
-                <div class="flex items-center gap-2 text-left">
-                    <span class="text-3xl">☕</span>
-                    <div>
-                        <div class="text-base font-black text-white">Traktir Kopi Dev</div>
-                        <div class="text-[10px] text-amber-300 font-bold">Dukung Pembaruan Ceki Tracker</div>
-                    </div>
-                </div>
-                <button id="btn-close-donate" type="button" class="text-slate-400 hover:text-white text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700">✕</button>
-            </div>
-
-            <p class="text-xs text-slate-300 mb-3 leading-relaxed text-left">
-                Suka pakai tracker ini pas nongkrong? Yuk traktir secangkir kopi buat developer biar server &amp; fitur baru makin kencang! ☕
-            </p>
-
-            <!-- Card QRIS -->
-            <div class="bg-white rounded-2xl p-3.5 mb-3 shadow-xl border-2 border-slate-200 flex flex-col items-center justify-center">
-                <!-- Preview Gambar QRIS (Mendukung jpeg, jpg, png) -->
-                <img id="qris-image" src="icons/qris.jpeg" alt="QRIS Donasi" class="max-w-full h-auto rounded-lg max-h-64 object-contain mx-auto" />
-
-                <!-- Placeholder jika file icons/qris belum dimasukkan -->
-                <div id="qris-placeholder" class="hidden py-8 px-4 text-center">
-                    <div class="text-4xl mb-2">📷</div>
-                    <div class="text-xs font-bold text-slate-800 mb-1">QRIS Siap Ditampilkan</div>
-                    <div class="text-[11px] text-slate-500 max-w-[200px] leading-tight mx-auto">
-                        Simpan gambar QRIS kamu dengan nama <code class="bg-slate-100 text-slate-800 px-1 py-0.5 rounded font-mono text-[10px]">icons/qris.jpeg</code> (atau .png/.jpg).
-                    </div>
-                </div>
-
-                <div class="mt-2 text-[10px] font-bold text-slate-500 tracking-wide flex items-center gap-1 justify-center">
-                    <span>🛡️ QRIS Resmi &middot; 0% Fee Potongan</span>
-                </div>
-            </div>
-
-            <div class="text-[11px] text-slate-400 mb-3 leading-tight">
-                Mendukung <strong>Semua Bank</strong> (BCA, Mandiri, BRI, BNI) &amp; <strong>e-Wallet</strong> (GoPay, OVO, Dana, ShopeePay, LinkAja).
-            </div>
-
-            <div class="flex flex-col gap-2">
-                <button id="btn-download-qris" type="button"
-                    class="w-full bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 font-black py-2.5 rounded-xl shadow-lg transition-all text-xs flex items-center justify-center gap-1.5">
-                    <span>📥 Download / Simpan QRIS</span>
-                </button>
-                <button type="button" onclick="document.getElementById('btn-close-donate').click()"
-                    class="w-full bg-slate-800 hover:bg-slate-700 text-slate-400 font-semibold py-2 rounded-xl text-xs transition-colors">
-                    Nanti Saja
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Form Masukan / Feedback -->
-    <div id="feedback-modal"
-        class="hidden fixed inset-0 bg-slate-950/90 z-[75] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div id="feedback-modal-content"
-            class="bg-slate-900 border-2 border-sky-500/80 rounded-2xl p-5 max-w-sm w-full shadow-[0_20px_50px_-10px_rgba(56,189,248,0.4)] max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-3">
-                <div class="flex items-center gap-2">
-                    <span class="text-2xl">💬</span>
-                    <div>
-                        <div class="text-base font-black text-white">Kirim Masukan</div>
-                        <div class="text-[10px] text-sky-400 font-bold">Langsung Masuk ke Email Developer</div>
-                    </div>
-                </div>
-                <button id="btn-close-feedback" type="button" class="text-slate-400 hover:text-white text-xs px-2 py-1 rounded bg-slate-800 border border-slate-700">✕</button>
-            </div>
-
-            <p class="text-xs text-slate-300 mb-3 leading-relaxed">
-                Punya ide fitur baru, lapor bug, atau mau curhat soal aturan Ceki? Tulis di bawah ini ya:
-            </p>
-
-            <form id="feedback-form" class="space-y-3">
+    <!-- Sync Modal -->
+    <div id="sync-modal" class="modal-backdrop modal-instant hidden" role="dialog" aria-modal="true">
+        <div class="modal-card">
+            <div class="modal-header">
                 <div>
-                    <label for="feedback-name" class="block text-[11px] font-bold text-slate-300 mb-1">Nama / Panggilan (Opsional):</label>
-                    <input type="text" id="feedback-name" placeholder="Misal: Budi / Tim Ceki Warkop"
-                        class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 transition-colors" />
+                    <h2 class="modal-title">Pindah Progress</h2>
+                    <div class="modal-subtitle">Lanjutkan match di HP lain via QR atau kode teks</div>
                 </div>
+                <button id="btn-close-sync" type="button" class="modal-close-btn" aria-label="Tutup">✕</button>
+            </div>
 
+            <div class="form-group">
+                <div class="form-label">1. Generate di HP ini</div>
+                <button id="btn-generate-code" type="button" class="btn btn-primary btn-full">Generate Kode &amp; QR</button>
+            </div>
+
+            <div id="generated-code-box" class="hidden">
+                <div id="qr-frame-box" class="qr-frame">
+                    <div id="qr-code-canvas"></div>
+                    <div id="qr-hint-text" class="qr-hint">Arahkan kamera HP pengganti ke QR ini</div>
+                </div>
+                <textarea id="generated-code-text" readonly rows="2" class="form-textarea form-textarea-mono"></textarea>
+                <div class="modal-actions-row" style="margin-top: 8px;">
+                    <button id="btn-copy-code" type="button" class="btn btn-secondary btn-sm">Salin Kode</button>
+                    <button id="btn-share-code" type="button" class="btn btn-secondary btn-sm">Bagikan</button>
+                </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <div class="form-group">
+                <div class="form-label">2. Di HP pengganti: scan QR atau tempel kode</div>
+                <button id="btn-open-scanner" type="button" class="btn btn-secondary btn-full">Scan QR dengan Kamera</button>
+            </div>
+
+            <div id="qr-scanner-box" class="hidden" style="margin-bottom: 10px;">
+                <div id="qr-reader" style="border-radius: 10px; overflow: hidden;"></div>
+                <button id="btn-cancel-scan" type="button" class="btn btn-secondary btn-full btn-sm" style="margin-top: 8px;">Batal Scan</button>
+            </div>
+
+            <div class="form-group">
+                <textarea id="import-code-input" rows="2" placeholder="Atau tempel kode progress di sini..." class="form-textarea form-textarea-mono"></textarea>
+            </div>
+            <button id="btn-import-code" type="button" class="btn btn-success btn-full">Sinkronkan</button>
+        </div>
+    </div>
+
+    <!-- History Sheet -->
+    <div id="history-modal" class="history-sheet hidden" role="dialog" aria-modal="true">
+        <div class="history-inner">
+            <div class="history-topbar">
+                <h2 class="modal-title" style="font-size: 20px;">Riwayat Pertandingan</h2>
+                <button id="btn-close-history" type="button" class="btn btn-secondary btn-sm">Tutup</button>
+            </div>
+            <button id="btn-clear-history" type="button" class="btn btn-danger-soft btn-full btn-sm">Hapus Semua Riwayat</button>
+            <div id="history-list" class="history-list"></div>
+        </div>
+    </div>
+
+    <!-- Round Action Modal -->
+    <div id="round-action-modal" class="modal-backdrop modal-backdrop-high modal-instant hidden" role="dialog" aria-modal="true">
+        <div class="modal-card modal-card-sm">
+            <div class="modal-header">
+                <h2 id="round-action-title" class="modal-title">Opsi Ronde 1</h2>
+                <button id="btn-close-round-action" type="button" class="modal-close-btn" aria-label="Tutup">✕</button>
+            </div>
+            <p class="modal-subtitle" style="margin: 0 0 14px;">Pilih tindakan untuk baris ronde ini:</p>
+            <div class="modal-actions" style="margin-top: 0;">
+                <button id="btn-clear-round-row" type="button" class="btn btn-secondary btn-full">Kosongkan Nilai Ronde</button>
+                <button id="btn-delete-round-row" type="button" class="btn btn-danger-soft btn-full">Hapus Baris Ronde</button>
+                <button id="btn-cancel-round-action" type="button" class="btn btn-sm btn-full" style="color: var(--text-muted);">Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donation QRIS Modal -->
+    <div id="donate-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+        <div id="donate-modal-content" class="modal-card modal-card-sm" style="text-align: center;">
+            <div class="modal-header" style="text-align: left;">
                 <div>
-                    <label for="feedback-category" class="block text-[11px] font-bold text-slate-300 mb-1">Kategori Masukan:</label>
-                    <select id="feedback-category"
-                        class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-sky-500 transition-colors">
-                        <option value="Saran Fitur Baru">💡 Saran Fitur Baru</option>
-                        <option value="Lapor Bug / Eror">🐛 Lapor Bug / Eror</option>
-                        <option value="Pertanyaan Aturan Ceki">🎴 Pertanyaan Aturan Ceki</option>
-                        <option value="Pujian / Lainnya">⭐ Lainnya</option>
+                    <h2 class="modal-title">Traktir Kopi Dev</h2>
+                    <div class="modal-subtitle">Dukung pengembangan Ceki 1000</div>
+                </div>
+                <button id="btn-close-donate" type="button" class="modal-close-btn" aria-label="Tutup">✕</button>
+            </div>
+            <p class="modal-subtitle" style="text-align: left; margin: 0 0 12px; line-height: 1.5;">
+                Suka pakai tracker ini pas nongkrong? Kamu bisa traktir kopi via QRIS (0% potongan platform).
+            </p>
+            <div class="qr-frame">
+                <img id="qris-image" src="icons/qris.jpeg" alt="QRIS Donasi" class="qris-img" />
+                <div id="qris-placeholder" class="hidden" style="padding: 24px 12px; color: #52525b;">
+                    <div style="font-size: 13px; font-weight: 700; margin-bottom: 4px;">QRIS Belum Tersedia</div>
+                    <div style="font-size: 11px;">Simpan gambar QRIS ke <code>icons/qris.jpeg</code></div>
+                </div>
+                <div class="qr-hint">Mendukung semua m-Banking &amp; e-Wallet</div>
+            </div>
+            <div class="modal-actions">
+                <button id="btn-download-qris" type="button" class="btn btn-primary btn-full">Simpan Gambar QRIS</button>
+                <button id="btn-dismiss-donate" type="button" class="btn btn-secondary btn-full btn-sm">Nanti Saja</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div id="feedback-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+        <div id="feedback-modal-content" class="modal-card">
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-title">Kirim Masukan</h2>
+                    <div class="modal-subtitle">Saran fitur, lapor bug, atau aturan Ceki</div>
+                </div>
+                <button id="btn-close-feedback" type="button" class="modal-close-btn" aria-label="Tutup">✕</button>
+            </div>
+            <form id="feedback-form">
+                <div class="form-group">
+                    <label for="feedback-name" class="form-label">Nama / Panggilan (Opsional)</label>
+                    <input type="text" id="feedback-name" placeholder="Misal: Budi / Tim Ceki" class="form-input" />
+                </div>
+                <div class="form-group">
+                    <label for="feedback-category" class="form-label">Kategori</label>
+                    <select id="feedback-category" class="form-select">
+                        <option value="Saran Fitur Baru">Saran Fitur Baru</option>
+                        <option value="Lapor Bug / Eror">Lapor Bug / Eror</option>
+                        <option value="Pertanyaan Aturan Ceki">Pertanyaan Aturan Ceki</option>
+                        <option value="Lainnya">Lainnya</option>
                     </select>
                 </div>
-
-                <div>
-                    <label for="feedback-message" class="block text-[11px] font-bold text-slate-300 mb-1">Pesan / Masukan:*</label>
-                    <textarea id="feedback-message" rows="4" required placeholder="Tulis masukan kamu di sini..."
-                        class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 resize-none transition-colors"></textarea>
+                <div class="form-group">
+                    <label for="feedback-message" class="form-label">Pesan *</label>
+                    <textarea id="feedback-message" rows="4" required placeholder="Tulis masukan kamu di sini..." class="form-textarea"></textarea>
                 </div>
-
-                <div class="bg-slate-800/60 p-2.5 rounded-xl border border-slate-700 text-[10px] text-slate-400 flex items-center gap-1.5">
-                    <span>🛡️</span>
-                    <span>Terkirim langsung &amp; aman ke developer (kangc3nd0l@gmail.com).</span>
-                </div>
-
-                <div class="flex flex-col gap-2 pt-1">
-                    <button id="btn-submit-feedback" type="submit"
-                        class="w-full bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-black py-2.5 rounded-xl shadow-lg transition-all text-xs flex items-center justify-center gap-1.5">
-                        <span>✉️ Kirim Masukan</span>
-                    </button>
-                    <button type="button" onclick="document.getElementById('btn-close-feedback').click()"
-                        class="w-full bg-slate-800 hover:bg-slate-700 text-slate-400 font-semibold py-2 rounded-xl text-xs transition-colors">
-                        Batal
-                    </button>
+                <div class="modal-actions">
+                    <button id="btn-submit-feedback" type="submit" class="btn btn-primary btn-full">Kirim Masukan</button>
+                    <button id="btn-cancel-feedback" type="button" class="btn btn-secondary btn-full btn-sm">Batal</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="confirm-modal" class="hidden fixed inset-0 bg-black/70 z-[95] flex items-center justify-center p-4">
-        <div class="bg-slate-800 border border-slate-600 rounded-xl p-5 max-w-sm w-full shadow-2xl">
-            <div id="confirm-modal-message" class="text-white text-sm mb-5 leading-relaxed"></div>
-            <div class="flex gap-2">
-                <button id="confirm-modal-cancel"
-                    class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 rounded-lg transition-colors text-sm">Batal</button>
-                <button id="confirm-modal-ok"
-                    class="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 rounded-lg transition-colors text-sm">Ya,
-                    Lanjut</button>
+    <!-- Custom Confirm Modal -->
+    <div id="confirm-modal" class="modal-backdrop modal-backdrop-top modal-instant hidden" role="dialog" aria-modal="true">
+        <div class="modal-card modal-card-sm">
+            <div id="confirm-modal-message" style="font-size: 14px; line-height: 1.5; margin-bottom: 18px;"></div>
+            <div class="modal-actions-row">
+                <button id="confirm-modal-cancel" type="button" class="btn btn-secondary">Batal</button>
+                <button id="confirm-modal-ok" type="button" class="btn btn-danger">Ya, Lanjut</button>
             </div>
         </div>
     </div>

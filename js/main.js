@@ -1,33 +1,13 @@
 /**
  * main.js
  * =======
- * Entry point. Import semua modul (ngejalanin efek samping wiring event
- * listener masing-masing), lalu urus "+ Ronde Baru" & Reset (dua aksi yang
- * motong lintas beberapa modul sekaligus), dan jalanin render pertama kali.
- *
- * Urutan file (lihat juga README di root project buat peta keseluruhan):
- *   1.  store.js             - localStorage state
- *   2.  scoring.js            - kalkulasi murni (totals, burn, tension)
- *   3.  timer.js               - timer durasi match
- *   4.  undo.js                - undo stack
- *   5.  burn-announcer.js      - notif kebakar (anti dobel)
- *   6.  toast.js                - toast & confirm modal custom
- *   7.  sound.js                - efek suara custom (audio file) & toggle mute
- *   8.  haptics.js              - getar HP pas kebakar/menang
- *   9.  wakelock.js             - layar gak mati sendiri pas match jalan
- *   10. render.js               - render tabel/footer + deteksi game over
- *   11. player-names.js         - input nama header
- *   12. keypad.js               - numpad custom + shortcut Gope/Nutup/Triss
- *   13. share.js                - share hasil ke gambar PNG (final & sementara)
- *   14. win-modal.js            - popup menang
- *   15. progress-modal.js       - popup skor sementara (share sebelum kelar)
- *   16. history-modal.js        - modal riwayat + hapus riwayat
- *   17. pwa.js                  - install prompt & service worker
- *   18. main.js (file ini)      - orkestrasi + init
+ * Entry point & orkestrasi modul.
  */
 
+import './theme.js';
+
 import { getRounds, addRound, resetMatchOnly } from './store.js';
-import { renderTable, renderFooter } from './render.js';
+import { renderTable, renderFooter, resetGameOverDismissed } from './render.js';
 import { pushUndo, popUndo, resetUndoStack } from './undo.js';
 import { resetBurnAnnouncer, syncAnnouncersToRounds } from './burn-announcer.js';
 import { clearActiveInput } from './keypad.js';
@@ -52,7 +32,7 @@ btnAdd.addEventListener('click', () => {
     const isFirstRound = getRounds().length === 0;
     addRound({ p1: '', p2: '', p3: '', p4: '' });
     if (isFirstRound) {
-        startNewMatchTimer(); // ronde pertama beneran mulai di sini -> timer jalan dari sini
+        startNewMatchTimer();
     }
     renderTable();
     renderFooter();
@@ -62,58 +42,48 @@ btnAdd.addEventListener('click', () => {
 btnUndo.addEventListener('click', () => {
     if (!popUndo()) return;
     syncAnnouncersToRounds(getRounds().length);
+    resetGameOverDismissed();
+    clearActiveInput();
     if (getRounds().length === 0) {
-        clearMatchTimer(); // undo balik ke kondisi bener-bener kosong -> timer dianggap belum mulai
+        clearMatchTimer();
     }
     renderTable();
     renderFooter();
 });
 
 btnReset.addEventListener('click', () => {
-    showConfirmModal('Yakin mau reset skor? (Data yang belum di-save ke Riwayat akan hilang)', () => {
+    showConfirmModal('Yakin mau reset skor? Data yang belum disimpan ke Riwayat akan hilang.', () => {
         resetMatchOnly();
         resetUndoStack();
         resetBurnAnnouncer();
+        resetGameOverDismissed();
         clearMatchTimer();
         clearActiveInput();
         renderTable();
         renderFooter();
-        showAppToast('🔄 Skor berhasil di-reset.', 'success');
+        showAppToast('Skor berhasil di-reset.', 'success');
     });
 });
 
-// Menu Fitur Interaktif (Staggered Popout di atas Cek Update)
+// Topbar Popover Menu
 const btnMenuToggle = document.getElementById('btn-menu-toggle');
 const quickMenuItems = document.getElementById('quick-menu-items');
-const menuToggleIcon = document.getElementById('menu-toggle-icon');
-const menuToggleLabel = document.getElementById('menu-toggle-label');
 
 if (btnMenuToggle && quickMenuItems) {
     let isMenuOpen = false;
-    let closeTimeout = null;
 
     function openMenu() {
-        if (closeTimeout) clearTimeout(closeTimeout);
         isMenuOpen = true;
         quickMenuItems.classList.remove('hidden');
-        void quickMenuItems.offsetWidth; // trigger reflow
-        quickMenuItems.classList.add('menu-expanded');
-        if (menuToggleIcon) menuToggleIcon.style.transform = 'rotate(45deg)';
-        if (menuToggleLabel) menuToggleLabel.textContent = 'Tutup Menu';
-        btnMenuToggle.classList.add('bg-slate-700', 'border-slate-500', 'text-white');
+        btnMenuToggle.classList.add('is-active');
+        btnMenuToggle.setAttribute('aria-expanded', 'true');
     }
 
     function closeMenu() {
         isMenuOpen = false;
-        quickMenuItems.classList.remove('menu-expanded');
-        if (menuToggleIcon) menuToggleIcon.style.transform = 'rotate(0deg)';
-        if (menuToggleLabel) menuToggleLabel.textContent = 'Menu';
-        btnMenuToggle.classList.remove('bg-slate-700', 'border-slate-500', 'text-white');
-        closeTimeout = setTimeout(() => {
-            if (!isMenuOpen) {
-                quickMenuItems.classList.add('hidden');
-            }
-        }, 260);
+        quickMenuItems.classList.add('hidden');
+        btnMenuToggle.classList.remove('is-active');
+        btnMenuToggle.setAttribute('aria-expanded', 'false');
     }
 
     btnMenuToggle.addEventListener('click', (e) => {
@@ -122,12 +92,20 @@ if (btnMenuToggle && quickMenuItems) {
         else openMenu();
     });
 
-    // Klik di luar container menu otomatis melipat kembali
+    // Tutup popover saat salah satu item diklik
+    quickMenuItems.addEventListener('click', () => {
+        if (isMenuOpen) closeMenu();
+    });
+
     document.addEventListener('click', (e) => {
         const container = document.getElementById('quick-menu-container');
-        if (container && !container.contains(e.target)) {
-            if (isMenuOpen) closeMenu();
+        if (container && !container.contains(e.target) && isMenuOpen) {
+            closeMenu();
         }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isMenuOpen) closeMenu();
     });
 }
 

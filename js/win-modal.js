@@ -1,13 +1,13 @@
 /**
  * win-modal.js
  * ============
- * Dulu hasil menang cuma nongol jadi banner ijo di atas tabel. Sekarang
- * jadi popup modal beneran (fullscreen overlay, senada sama history-modal
- * & confirm-modal) dengan animasi masuk, biar momen menangnya lebih berasa.
+ * Popup kemenangan dengan grafik drama skor, gelar pertandingan,
+ * tombol Koreksi Skor (mencegah terjebak jika salah input di ronde terakhir),
+ * serta penyimpanan riwayat yang aman untuk nama pemain kembar.
  */
 
 import { players, getPlayerNames, addHistoryEntry, resetMatchOnly, getRounds } from './store.js';
-import { renderTable, renderFooter, onGameOver } from './render.js';
+import { renderTable, renderFooter, onGameOver, dismissGameOverForEdit, resetGameOverDismissed } from './render.js';
 import { clearMatchTimer } from './timer.js';
 import { resetUndoStack } from './undo.js';
 import { resetBurnAnnouncer } from './burn-announcer.js';
@@ -17,13 +17,16 @@ import { shareResultAsImage } from './share.js';
 import { playWinSound } from './sound.js';
 import { vibrateWin } from './haptics.js';
 import { calculateTotals } from './scoring.js';
-import { drawProgressionChart, PLAYER_COLORS } from './chart.js';
+import { drawProgressionChart, getPlayerColors } from './chart.js';
+import { onThemeChange } from './theme.js';
+import { escapeHtml, ICONS } from './utils.js';
 
 const winModal = document.getElementById('win-modal');
 const winModalContent = document.getElementById('win-modal-content');
 const winModalBody = document.getElementById('win-modal-body');
 
 let pendingResult = null;
+let lastChartData = null;
 let confettiAnimationId = null;
 let confettiCanvas = null;
 
@@ -34,19 +37,19 @@ function startConfetti() {
     document.body.appendChild(confettiCanvas);
 
     const ctx = confettiCanvas.getContext('2d');
-    let width = (confettiCanvas.width = window.innerWidth);
-    let height = (confettiCanvas.height = window.innerHeight);
+    const width = (confettiCanvas.width = window.innerWidth);
+    const height = (confettiCanvas.height = window.innerHeight);
 
-    const colors = ['#f59e0b', '#ef4444', '#10b981', '#3b82f6', '#ec4899', '#8b5cf6', '#fbbf24'];
-    const particles = Array.from({ length: 75 }, () => ({
+    const colors = ['#10b981', '#3b82f6', '#f59e0b', '#fb7185', '#a78bfa'];
+    const particles = Array.from({ length: 55 }, () => ({
         x: Math.random() * width,
         y: Math.random() * -height,
-        r: Math.random() * 5 + 3,
-        d: Math.random() * 30 + 10,
+        r: Math.random() * 4.5 + 2.5,
+        d: Math.random() * 25 + 10,
         color: colors[Math.floor(Math.random() * colors.length)],
         tilt: Math.random() * 10 - 10,
         tiltAngle: 0,
-        tiltAngleIncremental: Math.random() * 0.07 + 0.04,
+        tiltAngleIncremental: Math.random() * 0.06 + 0.03,
     }));
 
     function draw() {
@@ -55,9 +58,9 @@ function startConfetti() {
 
         particles.forEach((p) => {
             p.tiltAngle += p.tiltAngleIncremental;
-            p.y += (Math.cos(p.d) + 3 + p.r / 2) * 0.75;
-            p.x += Math.sin(p.d) * 1.5;
-            p.tilt = Math.sin(p.tiltAngle) * 12;
+            p.y += (Math.cos(p.d) + 2.6 + p.r / 2) * 0.7;
+            p.x += Math.sin(p.d) * 1.2;
+            p.tilt = Math.sin(p.tiltAngle) * 10;
 
             ctx.beginPath();
             ctx.lineWidth = p.r;
@@ -89,15 +92,31 @@ function stopConfetti() {
     }
 }
 
+function buildUniqueLegacyScores(playerNames, totals) {
+    const out = {};
+    players.forEach(p => {
+        const base = playerNames[p] || p.toUpperCase();
+        let key = base;
+        let suffix = 2;
+        while (Object.prototype.hasOwnProperty.call(out, key)) {
+            key = `${base} (${suffix++})`;
+        }
+        out[key] = totals[p];
+    });
+    return out;
+}
+
 function open(result) {
     pendingResult = result;
     playWinSound();
     vibrateWin();
     startConfetti();
+
     const playerNames = getPlayerNames();
+    const pColors = getPlayerColors();
     const { winners, losers, minScore, totals, durationText, burnCounts, burnsInflictedCounts = {} } = result;
-    const winnerDisplay = winners.map(w => playerNames[w]).join(' & ');
-    const loserDisplay = losers.map(l => playerNames[l]).join(' & ');
+    const winnerDisplay = winners.map(w => escapeHtml(playerNames[w])).join(' &amp; ');
+    const loserDisplay = losers.map(l => escapeHtml(playerNames[l])).join(' &amp; ');
 
     const maxInflicted = Math.max(...players.map(p => burnsInflictedCounts[p] || 0));
     const executioners = maxInflicted > 0 ? players.filter(p => burnsInflictedCounts[p] === maxInflicted) : [];
@@ -106,84 +125,86 @@ function open(result) {
 
     const rounds = getRounds();
     const { progressionHistory, burnHistory } = calculateTotals(rounds);
+    lastChartData = { progressionHistory, burnHistory, playerNames: { ...playerNames } };
 
     winModalBody.innerHTML = `
-    <div class="text-3xl font-black mb-1 text-center"><span class="trophy-bounce">🏆</span> ${winnerDisplay} Menang!</div>
-    <div class="text-center mt-2">
-      <span class="text-sm bg-green-700/40 text-white inline-block px-4 py-1.5 rounded-full border border-green-600">
-        Skor Terendah: <span class="text-red-200 font-bold">${loserDisplay} (${minScore})</span>
-      </span>
-    </div>
-    <div class="text-xs text-green-100/80 mt-2 font-mono text-center">⏱️ Durasi: ${durationText} &middot; ${rounds.length} ronde</div>
-    <div class="grid grid-cols-2 gap-2 mt-4">
-      ${players.map(p => `
-        <div class="bg-slate-900/40 border border-slate-700/80 rounded-xl p-2.5 text-center">
-          <div class="text-[11px] text-slate-300 font-bold truncate">${playerNames[p]}</div>
-          <div class="text-xl font-black font-mono mt-0.5 ${winners.includes(p) ? 'text-green-300' : (losers.includes(p) ? 'text-red-400' : 'text-slate-100')}">${totals[p]}</div>
-          <div class="flex flex-col gap-0.5 mt-1">
-            ${(burnsInflictedCounts[p] || 0) > 0 ? `<div class="text-[10px] text-emerald-300 font-semibold">⚔️ bakar ${burnsInflictedCounts[p]}x</div>` : ''}
-            ${(burnCounts[p] || 0) > 0 ? `<div class="text-[10px] text-orange-300 font-semibold">🔥 kebakar ${burnCounts[p]}x</div>` : ''}
-          </div>
+        <div class="win-hero">
+            <div class="win-badge">🏆 Pertandingan Selesai</div>
+            <h2 class="win-headline">${winnerDisplay} Menang!</h2>
+            <div class="win-meta">
+                <span>${ICONS.clock} ${escapeHtml(durationText)}</span>
+                <span>&middot;</span>
+                <span>${rounds.length} ronde</span>
+            </div>
+            <div>
+                <span class="loser-pill">Terendah: ${loserDisplay} (${minScore})</span>
+            </div>
         </div>
-      `).join('')}
-    </div>
 
-    <!-- Grafik Garis Drama Skor Pertandingan -->
-    <div class="mt-4 bg-slate-950/70 rounded-2xl p-3 border border-slate-700/80 shadow-inner">
-      <div class="flex items-center justify-between mb-2">
-        <span class="text-xs font-black text-slate-200 flex items-center gap-1.5">
-          📈 Grafik Drama Skor
-        </span>
-        <span class="text-[10px] text-slate-400 font-mono">${rounds.length} ronde</span>
-      </div>
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mb-2.5 text-[11px] font-bold">
-        ${players.map(p => `
-          <div class="flex items-center gap-1.5 bg-slate-900/80 px-2 py-1 rounded-lg border border-slate-800">
-            <span class="w-2.5 h-2.5 rounded-full inline-block shrink-0 shadow-sm" style="background-color: ${PLAYER_COLORS[p]}"></span>
-            <span class="text-slate-300 truncate">${playerNames[p]}</span>
-          </div>
-        `).join('')}
-      </div>
-      <div class="relative w-full overflow-hidden rounded-xl border border-slate-800 bg-[#090d16]">
-        <canvas id="win-progression-chart" class="w-full block"></canvas>
-      </div>
-      <div class="text-[10px] text-slate-400 mt-2 text-center flex items-center justify-center gap-1">
-        <span>🔥 Menandakan titik ronde pemain terbakar / reset</span>
-      </div>
-    </div>
+        <div class="score-summary-grid">
+            ${players.map(p => `
+                <div class="score-summary-card${winners.includes(p) ? ' is-winner' : ''}">
+                    <div class="score-summary-name">${escapeHtml(playerNames[p])}</div>
+                    <div class="score-summary-value" style="color: ${winners.includes(p) ? 'var(--success)' : (losers.includes(p) ? 'var(--danger)' : 'var(--text-primary)')}">${totals[p]}</div>
+                    <div class="score-summary-tags">
+                        ${(burnsInflictedCounts[p] || 0) > 0 ? `<span class="tag-burner">${ICONS.sword} ${burnsInflictedCounts[p]}x</span>` : ''}
+                        ${(burnCounts[p] || 0) > 0 ? `<span class="tag-burned">${ICONS.flame} ${burnCounts[p]}x</span>` : ''}
+                    </div>
+                </div>
+            `).join('')}
+        </div>
 
-    ${(executioners.length > 0 || gosongers.length > 0) ? `
-      <div class="mt-3.5 bg-slate-900/50 rounded-xl p-2.5 border border-slate-700/60 text-left space-y-1">
-        <div class="text-[10px] text-green-200/70 font-bold uppercase tracking-wider text-center mb-1">🎖️ Gelar Pertandingan</div>
-        ${executioners.length > 0 ? `
-          <div class="flex justify-between items-center text-[11px]">
-            <span class="text-emerald-300 font-semibold flex items-center gap-1">⚔️ The Executioner</span>
-            <span class="text-white font-bold">${executioners.map(p => playerNames[p]).join(', ')} (${maxInflicted}x)</span>
-          </div>
+        <div class="chart-box">
+            <div class="chart-header">
+                <span style="display:inline-flex;align-items:center;gap:6px;">${ICONS.chart} Grafik Drama Skor</span>
+                <span class="tabular-nums" style="color:var(--text-muted);font-family:var(--font-mono);font-size:11px;">${rounds.length} ronde</span>
+            </div>
+            <div class="chart-legend">
+                ${players.map(p => `
+                    <div class="chart-legend-item">
+                        <span class="chart-legend-dot" style="background-color:${pColors[p]}"></span>
+                        <span class="chart-legend-label">${escapeHtml(playerNames[p])}</span>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="chart-canvas-wrap">
+                <canvas id="win-progression-chart"></canvas>
+            </div>
+            <div class="chart-caption">🔥 Menandakan ronde pemain terbakar / reset skor</div>
+        </div>
+
+        ${(executioners.length > 0 || gosongers.length > 0) ? `
+            <div class="awards-box">
+                <div class="awards-title">Gelar Pertandingan</div>
+                ${executioners.length > 0 ? `
+                    <div class="award-row">
+                        <span class="tag-burner">${ICONS.sword} The Executioner</span>
+                        <strong>${executioners.map(p => escapeHtml(playerNames[p])).join(', ')} (${maxInflicted}x)</strong>
+                    </div>
+                ` : ''}
+                ${gosongers.length > 0 ? `
+                    <div class="award-row">
+                        <span class="tag-burned">${ICONS.flame} Mr. Gosong</span>
+                        <strong>${gosongers.map(p => escapeHtml(playerNames[p])).join(', ')} (${maxBurns}x)</strong>
+                    </div>
+                ` : ''}
+            </div>
         ` : ''}
-        ${gosongers.length > 0 ? `
-          <div class="flex justify-between items-center text-[11px]">
-            <span class="text-orange-300 font-semibold flex items-center gap-1">🔥 Mr. Gosong</span>
-            <span class="text-white font-bold">${gosongers.map(p => playerNames[p]).join(', ')} (${maxBurns}x)</span>
-          </div>
-        ` : ''}
-      </div>
-    ` : ''}
 
-    <div class="text-[9px] text-green-200/50 font-mono tracking-widest text-center mt-3">SCORE TRACKER 1000 &middot; CEKI</div>
+        <div class="modal-watermark">CEKI 1000 &middot; SCORE TRACKER</div>
 
-    <button id="btn-save-history" class="mt-5 w-full bg-white text-green-700 hover:bg-slate-100 active:bg-slate-200 font-black py-3 rounded-xl shadow-lg transition-colors text-base">
-      Simpan & Mulai Baru
-    </button>
-    <button id="btn-share-image" class="mt-2 w-full bg-green-700/40 hover:bg-green-700/60 text-white font-bold py-2.5 rounded-xl border border-green-500 transition-colors text-xs">
-      📸 Share Hasil ke Gambar
-    </button>
-  `;
+        <div class="modal-actions">
+            <button id="btn-save-history" type="button" class="btn btn-success btn-full">Simpan &amp; Mulai Baru</button>
+            <div class="modal-actions-row">
+                <button id="btn-share-image" type="button" class="btn btn-secondary btn-sm">${ICONS.share} <span>Share PNG</span></button>
+                <button id="btn-edit-win-score" type="button" class="btn btn-secondary btn-sm">${ICONS.edit} <span>Koreksi Skor</span></button>
+            </div>
+        </div>
+    `;
 
     winModal.classList.remove('hidden');
-    // Trigger reflow biar transisi masuk jalan (bukan langsung full-state)
     void winModalContent.offsetWidth;
-    winModal.classList.add('win-modal-visible');
+    winModal.classList.add('is-visible');
 
     const chartCanvas = document.getElementById('win-progression-chart');
     if (chartCanvas) {
@@ -196,12 +217,22 @@ function open(result) {
 
 function close() {
     stopConfetti();
-    winModal.classList.remove('win-modal-visible');
+    winModal.classList.remove('is-visible');
     setTimeout(() => winModal.classList.add('hidden'), 200);
 }
 
+onThemeChange(() => {
+    if (!winModal.classList.contains('hidden') && lastChartData) {
+        const chartCanvas = document.getElementById('win-progression-chart');
+        if (chartCanvas) {
+            drawProgressionChart(chartCanvas, lastChartData.progressionHistory, lastChartData.burnHistory, lastChartData.playerNames);
+        }
+    }
+});
+
 winModalBody.addEventListener('click', (e) => {
-    if (e.target.id === 'btn-save-history') {
+    const saveBtn = e.target.closest('#btn-save-history');
+    if (saveBtn) {
         if (!pendingResult) return;
         const playerNames = getPlayerNames();
         const { winners, losers, minScore, totals, durationText, burnCounts, burnsInflictedCounts = {} } = pendingResult;
@@ -212,34 +243,44 @@ winModalBody.addEventListener('click', (e) => {
             date: new Date().toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
             winner: winners.map(w => playerNames[w]).join(' & '),
             loser: losers.map(l => playerNames[l]).join(' & '),
-            minScore: minScore,
+            minScore,
             duration: durationText,
-            scores: Object.fromEntries(players.map(p => [playerNames[p], totals[p]])),
+            scores: buildUniqueLegacyScores(playerNames, totals),
+            totalsByPlayer: { ...totals },
             rounds: JSON.parse(JSON.stringify(rounds)),
-            progressionHistory: progressionHistory,
-            burnHistory: burnHistory,
+            progressionHistory,
+            burnHistory,
             playerNames: { ...playerNames },
             burnCounts: { ...burnCounts },
-            burnsInflictedCounts: { ...burnsInflictedCounts }
+            burnsInflictedCounts: { ...burnsInflictedCounts },
         });
 
         resetMatchOnly();
         resetUndoStack();
         resetBurnAnnouncer();
+        resetGameOverDismissed();
         clearMatchTimer();
         clearActiveInput();
         close();
         pendingResult = null;
+        lastChartData = null;
         renderTable();
         renderFooter();
 
-        showAppToast('✅ Data tersimpan! Tap "+ Ronde Baru" buat mulai match berikutnya.', 'success');
+        showAppToast('Data tersimpan ke Riwayat! Tap "+ Ronde Baru" untuk match berikutnya.', 'success');
+        return;
     }
 
-    if (e.target.id === 'btn-share-image') {
+    if (e.target.closest('#btn-share-image')) {
         shareResultAsImage();
+        return;
+    }
+
+    if (e.target.closest('#btn-edit-win-score')) {
+        close();
+        dismissGameOverForEdit();
+        showAppToast('Mode koreksi aktif. Ubah angka atau tekan Undo.', 'info');
     }
 });
 
-// Daftarin diri ke render.js: begitu game over kedetect, popup ini yang kebuka.
 onGameOver(open);

@@ -1,9 +1,12 @@
-const CACHE_NAME = 'ceki-score-tracker-v35';
+const CACHE_NAME = 'ceki-score-tracker-v41b';
 const APP_SHELL = [
     './',
     './index.html',
     './style.css',
     './manifest.json',
+    './release.json',
+    './js/utils.js',
+    './js/theme.js',
     './js/store.js',
     './js/scoring.js',
     './js/chart.js',
@@ -34,7 +37,6 @@ const APP_SHELL = [
     './icons/qris.jpeg',
 ];
 
-// Install: cache app shell secara tangguh (tidak gagal jika salah satu audio tidak ada)
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
@@ -49,14 +51,12 @@ self.addEventListener('install', (event) => {
     );
 });
 
-// pwa.js kirim pesan ini pas user klik banner "Ada update baru".
 self.addEventListener('message', (event) => {
     if (event.data && event.data.type === 'SKIP_WAITING') {
         self.skipWaiting();
     }
 });
 
-// Activate: bersihin cache versi lama
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keys) =>
@@ -67,20 +67,32 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Fetch: offline fallback tangguh untuk navigasi app shell, cache-first untuk aset statis
 self.addEventListener('fetch', (event) => {
     const req = event.request;
     if (req.method !== 'GET') return;
 
-    // Untuk range request (streaming audio browser), bypass langsung ke network
     if (req.headers.has('range')) {
         event.respondWith(fetch(req));
         return;
     }
 
-    // Khusus permintaan navigasi halaman (buka PWA dari homescreen / reload tab):
-    // Prioritaskan network jika online agar selalu dapat versi terbaru,
-    // tapi jika offline / 404 / gagal, WAJIB fallback ke cached app shell (index.html)!
+    // release.json selalu network-first agar popup update menampilkan changelog versi BARU, bukan versi lama dari cache
+    const reqUrl = new URL(req.url);
+    if (reqUrl.pathname.endsWith('/release.json')) {
+        event.respondWith(
+            fetch(req, { cache: 'no-store' })
+                .then((networkRes) => {
+                    if (networkRes && networkRes.status === 200) {
+                        const resClone = networkRes.clone();
+                        caches.open(CACHE_NAME).then((cache) => cache.put('./release.json', resClone));
+                    }
+                    return networkRes;
+                })
+                .catch(() => caches.match('./release.json'))
+        );
+        return;
+    }
+
     if (req.mode === 'navigate') {
         event.respondWith(
             fetch(req)
@@ -90,13 +102,11 @@ self.addEventListener('fetch', (event) => {
                         caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
                         return networkRes;
                     }
-                    // Jika server membalas non-200 (misal 404 path redirect), fallback ke app shell
                     return caches.match(req).then((cached) => {
                         return cached || caches.match('./') || caches.match('./index.html') || networkRes;
                     });
                 })
                 .catch(() => {
-                    // Offline / jaringan terputus -> ambil index.html dari cache
                     return caches.match(req).then((cached) => {
                         return cached || caches.match('./') || caches.match('./index.html');
                     });
@@ -105,16 +115,14 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Aset statis (JS, CSS, Icon, Audio, dan CDN scripts)
     event.respondWith(
         caches.match(req, { ignoreSearch: true }).then((cached) => {
             if (cached) return cached;
             return fetch(req)
                 .then((res) => {
-                    // Simpan salinan ke cache jika same-origin atau CDN terpercaya
                     if (res && res.status === 200) {
                         const origin = new URL(req.url).origin;
-                        if (origin === self.location.origin || origin.includes('cdnjs.cloudflare.com') || origin.includes('cdn.tailwindcss.com')) {
+                        if (origin === self.location.origin || origin.includes('cdnjs.cloudflare.com')) {
                             const resClone = res.clone();
                             caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
                         }

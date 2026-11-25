@@ -1,29 +1,28 @@
 /**
  * sound.js
  * ========
- * Efek suara cerdas & audio meme Ceki:
- *   - Suara kebakar: audio/burn.mp3
- *   - Suara menang: audio/win.mp3, win1.mp3
- *   - Suara peringatan mau nyalip / terancam: audio/warn.mp3
+ * Efek suara & audio meme Ceki:
+ *   - Suara kebakar: audio/burn.mp3 (fallback Web Audio synth)
+ *   - Suara peringatan mau nyalip / terancam: audio/warn.mp3 (fallback synth)
+ *   - Suara menang: Web Audio API fanfare synth langsung (tanpa 404 fetch)
  *   - Suara feedback sentuhan tombol keypad
- * Menggunakan Web Audio API Buffer Engine (anti-blokir autoplay mobile, bebas delay),
- * dan otomatis fallback ke Web Audio API synthesizer jika file belum ada.
- * Ada tombol mute (🔊/🔇) yang kepersist ke localStorage.
  */
+
+import { ICONS } from './utils.js';
 
 const MUTE_KEY = 'score_tracker_muted';
 const btnMuteToggle = document.getElementById('btn-mute-toggle');
 
-let muted = localStorage.getItem(MUTE_KEY) === 'true';
+let muted = (() => {
+    try {
+        return localStorage.getItem(MUTE_KEY) === 'true';
+    } catch (e) {
+        return false;
+    }
+})();
 
-// Gunakan URL absolut yang di-resolve berdasarkan lokasi modul saat ini (aman untuk GitHub Pages subpath)
 const BURN_FILES = [
     new URL('../audio/burn.mp3', import.meta.url).href,
-];
-
-const WIN_FILES = [
-    new URL('../audio/win.mp3', import.meta.url).href,
-    new URL('../audio/win1.mp3', import.meta.url).href,
 ];
 
 const WARN_FILE = new URL('../audio/warn.mp3', import.meta.url).href;
@@ -42,7 +41,6 @@ function getAudioContext() {
     return audioCtx;
 }
 
-// In-memory audio buffer cache agar pemutaran instan tanpa request berulang
 const audioBufferCache = new Map();
 
 async function loadBuffer(url) {
@@ -91,14 +89,11 @@ async function playAudioFile(url, synthFallback) {
             return;
         }
     }
-
-    // Jika file audio tidak ada atau gagal di-buffer, jalankan synthesizer fallback
     if (synthFallback && typeof synthFallback === 'function') {
         synthFallback();
     }
 }
 
-// Inisialisasi AudioContext & preload audio pada tap/klik pertama agar mobile browser mengizinkan audio
 function onFirstInteraction() {
     getAudioContext();
     loadBuffer(WARN_FILE);
@@ -118,7 +113,7 @@ function playSynthBurn() {
         const now = ctx.currentTime;
         osc.frequency.setValueAtTime(320, now);
         osc.frequency.exponentialRampToValueAtTime(70, now + 0.45);
-        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.setValueAtTime(0.28, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
         osc.connect(gain);
         gain.connect(ctx.destination);
@@ -134,16 +129,16 @@ function playSynthWin() {
     const ctx = getAudioContext();
     if (!ctx) return;
     try {
-        const notes = [523.25, 659.25, 783.99, 1046.50];
+        const notes = [523.25, 659.25, 783.99, 1046.5];
         const now = ctx.currentTime;
         notes.forEach((freq, idx) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
-            const startTime = now + idx * 0.11;
-            const stopTime = startTime + 0.22;
+            const startTime = now + idx * 0.1;
+            const stopTime = startTime + 0.24;
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(freq, startTime);
-            gain.gain.setValueAtTime(0.25, startTime);
+            gain.gain.setValueAtTime(0.24, startTime);
             gain.gain.exponentialRampToValueAtTime(0.01, stopTime);
             osc.connect(gain);
             gain.connect(ctx.destination);
@@ -160,7 +155,6 @@ function playSynthWarn() {
     const ctx = getAudioContext();
     if (!ctx) return;
     try {
-        // Nada alert sonar / bahaya dua nada naik-turun cepat
         const now = ctx.currentTime;
         [0, 0.15].forEach((delay) => {
             const osc = ctx.createOscillator();
@@ -168,7 +162,7 @@ function playSynthWarn() {
             osc.type = 'sine';
             osc.frequency.setValueAtTime(587.33, now + delay);
             osc.frequency.exponentialRampToValueAtTime(440, now + delay + 0.12);
-            gain.gain.setValueAtTime(0.35, now + delay);
+            gain.gain.setValueAtTime(0.3, now + delay);
             gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.12);
             osc.connect(gain);
             gain.connect(ctx.destination);
@@ -189,14 +183,14 @@ export function playKeypadClick() {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(650, now);
-        osc.frequency.exponentialRampToValueAtTime(820, now + 0.025);
-        gain.gain.setValueAtTime(0.08, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+        osc.frequency.setValueAtTime(640, now);
+        osc.frequency.exponentialRampToValueAtTime(800, now + 0.022);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.022);
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start(now);
-        osc.stop(now + 0.025);
+        osc.stop(now + 0.022);
     } catch (e) {
         // ignore
     }
@@ -210,32 +204,36 @@ export function playBurnSound() {
 
 export function playWinSound() {
     if (muted) return;
-    const chosen = WIN_FILES[Math.floor(Math.random() * WIN_FILES.length)];
-    playAudioFile(chosen, playSynthWin);
+    playSynthWin();
 }
 
 let lastWarnPlayedAt = 0;
 export function playWarnSound() {
     if (muted) return;
-    // Debounce ringan 400ms untuk mencegah pemanggilan ganda dalam milidetik yang sama
     const now = Date.now();
     if (now - lastWarnPlayedAt < 400) return;
     lastWarnPlayedAt = now;
-
     playAudioFile(WARN_FILE, playSynthWarn);
 }
 
 function updateMuteIcon() {
     const btn = document.getElementById('btn-mute-toggle');
     if (!btn) return;
-    btn.textContent = muted ? '🔇' : '🔊';
-    btn.setAttribute('aria-label', muted ? 'Bunyikan suara' : 'Matikan suara');
+    btn.innerHTML = muted ? ICONS.volumeOff : ICONS.volumeOn;
+    const label = muted ? 'Bunyikan suara' : 'Matikan suara';
+    btn.setAttribute('aria-label', label);
+    btn.setAttribute('title', label);
+    btn.classList.toggle('is-active', !muted);
 }
 
 if (btnMuteToggle) {
     btnMuteToggle.addEventListener('click', () => {
         muted = !muted;
-        localStorage.setItem(MUTE_KEY, String(muted));
+        try {
+            localStorage.setItem(MUTE_KEY, String(muted));
+        } catch (e) {
+            // ignore
+        }
         updateMuteIcon();
     });
 }

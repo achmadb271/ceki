@@ -5,10 +5,16 @@
  * ditambahin (lihat main.js), bukan pas halaman dibuka.
  */
 
-import { getMatchStartTime, getMatchEndTime, startNewMatch as storeStartNewMatch, markMatchEnd as storeMarkMatchEnd, clearMatchTiming } from './store.js';
+import {
+    getMatchStartTime,
+    getMatchEndTime,
+    startNewMatch as storeStartNewMatch,
+    markMatchEnd as storeMarkMatchEnd,
+    clearMatchEnd as storeClearMatchEnd,
+    clearMatchTiming,
+} from './store.js';
 import { holdWakeLock, releaseWakeLock } from './wakelock.js';
 
-const matchTimerEl = document.getElementById('match-timer');
 let timerInterval = null;
 
 export function formatDuration(ms) {
@@ -21,21 +27,32 @@ export function formatDuration(ms) {
 }
 
 export function updateTimerDisplay() {
-    const el = document.getElementById('match-timer');
-    if (!el) return;
+    const textEl = document.getElementById('match-timer-text');
+    const pill = document.getElementById('match-timer');
+    if (!textEl) return;
     const start = getMatchStartTime();
+    const endTs = getMatchEndTime();
+
+    if (pill) {
+        pill.classList.toggle('is-running', !!start && !endTs && isTimerRunning());
+        pill.classList.toggle('is-finished', !!start && !!endTs);
+        pill.title = !start
+            ? 'Timer mulai saat ronde pertama dibuat'
+            : (endTs ? 'Durasi akhir pertandingan' : 'Pertandingan sedang berjalan');
+    }
+
     if (!start) {
-        el.textContent = '⏱️ 00:00';
+        textEl.textContent = '00:00';
         return;
     }
-    const end = getMatchEndTime() || Date.now();
-    el.textContent = '⏱️ ' + formatDuration(end - start);
+    const end = endTs || Date.now();
+    textEl.textContent = formatDuration(end - start);
 }
 
 export function startMatchTimer() {
     stopMatchTimer();
-    updateTimerDisplay();
     timerInterval = setInterval(updateTimerDisplay, 1000);
+    updateTimerDisplay();
     holdWakeLock();
 }
 
@@ -43,6 +60,7 @@ export function stopMatchTimer() {
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = null;
     releaseWakeLock();
+    updateTimerDisplay();
 }
 
 export function isTimerRunning() {
@@ -53,6 +71,13 @@ export function markMatchEndIfNeeded() {
     storeMarkMatchEnd();
     stopMatchTimer();
     updateTimerDisplay();
+}
+
+export function resumeMatchTimerIfReopened() {
+    storeClearMatchEnd();
+    if (getMatchStartTime() && !isTimerRunning()) {
+        startMatchTimer();
+    }
 }
 
 export function startNewMatchTimer() {
@@ -70,10 +95,10 @@ export function clearMatchTimer() {
 /** Dipanggil sekali pas load: lanjutin timer kalau match lagi jalan, atau tampilin durasi final kalau udah selesai. */
 export function initTimerFromSavedState() {
     if (getMatchEndTime()) {
-        updateTimerDisplay(); // game sebelumnya udah selesai, timer beku di durasi akhir
+        updateTimerDisplay();
     } else if (getMatchStartTime()) {
-        startMatchTimer(); // ada match yang lagi jalan (reload di tengah permainan) -> lanjutin
+        startMatchTimer();
     } else {
-        updateTimerDisplay(); // belum ada ronde sama sekali
+        updateTimerDisplay();
     }
 }

@@ -1,40 +1,35 @@
 /**
  * chart.js
  * ========
- * Grafik Garis Drama Skor Pertandingan (Match Progression Chart) berbasis HTML5 Canvas murni.
- * Render garis kumulatif tiap pemain dari Ronde 0 (awal) hingga ronde terakhir.
- * Dilengkapi:
- *   - Garis target kemenangan 1000 poin (garis emas putus-putus)
- *   - Garis baseline 0 poin & garis minus jika ada pemain yang tekor
- *   - Titik marker di setiap ronde
- *   - Penanda khusus kobaran api 🔥 di ronde pemain kena bakar (reset / drop dramatis)
- *   - HiDPI/Retina crisp scaling agar tidak buram di layar smartphone
- *   - Offline 100% tanpa library eksternal
+ * Grafik Garis Drama Skor Pertandingan (HTML5 Canvas murni, HiDPI/Retina).
+ * Mendukung tema Terang & Gelap, padding kanan cukup untuk 4+ digit,
+ * dan algoritma anti-tabrakan vertikal untuk label skor akhir.
  */
 
 import { players } from './store.js';
+import { getTheme } from './theme.js';
 
-export const PLAYER_COLORS = {
-    p1: '#38bdf8', // Sky 400
-    p2: '#c084fc', // Purple 400
-    p3: '#f472b6', // Pink 400
-    p4: '#818cf8', // Indigo 400
+export const PLAYER_COLORS_DARK = {
+    p1: '#38bdf8',
+    p2: '#a78bfa',
+    p3: '#fb7185',
+    p4: '#34d399',
 };
 
-export const PLAYER_BG_COLORS = {
-    p1: 'rgba(56, 189, 248, 0.15)',
-    p2: 'rgba(192, 132, 252, 0.15)',
-    p3: 'rgba(244, 114, 182, 0.15)',
-    p4: 'rgba(129, 140, 248, 0.15)',
+export const PLAYER_COLORS_LIGHT = {
+    p1: '#0284c7',
+    p2: '#7c3aed',
+    p3: '#e11d48',
+    p4: '#059669',
 };
 
-/**
- * Menggambar grafik progression di elemen canvas yang diberikan.
- * @param {HTMLCanvasElement} canvas
- * @param {Array<Object>} progressionHistory Array of { p1, p2, p3, p4 } dari R0..Rn
- * @param {Array<Array<string>>} burnHistory Array of player IDs yang kebakar di tiap ronde
- * @param {Object} playerNames { p1: 'Nama 1', ... }
- */
+export function getPlayerColors() {
+    return getTheme() === 'light' ? PLAYER_COLORS_LIGHT : PLAYER_COLORS_DARK;
+}
+
+// Tetap export default alias untuk kompatibilitas
+export const PLAYER_COLORS = PLAYER_COLORS_DARK;
+
 export function drawProgressionChart(canvas, progressionHistory, burnHistory = [], playerNames = {}) {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -44,11 +39,45 @@ export function drawProgressionChart(canvas, progressionHistory, burnHistory = [
         progressionHistory = [{ p1: 0, p2: 0, p3: 0, p4: 0 }];
     }
 
-    // Hitung ukuran rendering canvas dengan rasio Retina/HiDPI
+    const isLight = getTheme() === 'light';
+    const colors = isLight ? PLAYER_COLORS_LIGHT : PLAYER_COLORS_DARK;
+
+    const palette = isLight
+        ? {
+            bg: '#f8fafc',
+            grid1000: 'rgba(217, 119, 6, 0.5)',
+            text1000: '#b45309',
+            gridMid: 'rgba(148, 163, 184, 0.45)',
+            textMid: '#64748b',
+            gridZero: 'rgba(100, 116, 139, 0.65)',
+            textZero: '#475569',
+            gridNeg: 'rgba(220, 38, 38, 0.3)',
+            textNeg: '#dc2626',
+            axisText: '#64748b',
+            dotFill: '#ffffff',
+            burnFill: '#dc2626',
+            burnStroke: '#ffffff',
+        }
+        : {
+            bg: '#0c0c10',
+            grid1000: 'rgba(245, 158, 11, 0.45)',
+            text1000: '#fbbf24',
+            gridMid: 'rgba(113, 113, 122, 0.35)',
+            textMid: '#71717a',
+            gridZero: 'rgba(161, 161, 170, 0.45)',
+            textZero: '#a1a1aa',
+            gridNeg: 'rgba(239, 68, 68, 0.32)',
+            textNeg: '#f87171',
+            axisText: '#71717a',
+            dotFill: '#111114',
+            burnFill: '#ef4444',
+            burnStroke: '#ffffff',
+        };
+
     const dpr = Math.max(1, window.devicePixelRatio || 1);
     const container = canvas.parentElement;
     const clientWidth = container ? container.clientWidth : 340;
-    const displayWidth = Math.max(280, clientWidth);
+    const displayWidth = Math.max(260, clientWidth);
     const displayHeight = 220;
 
     canvas.width = displayWidth * dpr;
@@ -59,22 +88,18 @@ export function drawProgressionChart(canvas, progressionHistory, burnHistory = [
     ctx.save();
     ctx.scale(dpr, dpr);
 
-    // Background kartu canvas
-    ctx.fillStyle = '#090d16';
-    ctx.beginPath();
-    ctx.roundRect ? ctx.roundRect(0, 0, displayWidth, displayHeight, 14) : ctx.rect(0, 0, displayWidth, displayHeight);
-    ctx.fill();
+    // Background
+    ctx.fillStyle = palette.bg;
+    ctx.fillRect(0, 0, displayWidth, displayHeight);
 
-    // Area batas chart
-    const padLeft = 44;
-    const padRight = 24;
-    const padTop = 32;
-    const padBottom = 28;
+    const padLeft = 42;
+    const padRight = 46; // cukup lega untuk 4 digit + tanda minus
+    const padTop = 26;
+    const padBottom = 26;
 
     const chartW = displayWidth - padLeft - padRight;
     const chartH = displayHeight - padTop - padBottom;
 
-    // Cari rentang skor Min dan Max
     let minScore = 0;
     let maxScore = 1000;
 
@@ -86,104 +111,95 @@ export function drawProgressionChart(canvas, progressionHistory, burnHistory = [
         });
     });
 
-    // Beri margin atas & bawah agar titik dan label tidak menempel di border
     const rangeBufferTop = 80;
-    const rangeBufferBottom = minScore < 0 ? 50 : 0;
+    const rangeBufferBottom = minScore < 0 ? 60 : 0;
     const effectiveMax = maxScore + rangeBufferTop;
     const effectiveMin = minScore - rangeBufferBottom;
     const scoreRange = effectiveMax - effectiveMin || 1;
 
-    // Fungsi mapping nilai skor ke koordinat Y
     function getY(val) {
         const ratio = (val - effectiveMin) / scoreRange;
         return padTop + chartH - (ratio * chartH);
     }
 
-    // Fungsi mapping indeks ronde ke koordinat X
-    const totalSteps = progressionHistory.length; // e.g., R0..Rn (length = n + 1)
+    const totalSteps = progressionHistory.length;
     function getX(stepIdx) {
         if (totalSteps <= 1) return padLeft + chartW / 2;
         return padLeft + (stepIdx / (totalSteps - 1)) * chartW;
     }
 
-    // --- 1. Gambar Grid Horizontal & Label Sumbu Y ---
+    // --- 1. Grid Horizontal & Label Sumbu Y ---
     ctx.lineWidth = 1;
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
-    ctx.font = '10px monospace';
+    ctx.font = '600 10px ui-monospace, SFMono-Regular, Menlo, monospace';
 
-    // Grid garis target 1000 (Emas)
     const y1000 = getY(1000);
-    ctx.strokeStyle = 'rgba(245, 158, 11, 0.45)';
+    ctx.strokeStyle = palette.grid1000;
     ctx.setLineDash([4, 4]);
     ctx.beginPath();
     ctx.moveTo(padLeft, y1000);
     ctx.lineTo(padLeft + chartW, y1000);
     ctx.stroke();
-    ctx.fillStyle = '#fbbf24';
-    ctx.fillText('1000 🏆', padLeft - 6, y1000);
+    ctx.fillStyle = palette.text1000;
+    ctx.fillText('1000', padLeft - 6, y1000);
 
-    // Grid garis 500 (Tengah)
     if (effectiveMin < 500 && effectiveMax > 500) {
         const y500 = getY(500);
-        ctx.strokeStyle = 'rgba(71, 85, 105, 0.4)';
+        ctx.strokeStyle = palette.gridMid;
         ctx.setLineDash([2, 4]);
         ctx.beginPath();
         ctx.moveTo(padLeft, y500);
         ctx.lineTo(padLeft + chartW, y500);
         ctx.stroke();
-        ctx.fillStyle = '#64748b';
+        ctx.fillStyle = palette.textMid;
         ctx.fillText('500', padLeft - 6, y500);
     }
 
-    // Grid garis 0 (Baseline)
     const y0 = getY(0);
-    ctx.strokeStyle = 'rgba(100, 116, 139, 0.6)';
+    ctx.strokeStyle = palette.gridZero;
     ctx.setLineDash([]);
     ctx.beginPath();
     ctx.moveTo(padLeft, y0);
     ctx.lineTo(padLeft + chartW, y0);
     ctx.stroke();
-    ctx.fillStyle = '#94a3b8';
+    ctx.fillStyle = palette.textZero;
     ctx.fillText('0', padLeft - 6, y0);
 
-    // Grid garis minus (jika ada tekor)
     if (minScore < 0) {
         const roundedMin = Math.floor(minScore / 100) * 100;
         const yMin = getY(roundedMin);
-        ctx.strokeStyle = 'rgba(239, 68, 68, 0.35)';
+        ctx.strokeStyle = palette.gridNeg;
         ctx.setLineDash([2, 4]);
         ctx.beginPath();
         ctx.moveTo(padLeft, yMin);
         ctx.lineTo(padLeft + chartW, yMin);
         ctx.stroke();
-        ctx.fillStyle = '#f87171';
+        ctx.fillStyle = palette.textNeg;
         ctx.fillText(`${roundedMin}`, padLeft - 6, yMin);
     }
 
-    ctx.setLineDash([]); // Reset line dash
+    ctx.setLineDash([]);
 
-    // --- 2. Gambar Label Sumbu X (Ronde) ---
+    // --- 2. Label Sumbu X (Ronde) ---
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    ctx.fillStyle = '#64748b';
-    ctx.font = '10px monospace';
+    ctx.fillStyle = palette.axisText;
+    ctx.font = '600 10px ui-monospace, SFMono-Regular, Menlo, monospace';
 
-    // Jika ronde terlalu banyak, tampilkan loncatan (step) agar tidak bertumpuk
-    const labelStep = totalSteps > 12 ? 3 : (totalSteps > 8 ? 2 : 1);
+    const labelStep = totalSteps > 14 ? 3 : (totalSteps > 8 ? 2 : 1);
     for (let i = 0; i < totalSteps; i++) {
         if (i === 0 || i === totalSteps - 1 || i % labelStep === 0) {
             const x = getX(i);
-            const label = i === 0 ? 'Awal' : `R${i}`;
+            const label = i === 0 ? 'R0' : `R${i}`;
             ctx.fillText(label, x, padTop + chartH + 8);
         }
     }
 
-    // --- 3. Gambar Garis Perkembangan Skor tiap Pemain ---
+    // --- 3. Garis Perkembangan Skor tiap Pemain ---
     players.forEach(p => {
-        const color = PLAYER_COLORS[p] || '#ffffff';
+        const color = colors[p] || '#ffffff';
 
-        // Buat path polyline
         ctx.beginPath();
         progressionHistory.forEach((step, idx) => {
             const x = getX(idx);
@@ -192,77 +208,81 @@ export function drawProgressionChart(canvas, progressionHistory, burnHistory = [
             else ctx.lineTo(x, y);
         });
 
-        // Glow neon ringan
         ctx.save();
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 4;
         ctx.strokeStyle = color;
-        ctx.lineWidth = 2.4;
+        ctx.lineWidth = 2.2;
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
         ctx.stroke();
         ctx.restore();
 
-        // Titik marker lingkaran
         progressionHistory.forEach((step, idx) => {
             const x = getX(idx);
             const y = getY(step[p] || 0);
-
-            // Cek apakah di ronde ini pemain kena bakar
             const isBurnedInRound = idx > 0 && burnHistory[idx - 1] && burnHistory[idx - 1].includes(p);
 
             if (isBurnedInRound) {
-                // Marker api drama kebakar 🔥
                 ctx.save();
-                ctx.shadowColor = '#ef4444';
-                ctx.shadowBlur = 8;
-
-                // Lingkaran merah menyala
                 ctx.beginPath();
-                ctx.arc(x, y, 7, 0, Math.PI * 2);
-                ctx.fillStyle = '#ef4444';
+                ctx.arc(x, y, 5.5, 0, Math.PI * 2);
+                ctx.fillStyle = palette.burnFill;
                 ctx.fill();
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.8;
+                ctx.strokeStyle = palette.burnStroke;
                 ctx.stroke();
 
-                // Ikon api di atas titik
                 ctx.font = '11px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'bottom';
                 ctx.fillText('🔥', x, y - 6);
                 ctx.restore();
-            } else {
-                // Titik marker biasa
+            } else if (totalSteps <= 16 || idx === 0 || idx === totalSteps - 1) {
                 ctx.beginPath();
-                ctx.arc(x, y, 3.2, 0, Math.PI * 2);
-                ctx.fillStyle = '#0f172a';
+                ctx.arc(x, y, 2.8, 0, Math.PI * 2);
+                ctx.fillStyle = palette.dotFill;
                 ctx.fill();
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 1.8;
                 ctx.strokeStyle = color;
                 ctx.stroke();
             }
         });
     });
 
-    // --- 4. Tag Skor Terakhir di Ujung Kanan Garis ---
+    // --- 4. Label Skor Akhir di Ujung Kanan (Anti-Tabrakan Vertikal) ---
     if (totalSteps > 1) {
         const lastStep = progressionHistory[totalSteps - 1];
-        players.forEach(p => {
-            const val = lastStep[p] || 0;
-            const x = getX(totalSteps - 1);
-            const y = getY(val);
-            const color = PLAYER_COLORS[p] || '#ffffff';
+        const xEnd = getX(totalSteps - 1);
+        const labelEntries = players.map(p => ({
+            p,
+            val: lastStep[p] || 0,
+            y: getY(lastStep[p] || 0),
+            color: colors[p] || '#ffffff',
+        })).sort((a, b) => a.y - b.y);
 
-            ctx.save();
-            ctx.fillStyle = color;
-            ctx.font = 'bold 9px monospace';
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'middle';
-            // Geser sedikit agar tidak menabrak titik
-            const textX = Math.min(displayWidth - 2, x + 6);
-            ctx.fillText(`${val}`, textX, y);
-            ctx.restore();
+        const minGap = 13;
+        for (let i = 1; i < labelEntries.length; i++) {
+            if (labelEntries[i].y - labelEntries[i - 1].y < minGap) {
+                labelEntries[i].y = labelEntries[i - 1].y + minGap;
+            }
+        }
+        // Clamp bawah jika melewati batas chart
+        const maxAllowedY = padTop + chartH + 4;
+        if (labelEntries[labelEntries.length - 1].y > maxAllowedY) {
+            labelEntries[labelEntries.length - 1].y = maxAllowedY;
+            for (let i = labelEntries.length - 2; i >= 0; i--) {
+                if (labelEntries[i + 1].y - labelEntries[i].y < minGap) {
+                    labelEntries[i].y = labelEntries[i + 1].y - minGap;
+                }
+            }
+        }
+
+        ctx.font = '700 10px ui-monospace, SFMono-Regular, Menlo, monospace';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+
+        labelEntries.forEach(entry => {
+            ctx.fillStyle = entry.color;
+            ctx.fillText(String(entry.val), xEnd + 7, Math.max(10, entry.y));
         });
     }
 

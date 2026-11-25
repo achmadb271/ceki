@@ -1,14 +1,14 @@
 {
     "id": "./",
-    "name": "Score Tracker 1000 - Ceki",
-    "short_name": "Ceki Score",
+    "name": "Ceki 1000 - Score Tracker",
+    "short_name": "Ceki 1000",
     "description": "Pencatat skor Ceki 4 pemain dengan sistem kebakar otomatis",
     "start_url": "./",
     "scope": "./",
     "display": "standalone",
     "orientation": "portrait",
-    "background_color": "#0f172a",
-    "theme_color": "#0f172a",
+    "background_color": "#09090b",
+    "theme_color": "#09090b",
     "icons": [
         {
             "src": "icons/icon-192.png",

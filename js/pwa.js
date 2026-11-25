@@ -1,12 +1,12 @@
 /**
  * pwa.js
  * ======
- * Install-to-homescreen prompt, registrasi service worker buat offline
- * support, & modal pop-up "What's New / Ada Update Baru!" dengan ringkasan
- * fitur lengkap serta jaminan skor aman.
+ * Install-to-homescreen prompt, registrasi service worker untuk offline
+ * support, dan modal update versi terbaru.
  */
 
 import { showAppToast } from './toast.js';
+import { escapeHtml } from './utils.js';
 
 const btnInstall = document.getElementById('btn-install');
 const updateModal = document.getElementById('update-modal');
@@ -18,85 +18,115 @@ const btnUpdateLater = document.getElementById('btn-update-later');
 const btnCloseUpdateModal = document.getElementById('btn-close-update-modal');
 const updateChip = document.getElementById('update-chip');
 const btnManualUpdateCheck = document.getElementById('btn-manual-update-check');
+const appVersionLabel = document.getElementById('app-version-label');
 
 let deferredInstallPrompt = null;
 let activeWaitingWorker = null;
 let swRegistration = null;
 
-// Konfigurasi ringkasan update versi terbaru (mudah diubah tiap rilis)
 const LATEST_RELEASE = {
-    version: 'v3.5',
-    subtitle: 'Anti-404 PWA & Dual Deployment',
+    version: 'v4.1',
+    subtitle: 'Keypad Lebih Lega, Timer Live & Keyboard Fisik',
     features: [
         {
-            icon: '🛡️',
-            title: 'PWA Launch Anti-404 & Offline Resilient',
-            desc: 'Aplikasi yang diinstall ke layar utama kini dijamin selalu terbuka mulus tanpa kendala 404 berkat navigation fallback terintegrasi.'
+            title: 'Total Skor Tetap Terlihat Saat Input',
+            desc: 'Baris TOT kini menempel tepat di atas keypad, lengkap dengan progress bar mini menuju 1000.',
         },
         {
-            icon: '🚀',
-            title: 'Dukungan Dual-Deployment',
-            desc: 'Dapat diakses dan diinstall sama baiknya dari domain Vercel maupun GitHub Pages.'
+            title: 'Timer Live Lebih Jelas',
+            desc: 'Timer di top bar menyala hijau dengan indikator live saat pertandingan berjalan.',
         },
         {
-            icon: '☕',
-            title: 'Traktir Kopi Dev via QRIS (0% Fee)',
-            desc: 'Dukung pengembangan Ceki Tracker langsung lewat scan QRIS m-Banking & e-Wallet favoritmu tanpa potongan platform.'
+            title: 'Input Lebih Cepat',
+            desc: 'Tap nama pemain langsung ter-select, dan di laptop bisa langsung ketik angka, Enter, serta panah kiri/kanan.',
         },
         {
-            icon: '💬',
-            title: 'Form Masukan & Lapor Bug',
-            desc: 'Punya ide fitur baru atau mau lapor error? Kirim masukan langsung dari dalam aplikasi ke email developer!'
-        }
-    ]
+            title: 'QR Pindah Progress Diperbaiki',
+            desc: 'QR tidak lagi tampil dobel, dan tombol Install dipindah ke menu titik tiga agar layar lebih bersih.',
+        },
+    ],
 };
+
+const btnMenuToggleEl = document.getElementById('btn-menu-toggle');
+function setMenuBadge(on) {
+    if (btnMenuToggleEl) btnMenuToggleEl.classList.toggle('has-badge', !!on);
+}
+
+if (appVersionLabel) {
+    appVersionLabel.textContent = `Ceki ${LATEST_RELEASE.version}`;
+}
 
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredInstallPrompt = e;
-    btnInstall.classList.remove('hidden');
+    if (btnInstall) btnInstall.classList.remove('hidden');
+    setMenuBadge(true);
 });
 
-btnInstall.addEventListener('click', async () => {
-    if (!deferredInstallPrompt) return;
-    deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
-    deferredInstallPrompt = null;
-    btnInstall.classList.add('hidden');
-});
+if (btnInstall) {
+    btnInstall.addEventListener('click', async () => {
+        if (!deferredInstallPrompt) return;
+        deferredInstallPrompt.prompt();
+        await deferredInstallPrompt.userChoice;
+        deferredInstallPrompt = null;
+        btnInstall.classList.add('hidden');
+        setMenuBadge(false);
+    });
+}
 
 window.addEventListener('appinstalled', () => {
-    btnInstall.classList.add('hidden');
+    if (btnInstall) btnInstall.classList.add('hidden');
+    setMenuBadge(false);
 });
 
-function renderChangelog() {
+function renderChangelog(release = LATEST_RELEASE) {
+    const data = release && release.version ? release : LATEST_RELEASE;
     if (updateModalBadge) {
-        updateModalBadge.textContent = `${LATEST_RELEASE.version} · ${LATEST_RELEASE.subtitle}`;
+        updateModalBadge.textContent = `${data.version} · ${data.subtitle || ''}`;
     }
     if (updateModalList) {
-        updateModalList.innerHTML = LATEST_RELEASE.features.map(f => `
-            <div class="flex items-start gap-2.5">
-                <span class="text-base shrink-0 mt-0.5">${f.icon}</span>
-                <div class="min-w-0">
-                    <div class="text-xs font-bold text-slate-100">${f.title}</div>
-                    <div class="text-[11px] text-slate-400 leading-snug">${f.desc}</div>
+        const features = Array.isArray(data.features) ? data.features : [];
+        updateModalList.innerHTML = features.map(f => `
+            <div class="changelog-item">
+                <span class="changelog-dot" aria-hidden="true"></span>
+                <div>
+                    <div style="font-size:12px;font-weight:700;color:var(--text-primary);">${escapeHtml(f.title)}</div>
+                    <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">${escapeHtml(f.desc)}</div>
                 </div>
             </div>
         `).join('');
     }
 }
 
-function openUpdateModal(waitingWorker) {
+async function fetchLatestReleaseInfo() {
+    try {
+        const res = await fetch(`./release.json?t=${Date.now()}`, { cache: 'no-store' });
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (data && typeof data.version === 'string' && Array.isArray(data.features)) {
+            return data;
+        }
+    } catch (err) {
+        // Offline / fallback ke LATEST_RELEASE lokal
+    }
+    return null;
+}
+
+async function openUpdateModal(waitingWorker) {
     if (waitingWorker) activeWaitingWorker = waitingWorker;
     if (updateChip) updateChip.classList.add('hidden');
-    renderChangelog();
+
+    // Ambil metadata versi TERBARU dari server (bukan versi lama yang sedang jalan di tab ini)
+    const remoteRelease = await fetchLatestReleaseInfo();
+    renderChangelog(remoteRelease || LATEST_RELEASE);
+
     updateModal.classList.remove('hidden');
-    void updateModalContent.offsetWidth; // trigger reflow biar animasi masuk jalan
-    updateModal.classList.add('update-modal-visible');
+    void updateModalContent.offsetWidth;
+    updateModal.classList.add('is-visible');
 }
 
 function closeUpdateModal(showChip = true) {
-    updateModal.classList.remove('update-modal-visible');
+    updateModal.classList.remove('is-visible');
     setTimeout(() => {
         updateModal.classList.add('hidden');
         if (showChip && activeWaitingWorker && updateChip) {
@@ -112,35 +142,25 @@ if (btnUpdateNow) {
             return;
         }
         btnUpdateNow.disabled = true;
-        btnUpdateNow.innerHTML = '<span>🔄 Memperbarui...</span>';
+        btnUpdateNow.textContent = 'Memperbarui...';
         activeWaitingWorker.postMessage({ type: 'SKIP_WAITING' });
     });
 }
 
-if (btnUpdateLater) {
-    btnUpdateLater.addEventListener('click', () => closeUpdateModal(true));
-}
-
-if (btnCloseUpdateModal) {
-    btnCloseUpdateModal.addEventListener('click', () => closeUpdateModal(true));
-}
-
+if (btnUpdateLater) btnUpdateLater.addEventListener('click', () => closeUpdateModal(true));
+if (btnCloseUpdateModal) btnCloseUpdateModal.addEventListener('click', () => closeUpdateModal(true));
 if (updateModal) {
     updateModal.addEventListener('click', (e) => {
         if (e.target === updateModal) closeUpdateModal(true);
     });
 }
-
 if (updateChip) {
-    updateChip.addEventListener('click', () => {
-        openUpdateModal(activeWaitingWorker);
-    });
+    updateChip.addEventListener('click', () => openUpdateModal(activeWaitingWorker));
 }
 
 function trackWorkerInstalling(worker) {
     if (!worker) return;
     worker.addEventListener('statechange', () => {
-        // 'installed' + ada controller aktif = ini UPDATE (bukan install pertama kali)
         if (worker.state === 'installed' && navigator.serviceWorker.controller) {
             openUpdateModal(worker);
         }
@@ -151,42 +171,33 @@ if ('serviceWorker' in navigator) {
     const initSW = () => {
         navigator.serviceWorker.register('sw.js', { scope: './' }).then((registration) => {
             swRegistration = registration;
-
-            // 1. Langsung paksa cek update ke server saat halaman dibuka (jangan tunggu 30 menit)
             registration.update().catch(() => {});
 
-            // 2. Kejadian kalau SW baru udah kelar ke-install sebelum tab ini sempet pasang listener
             if (registration.waiting && navigator.serviceWorker.controller) {
                 openUpdateModal(registration.waiting);
             }
-
-            // 3. Jika sedang menginstal saat ini
             if (registration.installing) {
                 trackWorkerInstalling(registration.installing);
             }
 
-            // 4. Pantau jika ada worker baru yang ditemukan
             registration.addEventListener('updatefound', () => {
                 if (registration.installing) {
                     trackWorkerInstalling(registration.installing);
                 }
             });
 
-            // 5. Cek lagi saat tab kembali dibuka / aktif dari background
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') {
                     registration.update().catch(() => {});
                 }
             });
 
-            // 6. Cek saat halaman di-restore dari bfcache (Safari/Chrome mobile)
             window.addEventListener('pageshow', (e) => {
                 if (e.persisted) {
                     registration.update().catch(() => {});
                 }
             });
 
-            // 7. Cek berkala tiap 10 menit
             setInterval(() => registration.update().catch(() => {}), 10 * 60 * 1000);
         }).catch((err) => {
             console.warn('[pwa.js] Gagal register service worker:', err);
@@ -199,7 +210,6 @@ if ('serviceWorker' in navigator) {
         window.addEventListener('load', initSW);
     }
 
-    // SW baru resmi ambil alih kontrol -> reload sekali biar pake aset versi baru.
     let hasReloaded = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (hasReloaded) return;
@@ -208,11 +218,10 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// Tombol manual cek update
 if (btnManualUpdateCheck) {
     btnManualUpdateCheck.addEventListener('click', async () => {
         if (!navigator.onLine) {
-            showAppToast('⚠️ HP sedang offline, tidak dapat memeriksa update.', 'info');
+            showAppToast('HP sedang offline, tidak dapat memeriksa update.', 'info');
             return;
         }
 
@@ -221,31 +230,30 @@ if (btnManualUpdateCheck) {
             return;
         }
 
-        btnManualUpdateCheck.innerHTML = '<span>🔄 Memeriksa...</span>';
+        btnManualUpdateCheck.textContent = 'Memeriksa...';
 
         if (swRegistration) {
             try {
                 await swRegistration.update();
                 setTimeout(() => {
-                    btnManualUpdateCheck.innerHTML = `<span>Ceki ${LATEST_RELEASE.version}</span> &middot; <span class="text-blue-400 font-bold">Cek Update</span>`;
+                    btnManualUpdateCheck.textContent = 'Cek Update';
                     if (swRegistration.waiting) {
                         openUpdateModal(swRegistration.waiting);
                     } else if (swRegistration.installing) {
                         trackWorkerInstalling(swRegistration.installing);
                     } else {
-                        showAppToast(`✅ Aplikasi sudah dalam versi terbaru (${LATEST_RELEASE.version})!`, 'success');
+                        showAppToast(`Aplikasi sudah versi terbaru (${LATEST_RELEASE.version}).`, 'success');
                     }
-                }, 1000);
+                }, 800);
             } catch (err) {
-                btnManualUpdateCheck.innerHTML = `<span>Ceki ${LATEST_RELEASE.version}</span> &middot; <span class="text-blue-400 font-bold">Cek Update</span>`;
-                // Tampilkan info versi aktif tanpa alert merah menakutkan
-                showAppToast(`✅ Aplikasi aktif: ${LATEST_RELEASE.version}. Tidak ada update baru.`, 'info');
+                btnManualUpdateCheck.textContent = 'Cek Update';
+                showAppToast(`Versi aktif: ${LATEST_RELEASE.version}. Tidak ada update baru.`, 'info');
             }
         } else {
             setTimeout(() => {
-                btnManualUpdateCheck.innerHTML = `<span>Ceki ${LATEST_RELEASE.version}</span> &middot; <span class="text-blue-400 font-bold">Cek Update</span>`;
-                showAppToast(`✅ Versi aktif saat ini: ${LATEST_RELEASE.version}`, 'info');
-            }, 600);
+                btnManualUpdateCheck.textContent = 'Cek Update';
+                showAppToast(`Versi aktif saat ini: ${LATEST_RELEASE.version}`, 'info');
+            }, 500);
         }
     });
 }

@@ -1,92 +1,96 @@
 /**
  * progress-modal.js
- * ==================
- * Popup "skor sementara" - buat share progress kapan aja di tengah match,
- * gak perlu nunggu sampe ada yang tembus 1000 (kadang mainnya disudahin
- * duluan karena capek). Sengaja beda warna (biru) dari popup menang (ijo)
- * biar gak ketuker keliatannya, dan gak ada bahasa "menang/kalah" - cuma
- * ranking urutan skor sekarang.
+ * =================
+ * Popup "Skor Sementara" untuk melihat klasemen & share progress di tengah match.
  */
 
 import { players, getPlayerNames, getRounds, getMatchStartTime } from './store.js';
-import { calculateTotals, rankPlayers, countBurns } from './scoring.js';
+import { calculateTotals, rankPlayers } from './scoring.js';
 import { formatDuration } from './timer.js';
 import { shareProgressAsImage } from './share.js';
 import { showAppToast } from './toast.js';
-import { drawProgressionChart, PLAYER_COLORS } from './chart.js';
+import { drawProgressionChart, getPlayerColors } from './chart.js';
+import { onThemeChange } from './theme.js';
+import { escapeHtml, ICONS } from './utils.js';
 
 const btnShowProgress = document.getElementById('btn-show-progress');
 const progressModal = document.getElementById('progress-modal');
 const progressModalContent = document.getElementById('progress-modal-content');
 const progressModalBody = document.getElementById('progress-modal-body');
 
+let lastChartData = null;
+
 function open() {
     const rounds = getRounds();
     if (rounds.length === 0) {
-        showAppToast('Belum ada skor buat di-share.', 'info');
+        showAppToast('Belum ada skor untuk dibagikan.', 'info');
         return;
     }
 
     const playerNames = getPlayerNames();
+    const pColors = getPlayerColors();
     const { totals, burnCounts, burnsInflictedCounts, progressionHistory, burnHistory } = calculateTotals(rounds);
     const ranked = rankPlayers(totals, burnsInflictedCounts, burnCounts);
     const durationText = getMatchStartTime() ? formatDuration(Date.now() - getMatchStartTime()) : '00:00';
+    lastChartData = { progressionHistory, burnHistory, playerNames: { ...playerNames } };
 
     progressModalBody.innerHTML = `
-    <div class="text-2xl font-black mb-1 text-center">📊 Skor Sementara</div>
-    <div class="text-xs text-blue-100/80 mt-2 font-mono text-center">⏱️ Durasi: ${durationText} &middot; ${rounds.length} ronde</div>
-    <div class="flex flex-col gap-2 mt-4">
-      ${ranked.map((p, i) => `
-        <div class="flex items-center gap-3 bg-slate-900/40 border border-slate-700 rounded-lg px-3 py-2.5">
-          <div class="w-6 h-6 rounded-full bg-slate-700 text-slate-200 text-xs font-black flex items-center justify-center shrink-0">${i + 1}</div>
-          <div class="flex-1 min-w-0">
-            <div class="text-sm font-semibold text-slate-200 truncate">${playerNames[p]}</div>
-            <div class="flex items-center gap-2 text-[10px] mt-0.5">
-              ${(burnsInflictedCounts[p] || 0) > 0 ? `<span class="text-emerald-300 font-semibold">⚔️ Bakar ${burnsInflictedCounts[p]}&times;</span>` : ''}
-              ${(burnCounts[p] || 0) > 0 ? `<span class="text-orange-300 font-semibold">🔥 Kebakar ${burnCounts[p]}&times;</span>` : ''}
+        <div class="win-hero">
+            <div class="win-badge progress-badge">Klasemen Sementara</div>
+            <h2 class="win-headline">Skor Sementara</h2>
+            <div class="win-meta">
+                <span>${ICONS.clock} ${escapeHtml(durationText)}</span>
+                <span>&middot;</span>
+                <span>${rounds.length} ronde</span>
             </div>
-          </div>
-          <div class="text-lg font-black text-white">${totals[p]}</div>
         </div>
-      `).join('')}
-    </div>
 
-    <!-- Grafik Garis Drama Skor Pertandingan -->
-    <div class="mt-4 bg-slate-950/70 rounded-2xl p-3 border border-slate-700/80 shadow-inner">
-      <div class="flex items-center justify-between mb-2">
-        <span class="text-xs font-black text-slate-200 flex items-center gap-1.5">
-          📈 Grafik Drama Skor
-        </span>
-        <span class="text-[10px] text-slate-400 font-mono">${rounds.length} ronde</span>
-      </div>
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mb-2.5 text-[11px] font-bold">
-        ${players.map(p => `
-          <div class="flex items-center gap-1.5 bg-slate-900/80 px-2 py-1 rounded-lg border border-slate-800">
-            <span class="w-2.5 h-2.5 rounded-full inline-block shrink-0 shadow-sm" style="background-color: ${PLAYER_COLORS[p]}"></span>
-            <span class="text-slate-300 truncate">${playerNames[p]}</span>
-          </div>
-        `).join('')}
-      </div>
-      <div class="relative w-full overflow-hidden rounded-xl border border-slate-800 bg-[#090d16]">
-        <canvas id="progress-progression-chart" class="w-full block"></canvas>
-      </div>
-      <div class="text-[10px] text-slate-400 mt-2 text-center flex items-center justify-center gap-1">
-        <span>🔥 Menandakan titik ronde pemain terbakar / reset</span>
-      </div>
-    </div>
+        <div class="rank-list">
+            ${ranked.map((p, i) => `
+                <div class="rank-item">
+                    <div class="rank-num">${i + 1}</div>
+                    <div class="rank-info">
+                        <div class="rank-name">${escapeHtml(playerNames[p])}</div>
+                        <div class="score-summary-tags" style="justify-content:flex-start;margin-top:2px;">
+                            ${(burnsInflictedCounts[p] || 0) > 0 ? `<span class="tag-burner">${ICONS.sword} Bakar ${burnsInflictedCounts[p]}x</span>` : ''}
+                            ${(burnCounts[p] || 0) > 0 ? `<span class="tag-burned">${ICONS.flame} Kebakar ${burnCounts[p]}x</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="rank-score">${totals[p]}</div>
+                </div>
+            `).join('')}
+        </div>
 
-    <div class="text-[9px] text-blue-200/50 font-mono tracking-widest text-center mt-3">SCORE TRACKER 1000 &middot; CEKI</div>
-    <button id="btn-share-progress-image" class="mt-4 w-full bg-white text-blue-700 hover:bg-slate-100 active:bg-slate-200 font-black py-3 rounded-xl shadow-lg transition-colors text-base">
-      📸 Share Skor Sementara
-    </button>
-    <button id="btn-close-progress" class="mt-2 w-full bg-blue-700/40 hover:bg-blue-700/60 text-white font-bold py-2.5 rounded-xl border border-blue-500 transition-colors text-xs">
-      Tutup
-    </button>
-  `;
+        <div class="chart-box">
+            <div class="chart-header">
+                <span style="display:inline-flex;align-items:center;gap:6px;">${ICONS.chart} Grafik Drama Skor</span>
+                <span class="tabular-nums" style="color:var(--text-muted);font-family:var(--font-mono);font-size:11px;">${rounds.length} ronde</span>
+            </div>
+            <div class="chart-legend">
+                ${players.map(p => `
+                    <div class="chart-legend-item">
+                        <span class="chart-legend-dot" style="background-color:${pColors[p]}"></span>
+                        <span class="chart-legend-label">${escapeHtml(playerNames[p])}</span>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="chart-canvas-wrap">
+                <canvas id="progress-progression-chart"></canvas>
+            </div>
+            <div class="chart-caption">🔥 Menandakan ronde pemain terbakar / reset skor</div>
+        </div>
+
+        <div class="modal-watermark">CEKI 1000 &middot; SCORE TRACKER</div>
+
+        <div class="modal-actions">
+            <button id="btn-share-progress-image" type="button" class="btn btn-primary btn-full">${ICONS.share} <span>Share Skor Sementara</span></button>
+            <button id="btn-close-progress" type="button" class="btn btn-secondary btn-full btn-sm">Tutup</button>
+        </div>
+    `;
 
     progressModal.classList.remove('hidden');
-    void progressModalContent.offsetWidth; // trigger reflow biar animasi masuk jalan
-    progressModal.classList.add('progress-modal-visible');
+    void progressModalContent.offsetWidth;
+    progressModal.classList.add('is-visible');
 
     const chartCanvas = document.getElementById('progress-progression-chart');
     if (chartCanvas) {
@@ -98,18 +102,26 @@ function open() {
 }
 
 function close() {
-    progressModal.classList.remove('progress-modal-visible');
+    progressModal.classList.remove('is-visible');
     setTimeout(() => progressModal.classList.add('hidden'), 200);
 }
 
-btnShowProgress.addEventListener('click', open);
-
-progressModalBody.addEventListener('click', (e) => {
-    if (e.target.id === 'btn-close-progress') close();
-    if (e.target.id === 'btn-share-progress-image') shareProgressAsImage();
+onThemeChange(() => {
+    if (!progressModal.classList.contains('hidden') && lastChartData) {
+        const chartCanvas = document.getElementById('progress-progression-chart');
+        if (chartCanvas) {
+            drawProgressionChart(chartCanvas, lastChartData.progressionHistory, lastChartData.burnHistory, lastChartData.playerNames);
+        }
+    }
 });
 
-// Klik di area gelap luar kartu = tutup juga
+if (btnShowProgress) btnShowProgress.addEventListener('click', open);
+
+progressModalBody.addEventListener('click', (e) => {
+    if (e.target.closest('#btn-close-progress')) close();
+    if (e.target.closest('#btn-share-progress-image')) shareProgressAsImage();
+});
+
 progressModal.addEventListener('click', (e) => {
     if (e.target === progressModal) close();
 });

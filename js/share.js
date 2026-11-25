@@ -68,7 +68,7 @@ export async function captureAndShare(captureTargetId, hideElementIds) {
 }
 
 export function shareResultAsImage() {
-    return captureAndShare('win-modal-content', ['btn-share-image', 'btn-save-history']);
+    return captureAndShare('win-modal-content', ['btn-share-image', 'btn-save-history', 'btn-edit-win-score']);
 }
 
 export function shareProgressAsImage() {
