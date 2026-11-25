@@ -1,22 +1,18 @@
 {
-  "version": "v4.1",
-  "subtitle": "Keypad Lebih Lega, Timer Live & Keyboard Fisik",
+  "version": "v4.2",
+  "subtitle": "Logo & Ikon Aplikasi Baru",
   "features": [
     {
+      "title": "Logo Baru Ceki 1000 (Kartu + Api Kebakar)",
+      "desc": "Ikon homescreen, favicon, dan logo top bar diperbarui dengan desain vector modern yang tajam di semua layar."
+    },
+    {
       "title": "Total Skor Tetap Terlihat Saat Input",
-      "desc": "Baris TOT kini menempel tepat di atas keypad, lengkap dengan progress bar mini menuju 1000."
+      "desc": "Baris TOT menempel tepat di atas keypad lengkap dengan progress bar menuju 1000."
     },
     {
-      "title": "Timer Live Lebih Jelas",
-      "desc": "Timer di top bar menyala hijau dengan indikator live saat pertandingan berjalan."
-    },
-    {
-      "title": "Input Lebih Cepat",
-      "desc": "Tap nama pemain langsung ter-select, dan di laptop bisa langsung ketik angka, Enter, serta panah kiri/kanan."
-    },
-    {
-      "title": "QR Pindah Progress & Update Modal Diperbaiki",
-      "desc": "QR tidak lagi tampil dobel, tombol Install pindah ke menu titik tiga, dan popup update selalu menampilkan changelog versi terbaru."
+      "title": "Timer Live & Dukungan Keyboard Fisik",
+      "desc": "Timer menyala hijau saat match berlangsung, dan input skor di laptop mendukung angka, Enter, serta panah kiri/kanan."
     }
   ]
 }

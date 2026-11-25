@@ -236,15 +236,19 @@ button:disabled {
     width: 28px;
     height: 28px;
     border-radius: 8px;
-    background: var(--accent);
-    color: #fff;
-    font-weight: 800;
-    font-size: 13px;
-    letter-spacing: -0.03em;
+    background: #09090b;
+    border: 1px solid var(--border-strong);
+    overflow: hidden;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+}
+
+.brand-mark img {
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
 .brand-title {
