@@ -1,18 +1,14 @@
 {
-  "version": "v4.2",
-  "subtitle": "Logo & Ikon Aplikasi Baru",
+  "version": "v4.2.1",
+  "subtitle": "Kontras Kolom Mode Gelap Lebih Jelas",
   "features": [
     {
-      "title": "Logo Baru Ceki 1000 (Kartu + Api Kebakar)",
-      "desc": "Ikon homescreen, favicon, dan logo top bar diperbarui dengan desain vector modern yang tajam di semua layar."
+      "title": "Highlight Kolom Skor di Mode Gelap",
+      "desc": "Setiap kotak skor, header nama pemain, dan baris TOT kini lebih tegas terpisah dari latar gelap agar lebih mudah dibaca di layar HP."
     },
     {
-      "title": "Total Skor Tetap Terlihat Saat Input",
-      "desc": "Baris TOT menempel tepat di atas keypad lengkap dengan progress bar menuju 1000."
-    },
-    {
-      "title": "Timer Live & Dukungan Keyboard Fisik",
-      "desc": "Timer menyala hijau saat match berlangsung, dan input skor di laptop mendukung angka, Enter, serta panah kiri/kanan."
+      "title": "Logo Baru Ceki 1000",
+      "desc": "Ikon homescreen, favicon, dan logo top bar memakai desain vector modern Kartu + Api Kebakar."
     }
   ]
 }

@@ -12,12 +12,13 @@
     --bg-surface: #111114;
     --bg-elevated: #18181b;
     --bg-muted: #202026;
-    --bg-input: #17171c;
-    --bg-input-hover: #1f1f26;
+    --bg-input: #1d1d24;
+    --bg-input-hover: #262630;
     --bg-overlay: rgba(9, 9, 11, 0.78);
 
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-strong: rgba(255, 255, 255, 0.16);
+    --border-subtle: rgba(255, 255, 255, 0.10);
+    --border-cell: rgba(255, 255, 255, 0.13);
+    --border-strong: rgba(255, 255, 255, 0.19);
 
     --text-primary: #fafafa;
     --text-secondary: #a1a1aa;
@@ -81,6 +82,7 @@
     --bg-overlay: rgba(15, 23, 42, 0.52);
 
     --border-subtle: rgba(9, 9, 11, 0.08);
+    --border-cell: rgba(9, 9, 11, 0.09);
     --border-strong: rgba(9, 9, 11, 0.16);
 
     --text-primary: #09090b;
@@ -463,7 +465,7 @@ button:disabled {
 
 .scoreboard-card {
     background: var(--bg-surface);
-    border: 1px solid var(--border-subtle);
+    border: 1px solid var(--border-cell);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     overflow: clip;
@@ -505,7 +507,7 @@ button:disabled {
     padding: 7px 6px;
     border-radius: 9px;
     background: var(--bg-input);
-    border: 1px solid transparent;
+    border: 1px solid var(--border-cell);
     text-align: center;
     font-size: 13px;
     font-weight: 800;
@@ -549,7 +551,7 @@ button:disabled {
     margin: 0 auto;
     border-radius: 8px;
     background: var(--bg-muted);
-    border: 1px solid var(--border-subtle);
+    border: 1px solid var(--border-cell);
     color: var(--text-secondary);
     font-family: var(--font-mono);
     font-size: 11px;
@@ -575,7 +577,7 @@ button:disabled {
     padding: 0 4px;
     border-radius: 10px;
     background: var(--bg-input);
-    border: 1.5px solid transparent;
+    border: 1.5px solid var(--border-cell);
     color: var(--text-primary);
     text-align: center;
     font-family: var(--font-mono);
@@ -699,7 +701,8 @@ body.keypad-open #score-body tr.score-row.row-spotlight {
 .total-cell {
     padding: 5px 3px;
     border-radius: 10px;
-    border: 1.5px solid transparent;
+    background: var(--bg-input);
+    border: 1.5px solid var(--border-cell);
     text-align: center;
     user-select: none;
     transition: background-color 0.2s ease, border-color 0.2s ease;
